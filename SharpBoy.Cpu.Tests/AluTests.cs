@@ -86,7 +86,7 @@ namespace SharpBoy.Cpu.Tests
             var serializer = new JsonSerializer();
             var registers = new Registers();
 
-            using (var s = File.Open($"TestData/alu_tests/v1/{opType}.json", FileMode.Open))
+            using (var s = File.Open($"gameboy-test-data/alu_tests/v1/{opType}.json", FileMode.Open))
             using (var sr = new StreamReader(s))
             using (var reader = new JsonTextReader(sr))
             {

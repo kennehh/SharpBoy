@@ -22,805 +22,805 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestData\alu_tests\v1\adc.json">
+    <None Update="gameboy-test-data\alu_tests\v1\adc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\add.json">
+    <None Update="gameboy-test-data\alu_tests\v1\add.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\and.json">
+    <None Update="gameboy-test-data\alu_tests\v1\and.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\bit.json">
+    <None Update="gameboy-test-data\alu_tests\v1\bit.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\ccf.json">
+    <None Update="gameboy-test-data\alu_tests\v1\ccf.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\cp.json">
+    <None Update="gameboy-test-data\alu_tests\v1\cp.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\cpl.json">
+    <None Update="gameboy-test-data\alu_tests\v1\cpl.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\daa.json">
+    <None Update="gameboy-test-data\alu_tests\v1\daa.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\or.json">
+    <None Update="gameboy-test-data\alu_tests\v1\or.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\res.json">
+    <None Update="gameboy-test-data\alu_tests\v1\res.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\rl.json">
+    <None Update="gameboy-test-data\alu_tests\v1\rl.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\rlc.json">
+    <None Update="gameboy-test-data\alu_tests\v1\rlc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\rr.json">
+    <None Update="gameboy-test-data\alu_tests\v1\rr.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\rrc.json">
+    <None Update="gameboy-test-data\alu_tests\v1\rrc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\sbc.json">
+    <None Update="gameboy-test-data\alu_tests\v1\sbc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\scf.json">
+    <None Update="gameboy-test-data\alu_tests\v1\scf.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\set.json">
+    <None Update="gameboy-test-data\alu_tests\v1\set.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\sla.json">
+    <None Update="gameboy-test-data\alu_tests\v1\sla.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\sra.json">
+    <None Update="gameboy-test-data\alu_tests\v1\sra.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\srl.json">
+    <None Update="gameboy-test-data\alu_tests\v1\srl.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\sub.json">
+    <None Update="gameboy-test-data\alu_tests\v1\sub.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\swap.json">
+    <None Update="gameboy-test-data\alu_tests\v1\swap.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\alu_tests\v1\xor.json">
+    <None Update="gameboy-test-data\alu_tests\v1\xor.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\00.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\00.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\01.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\01.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\02.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\02.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\03.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\03.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\04.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\04.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\05.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\05.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\06.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\06.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\07.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\07.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\08.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\08.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\09.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\09.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\0a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\0a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\0b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\0b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\0c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\0c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\0d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\0d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\0e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\0e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\0f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\0f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\10.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\10.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\11.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\11.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\12.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\12.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\13.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\13.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\14.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\14.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\15.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\15.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\16.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\16.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\17.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\17.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\18.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\18.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\19.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\19.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\1a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\1a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\1b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\1b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\1c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\1c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\1d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\1d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\1e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\1e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\1f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\1f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\20.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\20.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\21.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\21.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\22.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\22.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\23.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\23.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\24.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\24.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\25.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\25.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\26.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\26.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\27.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\27.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\28.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\28.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\29.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\29.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\2a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\2a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\2b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\2b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\2c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\2c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\2d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\2d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\2e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\2e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\2f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\2f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\30.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\30.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\31.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\31.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\32.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\32.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\33.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\33.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\34.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\34.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\35.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\35.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\36.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\36.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\37.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\37.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\38.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\38.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\39.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\39.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\3a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\3a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\3b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\3b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\3c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\3c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\3d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\3d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\3e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\3e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\3f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\3f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\40.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\40.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\41.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\41.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\42.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\42.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\43.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\43.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\44.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\44.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\45.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\45.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\46.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\46.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\47.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\47.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\48.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\48.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\49.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\49.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\4a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\4a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\4b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\4b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\4c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\4c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\4d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\4d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\4e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\4e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\4f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\4f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\50.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\50.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\51.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\51.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\52.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\52.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\53.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\53.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\54.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\54.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\55.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\55.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\56.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\56.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\57.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\57.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\58.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\58.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\59.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\59.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\5a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\5a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\5b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\5b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\5c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\5c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\5d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\5d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\5e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\5e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\5f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\5f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\60.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\60.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\61.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\61.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\62.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\62.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\63.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\63.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\64.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\64.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\65.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\65.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\66.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\66.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\67.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\67.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\68.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\68.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\69.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\69.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\6a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\6a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\6b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\6b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\6c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\6c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\6d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\6d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\6e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\6e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\6f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\6f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\70.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\70.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\71.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\71.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\72.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\72.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\73.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\73.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\74.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\74.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\75.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\75.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\76.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\76.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\77.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\77.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\78.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\78.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\79.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\79.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\7a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\7a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\7b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\7b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\7c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\7c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\7d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\7d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\7e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\7e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\7f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\7f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\80.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\80.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\81.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\81.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\82.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\82.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\83.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\83.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\84.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\84.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\85.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\85.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\86.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\86.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\87.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\87.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\88.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\88.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\89.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\89.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\8a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\8a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\8b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\8b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\8c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\8c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\8d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\8d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\8e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\8e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\8f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\8f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\90.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\90.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\91.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\91.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\92.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\92.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\93.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\93.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\94.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\94.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\95.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\95.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\96.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\96.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\97.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\97.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\98.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\98.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\99.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\99.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\9a.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\9a.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\9b.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\9b.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\9c.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\9c.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\9d.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\9d.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\9e.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\9e.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\9f.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\9f.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a0.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a0.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a1.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a2.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a3.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a3.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a4.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a4.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a5.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a5.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a6.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a6.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a7.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a7.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a8.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a8.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\a9.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\a9.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\aa.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\aa.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ab.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ab.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ac.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ac.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ad.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ad.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ae.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ae.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\af.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\af.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b0.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b0.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b1.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b2.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b3.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b3.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b4.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b4.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b5.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b5.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b6.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b6.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b7.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b7.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b8.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b8.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\b9.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\b9.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ba.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ba.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\bb.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\bb.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\bc.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\bc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\bd.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\bd.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\be.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\be.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\bf.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\bf.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c0.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c0.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c1.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c2.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c3.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c3.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c4.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c4.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c5.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c5.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c6.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c6.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c7.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c7.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c8.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c8.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\c9.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\c9.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ca.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ca.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\cb.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\cb.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\cc.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\cc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\cd.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\cd.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ce.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ce.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\cf.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\cf.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d0.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d0.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d1.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d2.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d4.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d4.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d5.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d5.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d6.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d6.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d7.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d7.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d8.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d8.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\d9.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\d9.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\da.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\da.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\dc.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\dc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\de.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\de.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\df.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\df.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e0.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e0.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e1.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e2.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e5.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e5.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e6.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e6.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e7.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e7.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e8.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e8.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\e9.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\e9.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ea.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ea.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ee.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ee.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\ef.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\ef.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f0.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f0.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f1.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f2.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f3.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f3.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f5.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f5.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f6.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f6.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f7.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f7.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f8.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f8.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\f9.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\f9.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\fa.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\fa.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\fb.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\fb.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\cpu_tests\v1\fe.json">
+    <None Update="gameboy-test-data\cpu_tests\v1\fe.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

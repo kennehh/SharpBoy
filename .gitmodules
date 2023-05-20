@@ -1,0 +1,3 @@
+[submodule "SharpBoy.Cpu.Tests/gameboy-test-data"]
+	path = SharpBoy.Cpu.Tests/gameboy-test-data
+	url = https://github.com/adtennant/gameboy-test-data.git

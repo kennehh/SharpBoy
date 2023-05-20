@@ -40,7 +40,7 @@ namespace SharpBoy.Cpu.Tests
             var serializer = new JsonSerializer();
             var cpu = new CpuCore(0x10000);
 
-            using (var s = File.Open($"TestData/cpu_tests/v1/{opcode:x2}.json", FileMode.Open))
+            using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open))
             using (var sr = new StreamReader(s))
             using (var reader = new JsonTextReader(sr))
             {
