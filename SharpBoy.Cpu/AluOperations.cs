@@ -76,7 +76,7 @@ namespace SharpBoy.Cpu
 
         internal static byte rlc(Registers registers, byte value)
         {
-            var bit7 = Utils.IsBitSet(value, 7).ToBit();
+            var bit7 = value >> 7 & 1;
             var result = (byte)(value << 1 | bit7);
 
             registers.SetFlag(Flag.Carry, bit7 == 1);
@@ -92,7 +92,7 @@ namespace SharpBoy.Cpu
             var result = (byte)(value >> 1 | registers.GetFlag(Flag.Carry).ToBit() << 7);
 
             registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 0));
-            registers.SetFlag(Flag.Zero, result == 0);
+            registers.SetFlag(Flag.Zero, false);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
 
@@ -101,11 +101,11 @@ namespace SharpBoy.Cpu
 
         internal static byte rrc(Registers registers, byte value)
         {
-            var bit0 = Utils.IsBitSet(value, 0).ToBit();
+            var bit0 = value & 1;
             var result = (byte)(value >> 1 | bit0 << 7);
 
             registers.SetFlag(Flag.Carry, bit0 == 1);
-            registers.SetFlag(Flag.Zero, result == 0);
+            registers.SetFlag(Flag.Zero, false);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
 

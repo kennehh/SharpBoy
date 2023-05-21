@@ -35,13 +35,14 @@ namespace SharpBoy.Cpu.Tests
         {
             [0x03] = 8, [0x09] = 8, [0x0b] = 8, [0x13] = 8, 
             [0x19] = 8, [0x1b] = 8, 
-            [0x23] = 8, [0x28] = 8, [0x2b] = 8, [0x2f] = 8,
+            [0x28] = 8, [0x23] = 8, [0x28] = 8, [0x29] = 8, [0x2b] = 8,
             [0x30] = 8, [0x33] = 8, [0x38] = 8, [0x39] = 8, [0x3b] = 8,
         };
 
         private static Dictionary<byte, int> overrideCycleBranchCheckValues = new Dictionary<byte, int>
         {
-            [0x28] = 12, [0x2f] = 12,
+            [0x18] = 12,
+            [0x20] = 12, [0x28] = 12, [0x2f] = 12,
             [0x30] = 12, [0x38] = 12,
         };
 

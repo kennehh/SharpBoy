@@ -315,6 +315,8 @@ namespace SharpBoy.Cpu
         private void stop()
         {
             Stopped = true;
+            registers.PC++;
+            currentCycles += 4;
         }
 
 #endregion
@@ -396,12 +398,7 @@ namespace SharpBoy.Cpu
             Write8Bit(address, registers.A);
         }
 
-        private void ld_a16_sp()
-        {
-            var address = ReadImmediate16Bit();
-            var value = Read16Bit(address);
-            registers.SP = value;
-        }
+        private void ld_a16_sp() => Write16Bit(ReadImmediate16Bit(), registers.SP);
 
         private void ld_hl_a(int increment)
         {
@@ -458,6 +455,16 @@ namespace SharpBoy.Cpu
 
 #region rr
 
+        private void rra()
+        {
+            registers.A = AluOperations.rr(registers, registers.A);
+        }
+
+        private void rrca()
+        {
+            registers.A = AluOperations.rrc(registers, registers.A);
+        }
+
         private void rr(Register8Bit reg)
         {
             var value = registers.ReadFromRegister(reg);
@@ -470,19 +477,9 @@ namespace SharpBoy.Cpu
             registers.WriteToRegister(reg, AluOperations.rr(registers, value));
         }
 
-        private void rra()
-        {
-            registers.A = AluOperations.rr(registers, registers.A);
-        }
+        #endregion
 
-        private void rrca()
-        {
-            registers.A = AluOperations.rr(registers, registers.A);
-        }
-
-#endregion
-
-#region add
+        #region add
         private void add_a_r8(Register8Bit reg) => add_a(registers.ReadFromRegister(reg));
 
         private void add_a_i8() => add_a(ReadImmediate8Bit());
@@ -506,15 +503,13 @@ namespace SharpBoy.Cpu
 
             var value = ReadRegister16Bit(reg);
             var result = registers.HL + value;
-            var halfCarryResult = (value & 0xfff) + (result & 0xfff);
-            var ushortResult = (ushort)result;
-
-            registers.SetFlag(Flag.Zero, ushortResult == 0);
+            var halfCarryResult = (registers.HL & 0xfff) + (value & 0xfff);
+             
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xfff);
             registers.SetFlag(Flag.Carry, result > 0xffff);
 
-            registers.HL = ushortResult;
+            registers.HL = (ushort)result;
         }
 
 #endregion
@@ -602,9 +597,8 @@ namespace SharpBoy.Cpu
         private void cpl()
         {
             var result = ~registers.A;
-            registers.SetFlag(Flag.Zero, false);
-            registers.SetFlag(Flag.HalfCarry, false);
-            registers.SetFlag(Flag.Carry, result > 0xff);
+            registers.SetFlag(Flag.Subtract, true);
+            registers.SetFlag(Flag.HalfCarry, true);
             registers.A = (byte)result;
         }
 
@@ -614,14 +608,14 @@ namespace SharpBoy.Cpu
 
         private void jr_i8()
         {
-            registers.PC += ReadImmediate8Bit();
-            currentCycles += 4;
+            var increment = (sbyte)ReadImmediate8Bit();
+            registers.PC = (ushort)(ReadRegisterPC() + increment);
             branchTaken = true;
         }
 
         private void jr_i8(Flag flag, bool isSet)
         {
-            var val = ReadImmediate8Bit();
+            var val = (sbyte)ReadImmediate8Bit();
             if (registers.GetFlag(flag) == isSet)
             {
                 registers.PC = (ushort)(ReadRegisterPC() + val);

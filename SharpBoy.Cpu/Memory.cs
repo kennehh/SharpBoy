@@ -26,8 +26,8 @@ namespace SharpBoy.Cpu
 
         public void Write16Bit(ushort address, ushort value)
         {
-            memory[address] = Utils.GetHighNibble(value);
-            memory[address + 1] = Utils.GetLowNibble(value);
+            memory[address] = Utils.GetLowByte(value);
+            memory[address + 1] = Utils.GetHighByte(value);
         }
     }
 }

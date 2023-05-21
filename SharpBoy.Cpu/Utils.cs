@@ -14,7 +14,7 @@ namespace SharpBoy.Cpu
         public static int ToBit(this bool x) => x ? 1 : 0;
 
         public static ushort Get16BitValue(byte low, byte high) => (ushort)(low << 8 | high);
-        public static byte GetLowNibble(ushort value) => (byte)(value >> 8 & 0xFF);
-        public static byte GetHighNibble(ushort value) => (byte)(value & 0xFF);
+        public static byte GetHighByte(ushort value) => (byte)(value >> 8 & 0xFF);
+        public static byte GetLowByte(ushort value) => (byte)(value & 0xFF);
     }
 }
