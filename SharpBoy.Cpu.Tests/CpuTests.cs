@@ -2,6 +2,7 @@
 using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,29 +32,52 @@ namespace SharpBoy.Cpu.Tests
             "0xf0", "0xf1", "0xf2", "0xf3",         "0xf5", "0xf6", "0xf7", "0xf8", "0xf9", "0xfa", "0xfb",                 "0xfe", //"0xff"
         };
 
-        private static Dictionary<byte, int> overrideCycleCheckValues = new Dictionary<byte, int>
+        private readonly static int[] expectedNonBranchCycles = new int[]
         {
-            [0x03] = 8, [0x09] = 8, [0x0b] = 8, [0x13] = 8, 
-            [0x19] = 8, [0x1b] = 8, 
-            [0x28] = 8, [0x23] = 8, [0x28] = 8, [0x29] = 8, [0x2b] = 8,
-            [0x30] = 8, [0x33] = 8, [0x38] = 8, [0x39] = 8, [0x3b] = 8,
+            4,  12, 8,  8,  4,  4,  8,  4,  20, 8,  8,  8,  4,  4,  8,  4,
+            4,  12, 8,  8,  4,  4,  8,  4,  12, 8,  8,  8,  4,  4,  8,  4,
+            8,  12, 8,  8,  4,  4,  8,  4,  8,  8,  8,  8,  4,  4,  8,  4,
+            8,  12, 8,  8,  12, 12, 12, 4,  8,  8,  8,  8,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            8,  12, 12, 16, 12, 16, 8,  16, 8,  16, 12, 4,  12, 24, 8,  16,
+            8,  12, 12, 0,  12, 16, 8,  16, 8,  16, 12, 0,  12, 0,  8,  16,
+            12, 12, 8,  0,  0,  16, 8,  16, 16, 4,  16, 0,  0,  0,  8,  16,
+            12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4,  0,  0,  8,  16
         };
 
-        private static Dictionary<byte, int> overrideCycleBranchCheckValues = new Dictionary<byte, int>
+        private readonly static int[] expectedBranchCycles = new int[]
         {
-            [0x18] = 12,
-            [0x20] = 12, [0x28] = 12, [0x2f] = 12,
-            [0x30] = 12, [0x38] = 12,
+            4,  12, 8,  8,  4,  4,  8,  4,  20, 8,  8,  8,  4,  4,  8,  4,
+            4,  12, 8,  8,  4,  4,  8,  4,  12, 8,  8,  8,  4,  4,  8,  4,
+            12, 12, 8,  8,  4,  4,  8,  4,  12,  8,  8,  8,  4,  4,  8,  4,
+            12, 12, 8,  8,  12, 12, 12, 4,  12,  8,  8,  8,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+            20, 12, 16, 16, 24, 16, 8,  16, 20, 16, 16, 4,  24, 24, 8,  16,
+            20, 12, 16, 0,  24, 16, 8,  16, 20, 16, 16, 0,  24, 0,  8,  16,
+            12, 12, 8,  0,  0,  16, 8,  16, 16, 4,  16, 0,  0,  0,  8,  16,
+            12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4,  0,  0,  8,  16
         };
-
-        //private readonly static byte[] opcodes = new byte[] { 0 };
 
         [Test, TestCaseSource(nameof(opcodes)), Parallelizable(ParallelScope.All)]
         public void OpcodeTest(string opcodeString)
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new CpuCore(0x10000);
+            var cpu = new CpuCore(0x100000);
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open))
             using (var sr = new StreamReader(s))
@@ -69,21 +93,7 @@ namespace SharpBoy.Cpu.Tests
                         var cycles = cpu.Tick();
                         AssertCpuState(cpu, test);
 
-                        int expectedCycles;
-                        if (cpu.branchTaken)
-                        {
-                            overrideCycleBranchCheckValues.TryGetValue(opcode, out expectedCycles);
-                        }
-                        else
-                        {
-                            overrideCycleCheckValues.TryGetValue(opcode, out expectedCycles);
-                        }
-
-                        if (expectedCycles == 0)
-                        {
-                            expectedCycles = test.cycles.Where(x => x?.Any() ?? false).Count() * 4;
-                        }
-
+                        var expectedCycles = cpu.branchTaken ? expectedBranchCycles[opcode] : expectedNonBranchCycles[opcode];
                         Assert.That(cycles, Is.EqualTo(expectedCycles), $"Cycles incorrect: {test.name}");
                     }
                 }

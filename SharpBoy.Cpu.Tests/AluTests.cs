@@ -22,8 +22,8 @@ namespace SharpBoy.Cpu.Tests
         [Test, Parallelizable]
         public void AluTest_cp() => RunAluTests("cp", AluOperations.cp);
 
-        //[Test, Parallelizable]
-        //public void AluTest_cpi() => RunAluTests("cpi", AluOperations.cpi);
+        [Test, Parallelizable]
+        public void AluTest_cpl() => RunAluTests("cpl", AluOperations.cpl);
 
         [Test, Parallelizable]
         public void AluTest_daa() => RunAluTests("daa", AluOperations.daa);
@@ -67,8 +67,8 @@ namespace SharpBoy.Cpu.Tests
         [Test, Parallelizable]
         public void AluTest_sub() => RunAluTests("sub", AluOperations.sub);
 
-        //[Test, Parallelizable]
-        //public void AluTest_swap() => RunAluTests("swap", AluOperations.swap);
+        [Test, Parallelizable]
+        public void AluTest_swap() => RunAluTests("swap", AluOperations.swap);
 
         [Test, Parallelizable]
         public void AluTest_xor() => RunAluTests("xor", AluOperations.xor);

@@ -17,9 +17,9 @@ namespace SharpBoy.Cpu
 
         public ushort Read16Bit(ushort address)
         {
-            var high = memory[address];
-            var low = memory[address + 1];
-            return Utils.Get16BitValue(low, high);
+            var low = memory[address];
+            var high = memory[(ushort)(address + 1)];
+            return Utils.Get16BitValue(high, low);
         }
 
         public void Write8Bit(ushort address, byte value) => memory[address] = value;
@@ -27,7 +27,7 @@ namespace SharpBoy.Cpu
         public void Write16Bit(ushort address, ushort value)
         {
             memory[address] = Utils.GetLowByte(value);
-            memory[address + 1] = Utils.GetHighByte(value);
+            memory[(ushort)(address + 1)] = Utils.GetHighByte(value);
         }
     }
 }

@@ -8,4 +8,7 @@
 		<_Parameter1>SharpBoy.Cpu.Tests</_Parameter1>
 	</AssemblyAttribute>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
 </Project>

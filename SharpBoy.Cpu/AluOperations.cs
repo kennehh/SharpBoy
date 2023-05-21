@@ -165,6 +165,24 @@ namespace SharpBoy.Cpu
             registers.SetFlag(Flag.HalfCarry, false);
         }
 
+        internal static byte cpl(Registers registers, byte value)
+        {
+            var result = ~value;
+            registers.SetFlag(Flag.Subtract, true);
+            registers.SetFlag(Flag.HalfCarry, true);
+            return (byte)result;
+        }
+
+        internal static byte swap(Registers registers, byte value)
+        {
+            var result = value >> 4 | value << 4;
+            registers.SetFlag(Flag.Zero, result == 0);
+            registers.SetFlag(Flag.Subtract, false);
+            registers.SetFlag(Flag.HalfCarry, false);
+            registers.SetFlag(Flag.Carry, false);
+            return (byte)result;
+        }
+
         private static byte add(Registers registers, byte a, byte b, bool isCarry, bool setCarry)
         {
             var cy = (registers.GetFlag(Flag.Carry) && isCarry).ToBit();
