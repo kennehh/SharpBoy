@@ -75,10 +75,23 @@ namespace SharpBoy.Cpu
             return val;
         }
 
+        private ushort ReadRegisterHL()
+        {
+            var val = registers.HL;
+            currentCycles += 4;
+            return val;
+        }
+
         private void WriteRegisterSP(ushort value)
         {
             registers.SP = value;
             currentCycles += 8;
+        }
+
+        private void WriteRegisterHL(ushort value)
+        {
+            registers.HL = value;
+            currentCycles += 4;
         }
 
         private void Write8Bit(ushort address, byte value)
@@ -335,9 +348,9 @@ namespace SharpBoy.Cpu
                 case 0xde: sbc_a_i8(); break;
                 case 0xdf: rst(0x18); break;
 
-                //case 0xe0: ret(Flag.Carry, false); break;
+                case 0xe0: ld_ia8_a(); break;
                 case 0xe1: pop(Register16Bit.HL); break;
-                //case 0xe2: jp_i16(Flag.Carry, false); break;
+                case 0xe2: ld_ca_a(); break;
                 // no 0xe3
                 // no 0xe4
                 case 0xe5: push(Register16Bit.HL); break;
@@ -345,24 +358,24 @@ namespace SharpBoy.Cpu
                 case 0xe7: rst(0x20); break;
                 case 0xe8: add_sp_i8(); break;
                 case 0xe9: jp_hl(); break;
-                //case 0xea: jp_i16(Flag.Carry, true); break;
+                case 0xea: ld_ia16_a(); break;
                 // no 0xeb
                 // no 0xec
                 // no 0xed
                 case 0xee: xor_a_i8(); break;
                 case 0xef: rst(0x28); break;
 
-                //case 0xf0: ret(Flag.Carry, false); break;
+                case 0xf0: ld_a_ia8(); break;
                 case 0xf1: pop_af(); break;
-                //case 0xf2: jp_i16(Flag.Carry, false); break;
+                case 0xf2: ld_a_ca(); break;
                 case 0xf3: di(); break;
                 // no 0xf4
                 case 0xf5: push(Register16Bit.AF); break;
                 case 0xf6: or_a_i8(); break;
                 case 0xf7: rst(0x30); break;
-                //case 0xf8: add_sp_i8(); break;
-                //case 0xf9: jp_hl(); break;
-                //case 0xfa: jp_i16(Flag.Carry, true); break;
+                case 0xf8: ld_hl_spi8(); break;
+                case 0xf9: ld_sp_hl(); break;
+                case 0xfa: ld_a_ia16(); break;
                 case 0xfb: ei(); break;
                 // no 0xfc
                 // no 0xfd
@@ -461,6 +474,30 @@ namespace SharpBoy.Cpu
             Write8Bit(registers.HL, value);
         }
 
+        private void ld_ia8_a()
+        {
+            var address = (ushort)(0xff00 | ReadImmediate8Bit());
+            Write8Bit(address, registers.A);
+        }
+
+        private void ld_a_ia8()
+        {
+            var address = (ushort)(0xff00 | ReadImmediate8Bit());
+            registers.A = Read8Bit(address);
+        }
+
+        private void ld_ca_a()
+        {
+            var address = (ushort)(0xff00 | registers.C);
+            Write8Bit(address, registers.A);
+        }
+
+        private void ld_a_ca()
+        {
+            var address = (ushort)(0xff00 | registers.C);
+            registers.A = Read8Bit(address);
+        }
+
         private void ld_r16_i16(Register16Bit reg)
         {
             var value = ReadImmediate16Bit();
@@ -500,9 +537,28 @@ namespace SharpBoy.Cpu
             registers.HL += (ushort)increment;
         }
 
-#endregion
+        private void ld_ia16_a()
+        {
+            var address = ReadImmediate16Bit();
+            Write8Bit(address, registers.A);
+        }
 
-#region rl
+        private void ld_a_ia16()
+        {
+            var address = ReadImmediate16Bit();
+            registers.A = Read8Bit(address);
+        }
+
+        private void ld_hl_spi8() => WriteRegisterHL(sp_i8());
+
+        private void ld_sp_hl()
+        {
+            registers.SP = ReadRegisterHL();
+        }
+
+        #endregion
+
+        #region rl
 
         private void rla()
         {
@@ -603,6 +659,24 @@ namespace SharpBoy.Cpu
             registers.SetFlag(Flag.Carry, carryResult > 0xff);
 
             WriteRegisterSP((ushort)result);
+        }
+
+        private ushort sp_i8()
+        {
+            // https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
+            // TL; DR: For ADD SP,n, the H-flag is set when carry occurs from bit 3 to bit 4.
+
+            var value = (sbyte)ReadImmediate8Bit();
+            var result = registers.SP + value;
+            var carryResult = (registers.SP & 0xff) + (value & 0xff);
+            var halfCarryResult = (registers.SP & 0xf) + (value & 0xf);
+
+            registers.SetFlag(Flag.Zero, false);
+            registers.SetFlag(Flag.Subtract, false);
+            registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xf);
+            registers.SetFlag(Flag.Carry, carryResult > 0xff);
+
+            return (ushort)result;
         }
 
         #endregion
