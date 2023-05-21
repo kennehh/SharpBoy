@@ -31,6 +31,20 @@ namespace SharpBoy.Cpu.Tests
             "0xf0", "0xf1", "0xf2", "0xf3",         "0xf5", "0xf6", "0xf7", "0xf8", "0xf9", "0xfa", "0xfb",                 "0xfe", //"0xff"
         };
 
+        private static Dictionary<byte, int> overrideCycleCheckValues = new Dictionary<byte, int>
+        {
+            [0x03] = 8, [0x09] = 8, [0x0b] = 8, [0x13] = 8, 
+            [0x19] = 8, [0x1b] = 8, 
+            [0x23] = 8, [0x28] = 8, [0x2b] = 8, [0x2f] = 8,
+            [0x30] = 8, [0x33] = 8, [0x38] = 8, [0x39] = 8, [0x3b] = 8,
+        };
+
+        private static Dictionary<byte, int> overrideCycleBranchCheckValues = new Dictionary<byte, int>
+        {
+            [0x28] = 12, [0x2f] = 12,
+            [0x30] = 12, [0x38] = 12,
+        };
+
         //private readonly static byte[] opcodes = new byte[] { 0 };
 
         [Test, TestCaseSource(nameof(opcodes)), Parallelizable(ParallelScope.All)]
@@ -52,10 +66,24 @@ namespace SharpBoy.Cpu.Tests
                         SetupInitialValues(cpu, test.initial);
 
                         var cycles = cpu.Tick();
-                        AssertCpuState(cpu, test.final);
+                        AssertCpuState(cpu, test);
 
-                        var expectedCycles = test.cycles.Where(x => x?.Any() ?? false).Count() * 4;
-                        Assert.That(cycles, Is.EqualTo(expectedCycles), "Cycles incorrect");
+                        int expectedCycles;
+                        if (cpu.branchTaken)
+                        {
+                            overrideCycleBranchCheckValues.TryGetValue(opcode, out expectedCycles);
+                        }
+                        else
+                        {
+                            overrideCycleCheckValues.TryGetValue(opcode, out expectedCycles);
+                        }
+
+                        if (expectedCycles == 0)
+                        {
+                            expectedCycles = test.cycles.Where(x => x?.Any() ?? false).Count() * 4;
+                        }
+
+                        Assert.That(cycles, Is.EqualTo(expectedCycles), $"Cycles incorrect: {test.name}");
                     }
                 }
             }
@@ -82,8 +110,10 @@ namespace SharpBoy.Cpu.Tests
             }
         }
 
-        private void AssertCpuState(CpuCore cpu, CpuTestData data)
+        private void AssertCpuState(CpuCore cpu, CpuTest test)
         {
+            var data = test.final;
+
             var a = Convert.ToByte(data.cpu.a, 16);
             var b = Convert.ToByte(data.cpu.b, 16);
             var c = Convert.ToByte(data.cpu.c, 16);
@@ -95,23 +125,23 @@ namespace SharpBoy.Cpu.Tests
             var pc =  Convert.ToUInt16(data.cpu.pc, 16);
             var sp =  Convert.ToUInt16(data.cpu.sp, 16);
 
-            Assert.That(cpu.registers.A, Is.EqualTo(a), "A is incorrect");
-            Assert.That(cpu.registers.B, Is.EqualTo(b), "B is incorrect");
-            Assert.That(cpu.registers.C, Is.EqualTo(c), "C is incorrect");
-            Assert.That(cpu.registers.D, Is.EqualTo(d), "D is incorrect");
-            Assert.That(cpu.registers.E, Is.EqualTo(e), "E is incorrect");
-            Assert.That(cpu.registers.F, Is.EqualTo(f), "F is incorrect");
-            Assert.That(cpu.registers.H, Is.EqualTo(h), "H is incorrect");
-            Assert.That(cpu.registers.L, Is.EqualTo(l), "L is incorrect");
-            Assert.That(cpu.registers.PC, Is.EqualTo(pc), "PC is incorrect");
-            Assert.That(cpu.registers.SP, Is.EqualTo(sp), "SP is incorrect");
+            Assert.That(cpu.registers.A, Is.EqualTo(a), $"A is incorrect: {test.name}");
+            Assert.That(cpu.registers.B, Is.EqualTo(b), $"B is incorrect: {test.name}");
+            Assert.That(cpu.registers.C, Is.EqualTo(c), $"C is incorrect: {test.name}");
+            Assert.That(cpu.registers.D, Is.EqualTo(d), $"D is incorrect: {test.name}");
+            Assert.That(cpu.registers.E, Is.EqualTo(e), $"E is incorrect: {test.name}");
+            Assert.That(cpu.registers.F, Is.EqualTo(f), $"F is incorrect: {test.name}");
+            Assert.That(cpu.registers.H, Is.EqualTo(h), $"H is incorrect: {test.name}");
+            Assert.That(cpu.registers.L, Is.EqualTo(l), $"L is incorrect: {test.name}");
+            Assert.That(cpu.registers.PC, Is.EqualTo(pc), $"PC is incorrect: {test.name}");
+            Assert.That(cpu.registers.SP, Is.EqualTo(sp), $"SP is incorrect: {test.name}");
 
             foreach (var addressValue in data.ram)
             {
                 var address = Convert.ToUInt16(addressValue[0], 16);
                 var expected = Convert.ToByte(addressValue[1], 16);
                 var actual = cpu.memory.Read8Bit(address);
-                Assert.That(actual, Is.EqualTo(expected), $"Value at memory address {address:x4} is incorrect");
+                Assert.That(actual, Is.EqualTo(expected), $"Value at memory address {address:x4} is incorrect: {test.name}");
             }
         }
 

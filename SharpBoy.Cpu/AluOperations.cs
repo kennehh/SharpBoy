@@ -67,7 +67,7 @@ namespace SharpBoy.Cpu
             var result = (byte)(value << 1 | registers.GetFlag(Flag.Carry).ToBit());
 
             registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 7));
-            registers.SetFlag(Flag.Zero, result == 0);
+            registers.SetFlag(Flag.Zero, false);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
 
@@ -80,7 +80,7 @@ namespace SharpBoy.Cpu
             var result = (byte)(value << 1 | bit7);
 
             registers.SetFlag(Flag.Carry, bit7 == 1);
-            registers.SetFlag(Flag.Zero, result == 0);
+            registers.SetFlag(Flag.Zero, false);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
 

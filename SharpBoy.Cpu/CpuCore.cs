@@ -12,6 +12,7 @@ namespace SharpBoy.Cpu
 
         internal Memory memory;
         internal Registers registers;
+        internal bool branchTaken = false;
 
         private int currentCycles;
 
@@ -24,6 +25,7 @@ namespace SharpBoy.Cpu
         public int Tick()
         {
             currentCycles = 0;
+            branchTaken = false;
 
             var opcode = ReadImmediate8Bit();
             ExecuteInstruction(opcode);
@@ -97,7 +99,7 @@ namespace SharpBoy.Cpu
                 case 0x05: dec_r8(Register8Bit.B); break;
                 case 0x06: ld_r8_i8(Register8Bit.B); break;
                 case 0x07: rlca(); break;
-                case 0x08: ld_a16_sp(Register16Bit.BC); break;
+                case 0x08: ld_a16_sp(); break;
                 case 0x09: add_hl_r16(Register16Bit.BC); break;
                 case 0x0a: ld_a_ra16(Register16Bit.BC); break;
                 case 0x0b: dec_r16(Register16Bit.BC); break;
@@ -394,7 +396,7 @@ namespace SharpBoy.Cpu
             Write8Bit(address, registers.A);
         }
 
-        private void ld_a16_sp(Register16Bit reg)
+        private void ld_a16_sp()
         {
             var address = ReadImmediate16Bit();
             var value = Read16Bit(address);
@@ -614,6 +616,7 @@ namespace SharpBoy.Cpu
         {
             registers.PC += ReadImmediate8Bit();
             currentCycles += 4;
+            branchTaken = true;
         }
 
         private void jr_i8(Flag flag, bool isSet)
@@ -622,6 +625,7 @@ namespace SharpBoy.Cpu
             if (registers.GetFlag(flag) == isSet)
             {
                 registers.PC = (ushort)(ReadRegisterPC() + val);
+                branchTaken = true;
             }
         }
 
@@ -638,6 +642,7 @@ namespace SharpBoy.Cpu
             {
                 registers.PC = pc;
                 currentCycles += 4;
+                branchTaken = true;
             }
         }
 
@@ -656,6 +661,7 @@ namespace SharpBoy.Cpu
             {
                 push(registers.PC);
                 registers.PC = pc;
+                branchTaken = true;
             }
         }
 
@@ -672,6 +678,7 @@ namespace SharpBoy.Cpu
             {
                 registers.PC = pop();
                 currentCycles += 4;
+                branchTaken = true;
             }
         }
 
