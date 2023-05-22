@@ -537,6 +537,63 @@ namespace SharpBoy.Cpu
 
         #endregion
 
+        #region bit/res/set
 
+        private void bit_r8(Register8Bit reg, byte bit)
+        {
+            var value = registers.ReadFromRegister(reg);
+            AluOperations.bit(registers, value, bit);
+        }
+
+        private void res_r8(Register8Bit reg, byte bit)
+        {
+            var value = registers.ReadFromRegister(reg);
+            var result = AluOperations.res(value, bit);
+            registers.WriteToRegister(reg, result);
+        }
+
+        private void set_r8(Register8Bit reg, byte bit)
+        {
+            var value = registers.ReadFromRegister(reg);
+            var result = AluOperations.set(value, bit);
+            registers.WriteToRegister(reg, result);
+        }
+
+        private void bit_hla(byte bit)
+        {
+            var value = Read8Bit(registers.HL);
+            AluOperations.bit(registers, value, bit);
+            currentCycles += 4;
+        }
+
+        private void res_hla(byte bit)
+        {
+            var value = Read8Bit(registers.HL);
+            var result = AluOperations.res(value, bit);
+            Write8Bit(registers.HL, result);            
+        }
+
+        private void set_hla(byte bit)
+        {
+            var value = Read8Bit(registers.HL);
+            var result = AluOperations.set(value, bit);
+            Write8Bit(registers.HL, result);
+        }
+
+        #endregion
+
+        private void swap_r8(Register8Bit reg)
+        {
+            var value = registers.ReadFromRegister(reg);
+            var result = AluOperations.swap(registers, value);
+            registers.WriteToRegister(reg, result);
+        }
+
+        private void swap_hla()
+        {
+            var value = Read8Bit(registers.HL);
+            var result = AluOperations.swap(registers, value);
+            Write8Bit(registers.HL, result);
+        }
     }
 }

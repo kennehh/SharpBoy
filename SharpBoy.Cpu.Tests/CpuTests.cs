@@ -69,7 +69,7 @@ namespace SharpBoy.Cpu.Tests
             8,  12, 12, 16, 12, 16, 8,  16, 8,  16, 12, 4,  12, 24, 8,  16,
             8,  12, 12, 0,  12, 16, 8,  16, 8,  16, 12, 0,  12, 0,  8,  16,
             12, 12, 8,  0,  0,  16, 8,  16, 16, 4,  16, 0,  0,  0,  8,  16,
-            12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4,  0,  0,  8,  16
+            12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4,  0,  0,  8,  16,
         };
 
         private readonly static int[] expectedBranchCycles = new int[]
@@ -89,7 +89,27 @@ namespace SharpBoy.Cpu.Tests
             20, 12, 16, 16, 24, 16, 8,  16, 20, 16, 16, 4,  24, 24, 8,  16,
             20, 12, 16, 0,  24, 16, 8,  16, 20, 16, 16, 0,  24, 0,  8,  16,
             12, 12, 8,  0,  0,  16, 8,  16, 16, 4,  16, 0,  0,  0,  8,  16,
-            12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4,  0,  0,  8,  16
+            12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4,  0,  0,  8,  16,
+        };
+
+        private readonly static int[] expectedCBCycles = new int[]
+        {
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
+            8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
         };
 
         [Test, TestCaseSource(nameof(opcodes)), Parallelizable(ParallelScope.All)]
@@ -97,7 +117,7 @@ namespace SharpBoy.Cpu.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new CpuCore(0x100000);
+            var cpu = new CpuCore(0x10000);
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -125,10 +145,9 @@ namespace SharpBoy.Cpu.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new CpuCore(0x100000);
-            var didNotTest = true;
+            var cpu = new CpuCore(0x10000);
 
-            using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb.json", FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb_{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
             using (var reader = new JsonTextReader(sr))
             {
@@ -137,25 +156,14 @@ namespace SharpBoy.Cpu.Tests
                     if (reader.TokenType == JsonToken.StartObject)
                     {
                         var test = serializer.Deserialize<CpuTest>(reader);
+                        SetupInitialValues(cpu, test.initial);
 
-                        if (Convert.ToByte(test.initial.ram[1][1], 16) == opcode)
-                        {
-                            didNotTest = false;
-                            SetupInitialValues(cpu, test.initial);
+                        var cycles = cpu.Tick();
+                        AssertCpuState(cpu, test);
 
-                            var cycles = cpu.Tick();
-                            AssertCpuState(cpu, test);
-
-                            var expectedCycles = cpu.branchTaken ? expectedBranchCycles[opcode] : expectedNonBranchCycles[opcode];
-                            //Assert.That(cycles, Is.EqualTo(expectedCycles), $"Cycles incorrect: {test.name}");
-                        }
+                        Assert.That(cycles, Is.EqualTo(expectedCBCycles[opcode]), $"Cycles incorrect: {test.name}");
                     }
                 }
-            }
-
-            if (didNotTest)
-            {
-                Assert.Fail($"Did not test opcode {opcodeString}");
             }
         }
 
