@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 
-namespace SharpBoy.Cpu.Tests
+namespace SharpBoy.Core.Tests
 {
     public class AluTests
     {

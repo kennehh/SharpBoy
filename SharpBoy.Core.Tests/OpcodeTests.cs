@@ -6,11 +6,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static SharpBoy.Cpu.Tests.AluTests;
+using static SharpBoy.Core.Tests.AluTests;
 
-namespace SharpBoy.Cpu.Tests
+namespace SharpBoy.Core.Tests
 {
-    public class CpuTests
+    public class OpcodeTests
     {
         private readonly static string[] opcodes = new string[]
         {
@@ -117,7 +117,7 @@ namespace SharpBoy.Cpu.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new CpuCore(0x10000);
+            var cpu = new Cpu(0x10000);
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -145,7 +145,7 @@ namespace SharpBoy.Cpu.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new CpuCore(0x10000);
+            var cpu = new Cpu(0x10000);
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb_{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -167,7 +167,7 @@ namespace SharpBoy.Cpu.Tests
             }
         }
 
-        private static void SetupInitialValues(CpuCore cpu, CpuTestData data)
+        private static void SetupInitialValues(Cpu cpu, CpuTestData data)
         {
             cpu.registers.A = Convert.ToByte(data.cpu.a, 16);
             cpu.registers.B = Convert.ToByte(data.cpu.b, 16);
@@ -188,7 +188,7 @@ namespace SharpBoy.Cpu.Tests
             }
         }
 
-        private void AssertCpuState(CpuCore cpu, CpuTest test)
+        private void AssertCpuState(Cpu cpu, CpuTest test)
         {
             var data = test.final;
 

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpBoy.Cpu
+namespace SharpBoy.Core
 {
-    public partial class CpuCore
+    public partial class Cpu
     {
 
         #region misc

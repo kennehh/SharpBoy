@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SharpBoy.Cpu
+namespace SharpBoy.Core
 {
     [StructLayout(LayoutKind.Explicit)]
     internal class Registers

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Text;
 
-namespace SharpBoy.Cpu
+namespace SharpBoy.Core
 {
-    public partial class CpuCore
+    public partial class Cpu
     {
         public bool Halted { get; private set; }
         public bool Stopped { get; private set; }
@@ -17,7 +17,7 @@ namespace SharpBoy.Cpu
 
         private int currentCycles;
 
-        public CpuCore(int memorySize) 
+        public Cpu(int memorySize) 
         { 
             memory = new Memory(memorySize);
             registers = new Registers();
@@ -389,10 +389,6 @@ namespace SharpBoy.Cpu
             }
 
         }
-
-        private Register8Bit GetLeftRegister(byte opcode) => (Register8Bit)((opcode >> 6) & 0xf);
-
-        private Register8Bit GetRightRegister(byte opcode) => (Register8Bit)(opcode & 0xf);
 
         private void ExecuteCBInstruction(byte cbOpcode)
         {
