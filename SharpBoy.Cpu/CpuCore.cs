@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using System.Text;
 
 namespace SharpBoy.Cpu
 {
-    public class CpuCore
+    public partial class CpuCore
     {
         public bool Halted { get; private set; }
         public bool Stopped { get; private set; }
@@ -325,7 +326,7 @@ namespace SharpBoy.Cpu
                 case 0xc8: ret(Flag.Zero, true); break;
                 case 0xc9: ret(); break;
                 case 0xca: jp_i16(Flag.Zero, true); break;
-                //case 0xcb: ExecuteCBInstruction(); break;
+                case 0xcb: ExecuteCBInstruction(ReadImmediate8Bit()); break;
                 case 0xcc: call_i16(Flag.Zero, true); break;
                 case 0xcd: call_i16(); break;
                 case 0xce: adc_a_i8(); break;
@@ -389,493 +390,288 @@ namespace SharpBoy.Cpu
 
         }
 
-#region misc
+        private Register8Bit GetLeftRegister(byte opcode) => (Register8Bit)((opcode >> 6) & 0xf);
 
-        private void nop() { }
+        private Register8Bit GetRightRegister(byte opcode) => (Register8Bit)(opcode & 0xf);
 
-        private void halt()
+        private void ExecuteCBInstruction(byte cbOpcode)
         {
-            Halted = true;
-        }
-
-        private void stop()
-        {
-            Stopped = true;
-            registers.PC++;
-        }
-
-        private void di() => InterruptsEnabled = false;
-        private void ei() => InterruptsEnabled = true;
-
-#endregion
-
-#region inc/dec
-
-        private void inc_r16(Register16Bit reg)
-        {
-            var value = (ushort)(ReadRegister16Bit(reg) + 1);
-            registers.WriteToRegister(reg, value);
-        }
-
-        private void inc_r8(Register8Bit reg)
-        {
-            var result = AluOperations.inc(registers, registers.ReadFromRegister(reg));
-            registers.WriteToRegister(reg, result);
-        }
-
-        private void inc_hla()
-        {
-            var result = AluOperations.inc(registers, Read8Bit(registers.HL));
-            Write8Bit(registers.HL, result);
-        }
-
-        private void dec_r16(Register16Bit reg)
-        {
-            var value = (ushort)(ReadRegister16Bit(reg) - 1);
-            registers.WriteToRegister(reg, value);
-        }
-
-        private void dec_r8(Register8Bit reg)
-        {
-            var result = AluOperations.dec(registers, registers.ReadFromRegister(reg));
-            registers.WriteToRegister(reg, result);
-        }
-
-        private void dec_hla()
-        {
-            var result = AluOperations.dec(registers, Read8Bit(registers.HL));
-            Write8Bit(registers.HL, result);
-        }
-
-#endregion
-
-#region ld
-        private void ld_r8_r8(Register8Bit a, Register8Bit b)
-        {
-            var value = registers.ReadFromRegister(b);
-            registers.WriteToRegister(a, value);
-        }
-
-        private void ld_r8_hla(Register8Bit reg)
-        {
-            var value = Read8Bit(registers.HL);
-            registers.WriteToRegister(reg, value);
-        }
-
-        private void ld_hla_r8(Register8Bit reg)
-        {
-            var value = registers.ReadFromRegister(reg);
-            Write8Bit(registers.HL, value);
-        }
-
-        private void ld_hla_i8()
-        {
-            var value = ReadImmediate8Bit();
-            Write8Bit(registers.HL, value);
-        }
-
-        private void ld_ia8_a()
-        {
-            var address = (ushort)(0xff00 | ReadImmediate8Bit());
-            Write8Bit(address, registers.A);
-        }
-
-        private void ld_a_ia8()
-        {
-            var address = (ushort)(0xff00 | ReadImmediate8Bit());
-            registers.A = Read8Bit(address);
-        }
-
-        private void ld_ca_a()
-        {
-            var address = (ushort)(0xff00 | registers.C);
-            Write8Bit(address, registers.A);
-        }
-
-        private void ld_a_ca()
-        {
-            var address = (ushort)(0xff00 | registers.C);
-            registers.A = Read8Bit(address);
-        }
-
-        private void ld_r16_i16(Register16Bit reg)
-        {
-            var value = ReadImmediate16Bit();
-            registers.WriteToRegister(reg, value);
-        }
-
-        private void ld_ra16_a(Register16Bit reg)
-        {
-            var address = registers.ReadFromRegister(reg);
-            Write8Bit(address, registers.A);
-        }
-
-        private void ld_a16_sp() => Write16Bit(ReadImmediate16Bit(), registers.SP);
-
-        private void ld_hl_a(int increment)
-        {
-            Write8Bit(registers.HL, registers.A);
-            registers.HL += (ushort)increment;
-        }
-
-        private void ld_r8_i8(Register8Bit reg)
-        {
-            var value = ReadImmediate8Bit();
-            registers.WriteToRegister(reg, value);
-        }
-
-        private void ld_a_ra16(Register16Bit reg)
-        {
-            var address = registers.ReadFromRegister(reg);
-            var value = Read8Bit(address);
-            registers.A = value;
-        }
-
-        private void ld_a_hl(int increment)
-        {
-            registers.A = Read8Bit(registers.HL);
-            registers.HL += (ushort)increment;
-        }
-
-        private void ld_ia16_a()
-        {
-            var address = ReadImmediate16Bit();
-            Write8Bit(address, registers.A);
-        }
-
-        private void ld_a_ia16()
-        {
-            var address = ReadImmediate16Bit();
-            registers.A = Read8Bit(address);
-        }
-
-        private void ld_hl_spi8() => WriteRegisterHL(sp_i8());
-
-        private void ld_sp_hl()
-        {
-            registers.SP = ReadRegisterHL();
-        }
-
-        #endregion
-
-        #region rl
-
-        private void rla()
-        {
-            registers.A = AluOperations.rl(registers, registers.A);
-        }
-
-        private void rlca()
-        {
-            registers.A = AluOperations.rlc(registers, registers.A);
-        }
-
-        private void rl(Register8Bit reg)
-        {
-            byte value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rl(registers, value));
-        }
-
-        private void rlc(Register8Bit reg)
-        {
-            byte value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rlc(registers, value));
-        }
-
-#endregion
-
-#region rr
-
-        private void rra()
-        {
-            registers.A = AluOperations.rr(registers, registers.A);
-        }
-
-        private void rrca()
-        {
-            registers.A = AluOperations.rrc(registers, registers.A);
-        }
-
-        private void rr(Register8Bit reg)
-        {
-            var value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rr(registers, value));
-        }
-
-        private void rrc(Register8Bit reg)
-        {
-            byte value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rr(registers, value));
-        }
-
-        #endregion
-
-        #region add
-        private void add_a_r8(Register8Bit reg) => add_a(registers.ReadFromRegister(reg));
-
-        private void add_a_i8() => add_a(ReadImmediate8Bit());
-
-        private void add_a_hla() => add_a(Read8Bit(registers.HL));
-
-        private void add_a(byte val) => registers.A = AluOperations.add(registers, registers.A, val);
-
-        private void adc_a_r8(Register8Bit reg) => adc_a(registers.ReadFromRegister(reg));
-
-        private void adc_a_i8() => adc_a(ReadImmediate8Bit());
-
-        private void adc_a_hla() => adc_a(Read8Bit(registers.HL));
-
-        private void adc_a(byte val) => registers.A = AluOperations.adc(registers, registers.A, val);
-
-        private void add_hl_r16(Register16Bit reg)
-        {
-            // https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
-            // ADD HL,rr - "Based on my testing, H is set if carry occurs from bit 11 to bit 12."
-
-            var value = ReadRegister16Bit(reg);
-            var result = registers.HL + value;
-            var halfCarryResult = (registers.HL & 0xfff) + (value & 0xfff);
-             
-            registers.SetFlag(Flag.Subtract, false);
-            registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xfff);
-            registers.SetFlag(Flag.Carry, result > 0xffff);
-
-            registers.HL = (ushort)result;
-        }
-
-        private void add_sp_i8()
-        {
-            // https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
-            // TL; DR: For ADD SP,n, the H-flag is set when carry occurs from bit 3 to bit 4.
-
-            var value = (sbyte)ReadImmediate8Bit();
-            var result = registers.SP + value;
-            var carryResult = (registers.SP & 0xff) + (value & 0xff);
-            var halfCarryResult = (registers.SP & 0xf) + (value & 0xf);
-
-            registers.SetFlag(Flag.Zero, false);
-            registers.SetFlag(Flag.Subtract, false);
-            registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xf);
-            registers.SetFlag(Flag.Carry, carryResult > 0xff);
-
-            WriteRegisterSP((ushort)result);
-        }
-
-        private ushort sp_i8()
-        {
-            // https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
-            // TL; DR: For ADD SP,n, the H-flag is set when carry occurs from bit 3 to bit 4.
-
-            var value = (sbyte)ReadImmediate8Bit();
-            var result = registers.SP + value;
-            var carryResult = (registers.SP & 0xff) + (value & 0xff);
-            var halfCarryResult = (registers.SP & 0xf) + (value & 0xf);
-
-            registers.SetFlag(Flag.Zero, false);
-            registers.SetFlag(Flag.Subtract, false);
-            registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xf);
-            registers.SetFlag(Flag.Carry, carryResult > 0xff);
-
-            return (ushort)result;
-        }
-
-        #endregion
-
-        #region sub
-        private void sub_a_r8(Register8Bit reg) => sub_a(registers.ReadFromRegister(reg));
-
-        private void sub_a_i8() => sub_a(ReadImmediate8Bit());
-
-        private void sub_a_hla() => sub_a(Read8Bit(registers.HL));
-
-        private void sub_a(byte val) => registers.A = AluOperations.sub(registers, registers.A, val);
-
-        private void sbc_a_r8(Register8Bit reg) => sbc_a(registers.ReadFromRegister(reg));
-
-        private void sbc_a_i8() => sbc_a(ReadImmediate8Bit());
-
-        private void sbc_a_hla() => sbc_a(Read8Bit(registers.HL));
-
-        private void sbc_a(byte val) => registers.A = AluOperations.sbc(registers, registers.A, val);
-
-#endregion
-
-#region and
-
-        private void and_a_r8(Register8Bit reg) => and_a(registers.ReadFromRegister(reg));
-
-        private void and_a_r8() => and_a(ReadImmediate8Bit());
-
-        private void and_a_hla() => and_a(Read8Bit(registers.HL));
-
-        private void and_a_i8() => and_a(ReadImmediate8Bit());
-
-        private void and_a(byte value) => registers.A = AluOperations.and(registers, registers.A, value);
-
-#endregion
-
-#region xor
-
-        private void xor_a_r8(Register8Bit reg) => xor_a(registers.ReadFromRegister(reg));
-
-        private void xor_a_r8() => xor_a(ReadImmediate8Bit());
-
-        private void xor_a_hla() => xor_a(Read8Bit(registers.HL));
-
-        private void xor_a_i8() => xor_a(ReadImmediate8Bit());
-
-        private void xor_a(byte value) => registers.A = AluOperations.xor(registers, registers.A, value);
-
-        
-
-#endregion
-
-#region or
-
-        private void or_a_r8(Register8Bit reg) => or_a(registers.ReadFromRegister(reg));
-
-        private void or_a_r8() => or_a(ReadImmediate8Bit());
-
-        private void or_a_hla() => or_a(Read8Bit(registers.HL));
-
-        private void or_a_i8() => or_a(ReadImmediate8Bit());
-
-        private void or_a(byte value) => registers.A = AluOperations.or(registers, registers.A, value);
-
-#endregion
-
-#region cp
-        private void cp_a_r8(Register8Bit reg) => cp_a(registers.ReadFromRegister(reg));
-
-        private void cp_a_hla() => cp_a(Read8Bit(registers.HL));
-
-        private void cp_a_i8() => cp_a(ReadImmediate8Bit());
-
-        private void cp_a(byte val) => AluOperations.cp(registers, registers.A, val);
-
-        #endregion
-
-        #region daa
-
-        private void daa() => registers.A = AluOperations.daa(registers, registers.A);
-
-#endregion
-
-#region ccf/scf/cpl
-
-        private void ccf() => AluOperations.ccf(registers);
-
-        private void scf() => AluOperations.scf(registers);
-
-        private void cpl() => registers.A = AluOperations.cpl(registers, registers.A);
-
-#endregion
-
-#region jump
-
-        private void jr_i8()
-        {
-            var increment = (sbyte)ReadImmediate8Bit();
-            registers.PC = (ushort)(ReadRegisterPC() + increment);
-            branchTaken = true;
-        }
-
-        private void jr_i8(Flag flag, bool isSet)
-        {
-            var val = (sbyte)ReadImmediate8Bit();
-            if (registers.GetFlag(flag) == isSet)
+            switch (cbOpcode)
             {
-                registers.PC = (ushort)(ReadRegisterPC() + val);
-                branchTaken = true;
+                case 0x00: rlc_r8(Register8Bit.B); break;
+                case 0x01: rlc_r8(Register8Bit.C); break;
+                case 0x02: rlc_r8(Register8Bit.D); break;
+                case 0x03: rlc_r8(Register8Bit.E); break;
+                case 0x04: rlc_r8(Register8Bit.H); break;
+                case 0x05: rlc_r8(Register8Bit.L); break;
+                case 0x06: rlc_hla(); break;
+                case 0x07: rlc_r8(Register8Bit.A); break;
+                case 0x08: rrc_r8(Register8Bit.B); break;
+                case 0x09: rrc_r8(Register8Bit.C); break;
+                case 0x0a: rrc_r8(Register8Bit.D); break;
+                case 0x0b: rrc_r8(Register8Bit.E); break;
+                case 0x0c: rrc_r8(Register8Bit.H); break;
+                case 0x0d: rrc_r8(Register8Bit.L); break;
+                case 0x0e: rrc_hla(); break;
+                case 0x0f: rrc_r8(Register8Bit.A); break;
+
+                case 0x10: rl_r8(Register8Bit.B); break;
+                case 0x11: rl_r8(Register8Bit.C); break;
+                case 0x12: rl_r8(Register8Bit.D); break;
+                case 0x13: rl_r8(Register8Bit.E); break;
+                case 0x14: rl_r8(Register8Bit.H); break;
+                case 0x15: rl_r8(Register8Bit.L); break;
+                case 0x16: rl_hla(); break;
+                case 0x17: rl_r8(Register8Bit.A); break;
+                case 0x18: rr_r8(Register8Bit.B); break;
+                case 0x19: rr_r8(Register8Bit.C); break;
+                case 0x1a: rr_r8(Register8Bit.D); break;
+                case 0x1b: rr_r8(Register8Bit.E); break;
+                case 0x1c: rr_r8(Register8Bit.H); break;
+                case 0x1d: rr_r8(Register8Bit.L); break;
+                case 0x1e: rr_hla(); break;
+                case 0x1f: rr_r8(Register8Bit.A); break;
+
+                case 0x20: sla_r8(Register8Bit.B); break;
+                case 0x21: sla_r8(Register8Bit.C); break;
+                case 0x22: sla_r8(Register8Bit.D); break;
+                case 0x23: sla_r8(Register8Bit.E); break;
+                case 0x24: sla_r8(Register8Bit.H); break;
+                case 0x25: sla_r8(Register8Bit.L); break;
+                case 0x26: sla_hla(); break;
+                case 0x27: sla_r8(Register8Bit.A); break;
+                case 0x28: sra_r8(Register8Bit.B); break;
+                case 0x29: sra_r8(Register8Bit.C); break;
+                case 0x2a: sra_r8(Register8Bit.D); break;
+                case 0x2b: sra_r8(Register8Bit.E); break;
+                case 0x2c: sra_r8(Register8Bit.H); break;
+                case 0x2d: sra_r8(Register8Bit.L); break;
+                case 0x2e: sra_hla(); break;
+                case 0x2f: sra_r8(Register8Bit.A); break;
+
+                case 0x30: 
+                case 0x31:
+                case 0x32:
+                case 0x33:
+                case 0x34:
+                case 0x35:
+                case 0x36:
+                case 0x37:
+                case 0x38:
+                case 0x39:
+                case 0x3a:
+                case 0x3b:
+                case 0x3c:
+                case 0x3d:
+                case 0x3e:
+                case 0x3f:
+
+                case 0x40:
+                case 0x41:
+                case 0x42:
+                case 0x43:
+                case 0x44:
+                case 0x45:
+                case 0x46:
+                case 0x47:
+                case 0x48:
+                case 0x49:
+                case 0x4a:
+                case 0x4b:
+                case 0x4c:
+                case 0x4d:
+                case 0x4e:
+                case 0x4f:
+
+                case 0x50:
+                case 0x51:
+                case 0x52:
+                case 0x53:
+                case 0x54:
+                case 0x55:
+                case 0x56:
+                case 0x57:
+                case 0x58:
+                case 0x59:
+                case 0x5a:
+                case 0x5b:
+                case 0x5c:
+                case 0x5d:
+                case 0x5e:
+                case 0x5f:
+
+                case 0x60:
+                case 0x61:
+                case 0x62:
+                case 0x63:
+                case 0x64:
+                case 0x65:
+                case 0x66:
+                case 0x67:
+                case 0x68:
+                case 0x69:
+                case 0x6a:
+                case 0x6b:
+                case 0x6c:
+                case 0x6d:
+                case 0x6e:
+                case 0x6f:
+
+                case 0x70:
+                case 0x71:
+                case 0x72:
+                case 0x73:
+                case 0x74:
+                case 0x75:
+                case 0x76:
+                case 0x77:
+                case 0x78:
+                case 0x79:
+                case 0x7a:
+                case 0x7b:
+                case 0x7c:
+                case 0x7d:
+                case 0x7e:
+                case 0x7f:
+
+                case 0x80:
+                case 0x81:
+                case 0x82:
+                case 0x83:
+                case 0x84:
+                case 0x85:
+                case 0x86:
+                case 0x87:
+                case 0x88:
+                case 0x89:
+                case 0x8a:
+                case 0x8b:
+                case 0x8c:
+                case 0x8d:
+                case 0x8e:
+                case 0x8f:
+
+                case 0x90:
+                case 0x91:
+                case 0x92:
+                case 0x93:
+                case 0x94:
+                case 0x95:
+                case 0x96:
+                case 0x97:
+                case 0x98:
+                case 0x99:
+                case 0x9a:
+                case 0x9b:
+                case 0x9c:
+                case 0x9d:
+                case 0x9e:
+                case 0x9f:
+
+                case 0xa0:
+                case 0xa1:
+                case 0xa2:
+                case 0xa3:
+                case 0xa4:
+                case 0xa5:
+                case 0xa6:
+                case 0xa7:
+                case 0xa8:
+                case 0xa9:
+                case 0xaa:
+                case 0xab:
+                case 0xac:
+                case 0xad:
+                case 0xae:
+                case 0xaf:
+
+                case 0xb0:
+                case 0xb1:
+                case 0xb2:
+                case 0xb3:
+                case 0xb4:
+                case 0xb5:
+                case 0xb6:
+                case 0xb7:
+                case 0xb8:
+                case 0xb9:
+                case 0xba:
+                case 0xbb:
+                case 0xbc:
+                case 0xbd:
+                case 0xbe:
+                case 0xbf:
+
+                case 0xc0:
+                case 0xc1:
+                case 0xc2:
+                case 0xc3:
+                case 0xc4:
+                case 0xc5:
+                case 0xc6:
+                case 0xc7:
+                case 0xc8:
+                case 0xc9:
+                case 0xca:
+                case 0xcb:
+                case 0xcc:
+                case 0xcd:
+                case 0xce:
+                case 0xcf:
+
+                case 0xd0:
+                case 0xd1:
+                case 0xd2:
+                // no 0xd3
+                case 0xd4:
+                case 0xd5:
+                case 0xd6:
+                case 0xd7:
+                case 0xd8:
+                case 0xd9:
+                case 0xda:
+                // no 0xdb
+                case 0xdc:
+                // no 0xdd
+                case 0xde:
+                case 0xdf:
+
+                case 0xe0:
+                case 0xe1:
+                case 0xe2:
+                // no 0xe3
+                // no 0xe4
+                case 0xe5:
+                case 0xe6:
+                case 0xe7:
+                case 0xe8:
+                case 0xe9:
+                case 0xea:
+                // no 0xeb
+                // no 0xec
+                // no 0xed
+                case 0xee:
+                case 0xef:
+
+                case 0xf0:
+                case 0xf1:
+                case 0xf2:
+                case 0xf3:
+                // no 0xf4
+                case 0xf5:
+                case 0xf6:
+                case 0xf7:
+                case 0xf8:
+                case 0xf9:
+                case 0xfa:
+                case 0xfb:
+                // no 0xfc
+                // no 0xfd
+                case 0xfe:
+                case 0xff:
+                default:
+                    throw new ArgumentException($"Unknown CB opcode: 0x{cbOpcode:x2}", nameof(cbOpcode));
             }
         }
-
-        private void jp_i16()
-        {
-            registers.PC = ReadImmediate16Bit();
-            currentCycles += 4;
-        }
-
-        private void jp_hl() => registers.PC = registers.HL;
-
-        private void jp_i16(Flag flag, bool isSet)
-        {
-            ushort pc = ReadImmediate16Bit();
-            if (registers.GetFlag(flag) == isSet)
-            {
-                registers.PC = pc;
-                currentCycles += 4;
-                branchTaken = true;
-            }
-        }
-
-        private void call_i16()
-        {
-            ushort pc = ReadImmediate16Bit();
-            push(registers.PC);
-            registers.PC = pc;
-        }
-
-        private void call_i16(Flag flag, bool isSet)
-        {
-            ushort pc = ReadImmediate16Bit();
-
-            if (registers.GetFlag(flag) == isSet)
-            {
-                push(registers.PC);
-                registers.PC = pc;
-                branchTaken = true;
-            }
-        }
-
-        private void ret()
-        {
-            registers.PC = pop();
-            currentCycles += 4;
-        }
-
-        private void ret(Flag flag, bool isSet)
-        {
-            currentCycles += 4;
-            if (registers.GetFlag(flag) == isSet)
-            {
-                registers.PC = pop();
-                currentCycles += 4;
-                branchTaken = true;
-            }
-        }
-
-        private void rst(byte address)
-        {
-            push(registers.PC);
-            registers.PC = address;
-        }
-
-#endregion
-
-#region stack
-
-        private void push(Register16Bit reg) => push(registers.ReadFromRegister(reg));
-
-        private void push(ushort value)
-        {
-            registers.SP -= 2;
-            Write16Bit(registers.SP, value);
-            currentCycles += 4;
-        }
-
-        private void pop(Register16Bit reg) => registers.WriteToRegister(reg, pop());
-
-        private void pop_af() => registers.AF = (ushort)(pop() & 0xfff0); // ensure the low nibble is cleared for F 
-
-        ushort pop()
-        {
-            var value = Read16Bit(registers.SP);
-            registers.SP += 2;
-            return value;
-        }
-
-#endregion
-
     }
 }

@@ -13,8 +13,8 @@ namespace SharpBoy.Cpu.Tests
         [Test, Parallelizable]
         public void AluTest_and() => RunAluTests("and", AluOperations.and);
 
-        //[Test, Parallelizable]
-        //public void AluTest_bit() => RunAluTests("bit", AluOperations.bit);
+        [Test, Parallelizable]
+        public void AluTest_bit() => RunAluTests("bit", AluOperations.bit);
 
         [Test, Parallelizable]
         public void AluTest_ccf() => RunAluTests("ccf", AluOperations.ccf);
@@ -31,8 +31,8 @@ namespace SharpBoy.Cpu.Tests
         [Test, Parallelizable]
         public void AluTest_or() => RunAluTests("or", AluOperations.or);
 
-        //[Test, Parallelizable]
-        //public void AluTest_res() => RunAluTests("res", AluOperations.res);
+        [Test, Parallelizable]
+        public void AluTest_res() => RunAluTests("res", AluOperations.res);
 
         [Test, Parallelizable]
         public void AluTest_rl() => RunAluTests("rl", AluOperations.rl);
@@ -52,17 +52,17 @@ namespace SharpBoy.Cpu.Tests
         [Test, Parallelizable]
         public void AluTest_scf() => RunAluTests("scf", AluOperations.scf);
 
-        //[Test, Parallelizable]
-        //public void AluTest_set() => RunAluTests("set", AluOperations.set);
+        [Test, Parallelizable]
+        public void AluTest_set() => RunAluTests("set", AluOperations.set);
 
-        //[Test, Parallelizable]
-        //public void AluTest_sla() => RunAluTests("sla", AluOperations.sla);
+        [Test, Parallelizable]
+        public void AluTest_sla() => RunAluTests("sla", AluOperations.sla);
 
-        //[Test, Parallelizable]
-        //public void AluTest_sra() => RunAluTests("sra", AluOperations.sra);
+        [Test, Parallelizable]
+        public void AluTest_sra() => RunAluTests("sra", AluOperations.sra);
 
-        //[Test, Parallelizable]
-        //public void AluTest_srl() => RunAluTests("srl", AluOperations.srl);
+        [Test, Parallelizable]
+        public void AluTest_srl() => RunAluTests("srl", AluOperations.srl);
 
         [Test, Parallelizable]
         public void AluTest_sub() => RunAluTests("sub", AluOperations.sub);
@@ -74,6 +74,8 @@ namespace SharpBoy.Cpu.Tests
         public void AluTest_xor() => RunAluTests("xor", AluOperations.xor);
 
         private void RunAluTests(string opType, Func<Registers, byte, byte> method) => RunAluTests(opType, (r, a, b) => method(r, a));
+
+        private void RunAluTests(string opType, Func<byte, byte, byte> method) => RunAluTests(opType, (r, a, b) => method(a, b));
 
         private void RunAluTests(string opType, Action<Registers> method) => RunAluTests(opType, (r, a, b) =>
         {

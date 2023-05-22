@@ -137,8 +137,8 @@ namespace SharpBoy.Cpu
         BC = 0, 
 	    DE = 1,
 	    HL = 2,
-	    AF = 3,
-	    SP = 4,
+        SP = 3,
+	    AF = 4,	    
 	    PC = 5,
     };
 }
