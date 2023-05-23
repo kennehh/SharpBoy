@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace SharpBoy.Core
+namespace SharpBoy.Core.Tests.Mocks
 {
-    internal class Memory
+    internal class MmuMock : IMmu
     {
-        private byte[] memory;
-
-        public Memory(int size)
-        {
-            memory = new byte[size];
-        }
+        private byte[] memory = new byte[0x10000];
 
         public byte Read8Bit(ushort address) => memory[address];
 

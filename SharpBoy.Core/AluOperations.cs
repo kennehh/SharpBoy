@@ -142,9 +142,9 @@ namespace SharpBoy.Core
             return value;
         }
 
-        internal static byte set(byte value, byte bitPosition) => Utils.SetBit(value, bitPosition);
+        internal static byte set(Registers registers, byte value, byte bitPosition) => Utils.SetBit(value, bitPosition);
 
-        internal static byte res(byte value, byte bitPosition) => Utils.ClearBit(value, bitPosition);
+        internal static byte res(Registers registers, byte value, byte bitPosition) => Utils.ClearBit(value, bitPosition);
 
         internal static byte sla(Registers registers, byte value)
         {

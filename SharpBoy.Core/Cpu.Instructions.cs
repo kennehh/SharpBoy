@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace SharpBoy.Core
@@ -10,12 +11,7 @@ namespace SharpBoy.Core
         #region misc
 
         private void nop() { }
-
-        private void halt()
-        {
-            Halted = true;
-        }
-
+        private void halt() => Halted = true;
         private void stop()
         {
             Stopped = true;
@@ -176,116 +172,31 @@ namespace SharpBoy.Core
 
         private void rla() => registers.A = AluOperations.rl(registers, registers.A);
         private void rlca() => registers.A = AluOperations.rlc(registers, registers.A);
-        private void rl_r8(Register8Bit reg)
-        {
-            byte value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rl_cb(registers, value));
-        }
-
-        private void rlc_r8(Register8Bit reg)
-        {
-            byte value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rlc_cb(registers, value));
-        }
-
-        private void rl_hla()
-        {
-            byte value = Read8Bit(registers.HL);
-            Write8Bit(registers.HL, AluOperations.rl_cb(registers, value));
-        }
-        private void rlc_hla()
-        {
-            byte value = Read8Bit(registers.HL);
-            Write8Bit(registers.HL, AluOperations.rlc_cb(registers, value));
-        }
+        private void rl(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rl_cb);
+        private void rlc(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rlc_cb);
 
         #endregion
 
         #region rr
 
         private void rra() => registers.A = AluOperations.rr(registers, registers.A);
-
         private void rrca() => registers.A = AluOperations.rrc(registers, registers.A);
-
-        private void rr_r8(Register8Bit reg)
-        {
-            var value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rr_cb(registers, value));
-        }
-
-        private void rrc_r8(Register8Bit reg)
-        {
-            byte value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.rrc_cb(registers, value));
-        }
-
-        private void rr_hla()
-        {
-            byte value = Read8Bit(registers.HL);
-            Write8Bit(registers.HL, AluOperations.rr_cb(registers, value));
-        }
-        private void rrc_hla()
-        {
-            byte value = Read8Bit(registers.HL);
-            Write8Bit(registers.HL, AluOperations.rrc_cb(registers, value));
-        }
+        private void rr(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rr_cb);
+        private void rrc(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rrc_cb);
 
         #endregion
 
         #region sla/sra/srl
 
-        private void sla_r8(Register8Bit reg)
-        {
-            var value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.sla(registers, value));
-        }
-        private void sla_hla()
-        {
-            var value = Read8Bit(registers.HL);
-            Write8Bit(registers.HL, AluOperations.sla(registers, value));
-        }
-
-        private void sra_r8(Register8Bit reg)
-        {
-            var value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.sra(registers, value));
-        }
-        private void sra_hla()
-        {
-            var value = Read8Bit(registers.HL);
-            Write8Bit(registers.HL, AluOperations.sra(registers, value));
-        }
-
-        private void srl_r8(Register8Bit reg)
-        {
-            var value = registers.ReadFromRegister(reg);
-            registers.WriteToRegister(reg, AluOperations.srl(registers, value));
-        }
-        private void srl_hla()
-        {
-            var value = Read8Bit(registers.HL);
-            Write8Bit(registers.HL, AluOperations.srl(registers, value));
-        }
-
+        private void sla(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.sla);
+        private void sra(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.sra);
+        private void srl(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.srl);
 
         #endregion
 
         #region add
-        private void add_a_r8(Register8Bit reg) => add_a(registers.ReadFromRegister(reg));
-
-        private void add_a_i8() => add_a(ReadImmediate8Bit());
-
-        private void add_a_hla() => add_a(Read8Bit(registers.HL));
-
-        private void add_a(byte val) => registers.A = AluOperations.add(registers, registers.A, val);
-
-        private void adc_a_r8(Register8Bit reg) => adc_a(registers.ReadFromRegister(reg));
-
-        private void adc_a_i8() => adc_a(ReadImmediate8Bit());
-
-        private void adc_a_hla() => adc_a(Read8Bit(registers.HL));
-
-        private void adc_a(byte val) => registers.A = AluOperations.adc(registers, registers.A, val);
+        private void add_a(Operand8Bit operand) => registers.A = AluOperations.add(registers, registers.A, ReadValue(operand));
+        private void adc_a(Operand8Bit operand) => registers.A = AluOperations.adc(registers, registers.A, ReadValue(operand));
 
         private void add_hl_r16(Register16Bit reg)
         {
@@ -342,77 +253,19 @@ namespace SharpBoy.Core
         #endregion
 
         #region sub
-        private void sub_a_r8(Register8Bit reg) => sub_a(registers.ReadFromRegister(reg));
-
-        private void sub_a_i8() => sub_a(ReadImmediate8Bit());
-
-        private void sub_a_hla() => sub_a(Read8Bit(registers.HL));
-
-        private void sub_a(byte val) => registers.A = AluOperations.sub(registers, registers.A, val);
-
-        private void sbc_a_r8(Register8Bit reg) => sbc_a(registers.ReadFromRegister(reg));
-
-        private void sbc_a_i8() => sbc_a(ReadImmediate8Bit());
-
-        private void sbc_a_hla() => sbc_a(Read8Bit(registers.HL));
-
-        private void sbc_a(byte val) => registers.A = AluOperations.sbc(registers, registers.A, val);
+        private void sub_a(Operand8Bit operand) => registers.A = AluOperations.sub(registers, registers.A, ReadValue(operand));
+        private void sbc_a(Operand8Bit operand) => registers.A = AluOperations.sbc(registers, registers.A, ReadValue(operand));
 
         #endregion
 
-        #region and
+        #region bitwise ops
+        private void and_a(Operand8Bit operand) => registers.A = AluOperations.and(registers, registers.A, ReadValue(operand));
 
-        private void and_a_r8(Register8Bit reg) => and_a(registers.ReadFromRegister(reg));
+        private void xor_a(Operand8Bit operand) => registers.A = AluOperations.xor(registers, registers.A, ReadValue(operand));
 
-        private void and_a_r8() => and_a(ReadImmediate8Bit());
+        private void or_a(Operand8Bit operand) => registers.A = AluOperations.or(registers, registers.A, ReadValue(operand));
 
-        private void and_a_hla() => and_a(Read8Bit(registers.HL));
-
-        private void and_a_i8() => and_a(ReadImmediate8Bit());
-
-        private void and_a(byte value) => registers.A = AluOperations.and(registers, registers.A, value);
-
-        #endregion
-
-        #region xor
-
-        private void xor_a_r8(Register8Bit reg) => xor_a(registers.ReadFromRegister(reg));
-
-        private void xor_a_r8() => xor_a(ReadImmediate8Bit());
-
-        private void xor_a_hla() => xor_a(Read8Bit(registers.HL));
-
-        private void xor_a_i8() => xor_a(ReadImmediate8Bit());
-
-        private void xor_a(byte value) => registers.A = AluOperations.xor(registers, registers.A, value);
-
-
-
-        #endregion
-
-        #region or
-
-        private void or_a_r8(Register8Bit reg) => or_a(registers.ReadFromRegister(reg));
-
-        private void or_a_r8() => or_a(ReadImmediate8Bit());
-
-        private void or_a_hla() => or_a(Read8Bit(registers.HL));
-
-        private void or_a_i8() => or_a(ReadImmediate8Bit());
-
-        private void or_a(byte value) => registers.A = AluOperations.or(registers, registers.A, value);
-
-        #endregion
-
-        #region cp
-        private void cp_a_r8(Register8Bit reg) => cp_a(registers.ReadFromRegister(reg));
-
-        private void cp_a_hla() => cp_a(Read8Bit(registers.HL));
-
-        private void cp_a_i8() => cp_a(ReadImmediate8Bit());
-
-        private void cp_a(byte val) => AluOperations.cp(registers, registers.A, val);
-
+        private void cp_a(Operand8Bit operand) => registers.A = AluOperations.cp(registers, registers.A, ReadValue(operand));
         #endregion
 
         #region daa
@@ -539,61 +392,79 @@ namespace SharpBoy.Core
 
         #region bit/res/set
 
-        private void bit_r8(Register8Bit reg, byte bit)
+        private void bit(Operand8Bit operand, int bit)
         {
-            var value = registers.ReadFromRegister(reg);
-            AluOperations.bit(registers, value, bit);
+            AluOperations.bit(registers, ReadValue(operand), (byte)bit);
+            if (operand == Operand8Bit.IndirectHL)
+            {
+                currentCycles += 4;
+            }
         }
 
-        private void res_r8(Register8Bit reg, byte bit)
-        {
-            var value = registers.ReadFromRegister(reg);
-            var result = AluOperations.res(value, bit);
-            registers.WriteToRegister(reg, result);
-        }
-
-        private void set_r8(Register8Bit reg, byte bit)
-        {
-            var value = registers.ReadFromRegister(reg);
-            var result = AluOperations.set(value, bit);
-            registers.WriteToRegister(reg, result);
-        }
-
-        private void bit_hla(byte bit)
-        {
-            var value = Read8Bit(registers.HL);
-            AluOperations.bit(registers, value, bit);
-            currentCycles += 4;
-        }
-
-        private void res_hla(byte bit)
-        {
-            var value = Read8Bit(registers.HL);
-            var result = AluOperations.res(value, bit);
-            Write8Bit(registers.HL, result);            
-        }
-
-        private void set_hla(byte bit)
-        {
-            var value = Read8Bit(registers.HL);
-            var result = AluOperations.set(value, bit);
-            Write8Bit(registers.HL, result);
-        }
+        private void res(Operand8Bit operand, int bit) => ReadWriteValue(operand, (byte)bit, AluOperations.res);
+        private void set(Operand8Bit operand, int bit) => ReadWriteValue(operand, (byte)bit, AluOperations.set);
 
         #endregion
 
-        private void swap_r8(Register8Bit reg)
+        #region swap
+        private void swap(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.swap);
+        #endregion
+
+        private byte ReadValue(Operand8Bit operand)
         {
-            var value = registers.ReadFromRegister(reg);
-            var result = AluOperations.swap(registers, value);
-            registers.WriteToRegister(reg, result);
+            return operand switch
+            {
+                Operand8Bit.B => registers.B,
+                Operand8Bit.C => registers.C,
+                Operand8Bit.D => registers.D,
+                Operand8Bit.E => registers.E,
+                Operand8Bit.H => registers.H,
+                Operand8Bit.L => registers.L,
+                Operand8Bit.IndirectHL => Read8Bit(registers.HL),
+                Operand8Bit.A => registers.A,
+                Operand8Bit.Immediate => ReadImmediate8Bit()
+            };
         }
 
-        private void swap_hla()
+        private void WriteValue(Operand8Bit operand, byte value)
         {
-            var value = Read8Bit(registers.HL);
-            var result = AluOperations.swap(registers, value);
-            Write8Bit(registers.HL, result);
+            switch (operand)
+            {                
+                case Operand8Bit.B: registers.B = value; break;
+                case Operand8Bit.C: registers.C = value; break;
+                case Operand8Bit.D: registers.D = value; break;
+                case Operand8Bit.E: registers.E = value; break;
+                case Operand8Bit.H: registers.H = value; break;
+                case Operand8Bit.L: registers.L = value; break;
+                case Operand8Bit.IndirectHL: Write8Bit(registers.HL, value); break;
+                case Operand8Bit.A: registers.A = value; break;
+                case Operand8Bit.Immediate: throw new ArgumentException();
+            };
         }
+
+        private void ReadWriteValue(Operand8Bit operand, Func<Registers, byte, byte> func)
+        {
+            WriteValue(operand, func(registers, ReadValue(operand)));
+        }
+
+        private void ReadWriteValue(Operand8Bit operand, byte value2, Func<Registers, byte, byte, byte> func)
+        {
+            WriteValue(operand, func(registers, ReadValue(operand), value2));
+        }
+    }
+
+    internal enum Operand8Bit
+    {
+        B = 0,
+        C = 1,
+        D = 2,
+        E = 3,
+        H = 4,
+        L = 5,
+        IndirectHL = 6,
+        A = 7,
+        IndirectBC = 8,
+        IndirectDE = 9,        
+        Immediate = 10
     }
 }

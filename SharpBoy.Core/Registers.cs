@@ -133,12 +133,12 @@ namespace SharpBoy.Core
     };
 
     internal enum Register16Bit
-    {
-        BC = 0, 
-	    DE = 1,
-	    HL = 2,
-        SP = 3,
-	    AF = 4,	    
-	    PC = 5,
+    {       
+        SP = 0,
+	    AF = 1,	    
+	    PC = 2,
+        HL = 6,
+        BC = 7,
+        DE = 8
     };
 }

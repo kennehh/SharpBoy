@@ -1,12 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NUnit.Framework.Internal;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static SharpBoy.Core.Tests.AluTests;
+using SharpBoy.Core.Tests.Mocks;
 
 namespace SharpBoy.Core.Tests
 {
@@ -117,7 +111,7 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new Cpu(0x10000);
+            var cpu = new Cpu(new MmuMock());
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -145,7 +139,7 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new Cpu(0x10000);
+            var cpu = new Cpu(new MmuMock());
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb_{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))

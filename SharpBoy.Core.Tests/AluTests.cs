@@ -1,6 +1,4 @@
 using Newtonsoft.Json;
-using System.Reflection.Emit;
-using System.Reflection.Metadata;
 
 namespace SharpBoy.Core.Tests
 {
@@ -76,8 +74,6 @@ namespace SharpBoy.Core.Tests
         public void AluTest_xor() => RunAluTests("xor", AluOperations.xor);
 
         private void RunAluTests(string opType, Func<Registers, byte, byte> method) => RunAluTests(opType, (r, a, b) => method(r, a));
-
-        private void RunAluTests(string opType, Func<byte, byte, byte> method) => RunAluTests(opType, (r, a, b) => method(a, b));
 
         private void RunAluTests(string opType, Action<Registers> method) => RunAluTests(opType, (r, a, b) =>
         {
