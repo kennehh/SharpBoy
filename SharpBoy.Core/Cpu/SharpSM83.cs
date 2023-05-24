@@ -473,7 +473,7 @@ namespace SharpBoy.Core.Cpu
         private void jr_i8(Flag flag, bool isSet)
         {
             var val = (sbyte)ReadImmediate8Bit();
-            if (Registers.GetFlag(flag) == isSet)
+            if (Registers.F.HasFlag(flag) == isSet)
             {
                 Registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + val);
                 BranchTaken = true;
@@ -492,7 +492,7 @@ namespace SharpBoy.Core.Cpu
         private void jp_i16(Flag flag, bool isSet)
         {
             ushort pc = ReadImmediate16Bit();
-            if (Registers.GetFlag(flag) == isSet)
+            if (Registers.F.HasFlag(flag) == isSet)
             {
                 Registers.PC = pc;
                 currentCycles += 4;
@@ -511,7 +511,7 @@ namespace SharpBoy.Core.Cpu
         {
             ushort pc = ReadImmediate16Bit();
 
-            if (Registers.GetFlag(flag) == isSet)
+            if (Registers.F.HasFlag(flag) == isSet)
             {
                 push(Registers.PC);
                 Registers.PC = pc;
@@ -528,7 +528,7 @@ namespace SharpBoy.Core.Cpu
         private void ret(Flag flag, bool isSet)
         {
             currentCycles += 4;
-            if (Registers.GetFlag(flag) == isSet)
+            if (Registers.F.HasFlag(flag) == isSet)
             {
                 Registers.PC = pop();
                 currentCycles += 4;

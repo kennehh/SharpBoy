@@ -9,7 +9,12 @@ namespace SharpBoy.Core.Tests.Mocks
 {
     internal class MmuMock : IMmu
     {
-        private byte[] memory = new byte[0x10000];
+        private byte[] memory;
+
+        public MmuMock(byte[] memory = null)
+        {
+            this.memory = memory ?? new byte[0x10000];
+        }
 
         public byte Read8Bit(ushort address) => memory[address];
 

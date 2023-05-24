@@ -65,11 +65,11 @@ namespace SharpBoy.Core.Cpu
         internal static byte daa(Registers registers, byte a)
         {
             // Check the condition flags to determine the adjustment needed
-            var carryFlag = registers.GetFlag(Flag.Carry);
-            var halfCarryFlag = registers.GetFlag(Flag.HalfCarry);
+            var carryFlag = registers.F.HasFlag(Flag.Carry);
+            var halfCarryFlag = registers.F.HasFlag(Flag.HalfCarry);
 
             // Perform the DAA adjustment
-            if (!registers.GetFlag(Flag.Subtract))
+            if (!registers.F.HasFlag(Flag.Subtract))
             {
                 if (carryFlag || a > 0x99)
                 {
@@ -103,7 +103,7 @@ namespace SharpBoy.Core.Cpu
 
         internal static void ccf(Registers registers)
         {
-            registers.ToggleFlag(Flag.Carry);
+            registers.F ^= Flag.Carry;
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
         }
@@ -190,7 +190,7 @@ namespace SharpBoy.Core.Cpu
 
         private static byte add(Registers registers, byte a, byte b, bool isCarry, bool setCarry)
         {
-            var cy = (registers.GetFlag(Flag.Carry) && isCarry).ToBit();
+            var cy = (registers.F.HasFlag(Flag.Carry) && isCarry).ToBit();
             var result = a + b + cy;
             var halfCarryResult = (a & 0xf) + (b & 0xf) + cy;
             var byteResult = (byte)result;
@@ -209,7 +209,7 @@ namespace SharpBoy.Core.Cpu
 
         private static byte sub(Registers registers, byte a, byte b, bool isBorrow, bool setCarry)
         {
-            var cy = (registers.GetFlag(Flag.Carry) && isBorrow).ToBit();
+            var cy = (registers.F.HasFlag(Flag.Carry) && isBorrow).ToBit();
             var result = a - b - cy;
             var halfCarryResult = (a & 0xf) - (b & 0xf) - cy;
             var byteResult = (byte)result;
@@ -228,7 +228,7 @@ namespace SharpBoy.Core.Cpu
 
         private static byte rl(Registers registers, byte value, bool clearZero)
         {
-            var result = (byte)(value << 1 | registers.GetFlag(Flag.Carry).ToBit());
+            var result = (byte)(value << 1 | registers.F.HasFlag(Flag.Carry).ToBit());
 
             registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 7));
             registers.SetFlag(Flag.Zero, !clearZero && result == 0);
@@ -253,7 +253,7 @@ namespace SharpBoy.Core.Cpu
 
         internal static byte rr(Registers registers, byte value, bool clearZero)
         {
-            var result = (byte)(value >> 1 | registers.GetFlag(Flag.Carry).ToBit() << 7);
+            var result = (byte)(value >> 1 | registers.F.HasFlag(Flag.Carry).ToBit() << 7);
 
             registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 0));
             registers.SetFlag(Flag.Zero, !clearZero && result == 0);

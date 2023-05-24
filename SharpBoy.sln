@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBoy.Core", "SharpBoy.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBoy.Core.Tests", "SharpBoy.Core.Tests\SharpBoy.Core.Tests.csproj", "{EA221235-2AB8-4542-A58D-D90A82B4862A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpBoy.Emulator", "SharpBoy.Emulator\SharpBoy.Emulator.csproj", "{595BC8CA-CC7A-4D2F-A958-006C5D9A9937}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{EA221235-2AB8-4542-A58D-D90A82B4862A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA221235-2AB8-4542-A58D-D90A82B4862A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA221235-2AB8-4542-A58D-D90A82B4862A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{595BC8CA-CC7A-4D2F-A958-006C5D9A9937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{595BC8CA-CC7A-4D2F-A958-006C5D9A9937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{595BC8CA-CC7A-4D2F-A958-006C5D9A9937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{595BC8CA-CC7A-4D2F-A958-006C5D9A9937}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

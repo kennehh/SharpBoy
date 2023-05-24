@@ -47,8 +47,6 @@ namespace SharpBoy.Core.Cpu
         public bool IME;
 
         public void SetFlag(Flag flag, bool val) => F = val ? F | flag : F & ~flag;
-        public void ToggleFlag(Flag flag) => F ^= flag;
-        public bool GetFlag(Flag flag) => F.HasFlag(flag);
     }
 
     internal enum Flag : byte
