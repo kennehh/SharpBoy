@@ -18,5 +18,15 @@ namespace SharpBoy.Core
         {
             return oam[address];
         }
+
+        public void WriteVram(ushort address, byte value)
+        {
+            vram[address] = value;
+        }
+
+        public void WriteOam(byte address, byte value)
+        {
+            oam[address] = value;
+        }
     }
 }

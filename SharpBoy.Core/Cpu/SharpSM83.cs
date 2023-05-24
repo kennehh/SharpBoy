@@ -3,31 +3,33 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Text;
+using SharpBoy.Core.Memory;
 
-namespace SharpBoy.Core
+namespace SharpBoy.Core.Cpu
 {
-    public class Cpu
+    public class SharpSM83
     {
         public bool Halted { get; private set; }
         public bool Stopped { get; private set; }
-        public bool InterruptsEnabled { get; private set; }
 
-        internal IMmu memory;
-        internal Registers registers;
-        internal bool branchTaken = false;
+        internal bool BranchTaken { get; private set; } = false;
+
+        internal IMmu Mmu { get; }
+        internal Registers Registers { get; }
+        
 
         private int currentCycles;
 
-        public Cpu(IMmu mmu) 
-        { 
-            memory = mmu;
-            registers = new Registers();
+        public SharpSM83(IMmu mmu)
+        {
+            Mmu = mmu;
+            Registers = new Registers();
         }
 
         public int Tick()
         {
             currentCycles = 0;
-            branchTaken = false;
+            BranchTaken = false;
 
             var opcode = ReadImmediate8Bit();
             ExecuteInstruction(opcode);
@@ -207,50 +209,50 @@ namespace SharpBoy.Core
                 case <= 0x2f: sra(operand); break;
                 case <= 0x37: swap(operand); break;
                 case <= 0x3f: srl(operand); break;
-                case <= 0x7f: bit(operand, (cbOpcode >> 3) & 0x07); break;
-                case <= 0xbf: res(operand, (cbOpcode >> 3) & 0x07); break;
-                case <= 0xff: set(operand, (cbOpcode >> 3) & 0x07); break;
+                case <= 0x7f: bit(operand, cbOpcode >> 3 & 0x07); break;
+                case <= 0xbf: res(operand, cbOpcode >> 3 & 0x07); break;
+                case <= 0xff: set(operand, cbOpcode >> 3 & 0x07); break;
                 default: throw new ArgumentException($"Unknown CB opcode: 0x{cbOpcode:x2}", nameof(cbOpcode));
             }
         }
 
         private byte ReadImmediate8Bit()
         {
-            var val = Read8BitValueFromMemory(registers.PC);
-            registers.PC += 1;
+            var val = Read8BitValueFromMemory(Registers.PC);
+            Registers.PC += 1;
             return val;
         }
 
         private ushort ReadImmediate16Bit()
         {
-            var val = Read16BitValueFromMemory(registers.PC);
-            registers.PC += 2;
+            var val = Read16BitValueFromMemory(Registers.PC);
+            Registers.PC += 2;
             return val;
         }
 
         private byte Read8BitValueFromMemory(ushort address)
         {
-            var val = memory.Read8Bit(address);
+            var val = Mmu.Read8Bit(address);
             currentCycles += 4;
             return val;
         }
 
         private ushort Read16BitValueFromMemory(ushort address)
         {
-            var val = memory.Read16Bit(address);
+            var val = Mmu.Read16Bit(address);
             currentCycles += 8;
             return val;
         }
 
         private void Write8BitValueToMemory(ushort address, byte value)
         {
-            memory.Write8Bit(address, value);
+            Mmu.Write8Bit(address, value);
             currentCycles += 4;
         }
 
         private void Write16BitValueToMemory(ushort address, ushort value)
         {
-            memory.Write16Bit(address, value);
+            Mmu.Write16Bit(address, value);
             currentCycles += 8;
         }
 
@@ -258,20 +260,20 @@ namespace SharpBoy.Core
         {
             return operand switch
             {
-                Operand8Bit.B => registers.B,
-                Operand8Bit.C => registers.C,
-                Operand8Bit.D => registers.D,
-                Operand8Bit.E => registers.E,
-                Operand8Bit.H => registers.H,
-                Operand8Bit.L => registers.L,
-                Operand8Bit.IndirectHL => Read8BitValueFromMemory(registers.HL),
-                Operand8Bit.A => registers.A,
+                Operand8Bit.B => Registers.B,
+                Operand8Bit.C => Registers.C,
+                Operand8Bit.D => Registers.D,
+                Operand8Bit.E => Registers.E,
+                Operand8Bit.H => Registers.H,
+                Operand8Bit.L => Registers.L,
+                Operand8Bit.IndirectHL => Read8BitValueFromMemory(Registers.HL),
+                Operand8Bit.A => Registers.A,
                 Operand8Bit.Immediate => ReadImmediate8Bit(),
-                Operand8Bit.IndirectBC => Read8BitValueFromMemory(registers.BC),
-                Operand8Bit.IndirectDE => Read8BitValueFromMemory(registers.DE),
+                Operand8Bit.IndirectBC => Read8BitValueFromMemory(Registers.BC),
+                Operand8Bit.IndirectDE => Read8BitValueFromMemory(Registers.DE),
                 Operand8Bit.IndirectImmediateWord => Read8BitValueFromMemory(ReadImmediate16Bit()),
                 Operand8Bit.IndirectImmediateByte => Read8BitValueFromMemory((ushort)(0xff00 | ReadImmediate8Bit())),
-                Operand8Bit.IndirectC => Read8BitValueFromMemory((ushort)(0xff00 | registers.C)),
+                Operand8Bit.IndirectC => Read8BitValueFromMemory((ushort)(0xff00 | Registers.C)),
                 _ => throw new NotImplementedException()
             };
         }
@@ -280,43 +282,43 @@ namespace SharpBoy.Core
         {
             switch (operand)
             {
-                case Operand8Bit.B: registers.B = value; break;
-                case Operand8Bit.C: registers.C = value; break;
-                case Operand8Bit.D: registers.D = value; break;
-                case Operand8Bit.E: registers.E = value; break;
-                case Operand8Bit.H: registers.H = value; break;
-                case Operand8Bit.L: registers.L = value; break;
-                case Operand8Bit.IndirectHL: Write8BitValueToMemory(registers.HL, value); break;
-                case Operand8Bit.A: registers.A = value; break;
-                case Operand8Bit.IndirectBC: Write8BitValueToMemory(registers.BC, value); break;
-                case Operand8Bit.IndirectDE: Write8BitValueToMemory(registers.DE, value); break;
+                case Operand8Bit.B: Registers.B = value; break;
+                case Operand8Bit.C: Registers.C = value; break;
+                case Operand8Bit.D: Registers.D = value; break;
+                case Operand8Bit.E: Registers.E = value; break;
+                case Operand8Bit.H: Registers.H = value; break;
+                case Operand8Bit.L: Registers.L = value; break;
+                case Operand8Bit.IndirectHL: Write8BitValueToMemory(Registers.HL, value); break;
+                case Operand8Bit.A: Registers.A = value; break;
+                case Operand8Bit.IndirectBC: Write8BitValueToMemory(Registers.BC, value); break;
+                case Operand8Bit.IndirectDE: Write8BitValueToMemory(Registers.DE, value); break;
                 case Operand8Bit.IndirectImmediateWord: Write8BitValueToMemory(ReadImmediate16Bit(), value); break;
                 case Operand8Bit.IndirectImmediateByte: Write8BitValueToMemory((ushort)(0xff00 | ReadImmediate8Bit()), value); break;
-                case Operand8Bit.IndirectC: Write8BitValueToMemory((ushort)(0xff00 | registers.C), value); break;
+                case Operand8Bit.IndirectC: Write8BitValueToMemory((ushort)(0xff00 | Registers.C), value); break;
                 default: throw new NotImplementedException();
             };
         }
 
         private void ReadWriteValue(Operand8Bit operand, Func<Registers, byte, byte> func)
         {
-            WriteValue(operand, func(registers, ReadValue(operand)));
+            WriteValue(operand, func(Registers, ReadValue(operand)));
         }
 
         private void ReadWriteValue(Operand8Bit operand, byte value2, Func<Registers, byte, byte, byte> func)
         {
-            WriteValue(operand, func(registers, ReadValue(operand), value2));
+            WriteValue(operand, func(Registers, ReadValue(operand), value2));
         }
 
         private ushort ReadValue(Operand16Bit operand)
         {
             return operand switch
             {
-                Operand16Bit.SP => registers.SP,
-                Operand16Bit.AF => registers.AF,
-                Operand16Bit.PC => registers.PC,
-                Operand16Bit.HL => registers.HL,
-                Operand16Bit.BC => registers.BC,
-                Operand16Bit.DE => registers.DE,
+                Operand16Bit.SP => Registers.SP,
+                Operand16Bit.AF => Registers.AF,
+                Operand16Bit.PC => Registers.PC,
+                Operand16Bit.HL => Registers.HL,
+                Operand16Bit.BC => Registers.BC,
+                Operand16Bit.DE => Registers.DE,
                 Operand16Bit.Immediate => ReadImmediate16Bit(),
                 //Operand16Bit.IndirectImmediate => Read16Bit(ReadImmediate16Bit()),
                 _ => throw new NotImplementedException()
@@ -327,12 +329,12 @@ namespace SharpBoy.Core
         {
             switch (operand)
             {
-                case Operand16Bit.SP: registers.SP = value; break;
-                case Operand16Bit.AF: registers.AF = value; break;
-                case Operand16Bit.PC: registers.PC = value; break;
-                case Operand16Bit.HL: registers.HL = value; break;
-                case Operand16Bit.BC: registers.BC = value; break;
-                case Operand16Bit.DE: registers.DE = value; break;
+                case Operand16Bit.SP: Registers.SP = value; break;
+                case Operand16Bit.AF: Registers.AF = value; break;
+                case Operand16Bit.PC: Registers.PC = value; break;
+                case Operand16Bit.HL: Registers.HL = value; break;
+                case Operand16Bit.BC: Registers.BC = value; break;
+                case Operand16Bit.DE: Registers.DE = value; break;
                 case Operand16Bit.IndirectImmediate: Write16BitValueToMemory(ReadImmediate16Bit(), value); break;
                 default: throw new NotImplementedException();
             };
@@ -342,11 +344,11 @@ namespace SharpBoy.Core
         private void stop()
         {
             Stopped = true;
-            registers.PC++;
+            Registers.PC++;
         }
 
-        private void di() => InterruptsEnabled = false;
-        private void ei() => InterruptsEnabled = true;
+        private void di() => Registers.IME = false;
+        private void ei() => Registers.IME = true;
 
         private void inc_16(Operand16Bit operand)
         {
@@ -373,30 +375,29 @@ namespace SharpBoy.Core
 
         private void ld_hl_a(int increment)
         {
-            Write8BitValueToMemory(registers.HL, registers.A);
-            registers.HL += (ushort)increment;
+            Write8BitValueToMemory(Registers.HL, Registers.A);
+            Registers.HL += (ushort)increment;
         }
 
         private void ld_a_hl(int increment)
         {
-            registers.A = Read8BitValueFromMemory(registers.HL);
-            registers.HL += (ushort)increment;
+            Registers.A = Read8BitValueFromMemory(Registers.HL);
+            Registers.HL += (ushort)increment;
         }
 
         private void ld_hl_spi8()
         {
-            registers.HL = sp_i8();
+            Registers.HL = sp_i8();
             currentCycles += 4;
         }
 
-
-        private void rla() => registers.A = AluOperations.rl(registers, registers.A);
-        private void rlca() => registers.A = AluOperations.rlc(registers, registers.A);
+        private void rla() => Registers.A = AluOperations.rl(Registers, Registers.A);
+        private void rlca() => Registers.A = AluOperations.rlc(Registers, Registers.A);
         private void rl(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rl_cb);
         private void rlc(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rlc_cb);
 
-        private void rra() => registers.A = AluOperations.rr(registers, registers.A);
-        private void rrca() => registers.A = AluOperations.rrc(registers, registers.A);
+        private void rra() => Registers.A = AluOperations.rr(Registers, Registers.A);
+        private void rrca() => Registers.A = AluOperations.rrc(Registers, Registers.A);
         private void rr(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rr_cb);
         private void rrc(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.rrc_cb);
 
@@ -404,8 +405,8 @@ namespace SharpBoy.Core
         private void sra(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.sra);
         private void srl(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.srl);
 
-        private void add_a(Operand8Bit operand) => registers.A = AluOperations.add(registers, registers.A, ReadValue(operand));
-        private void adc_a(Operand8Bit operand) => registers.A = AluOperations.adc(registers, registers.A, ReadValue(operand));
+        private void add_a(Operand8Bit operand) => Registers.A = AluOperations.add(Registers, Registers.A, ReadValue(operand));
+        private void adc_a(Operand8Bit operand) => Registers.A = AluOperations.adc(Registers, Registers.A, ReadValue(operand));
 
         private void add_hl_r16(Operand16Bit operand)
         {
@@ -413,19 +414,19 @@ namespace SharpBoy.Core
             // ADD HL,rr - "Based on my testing, H is set if carry occurs from bit 11 to bit 12."
 
             var value = ReadValue(operand);
-            var result = registers.HL + value;
-            var halfCarryResult = (registers.HL & 0xfff) + (value & 0xfff);
+            var result = Registers.HL + value;
+            var halfCarryResult = (Registers.HL & 0xfff) + (value & 0xfff);
 
-            registers.SetFlag(Flag.Subtract, false);
-            registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xfff);
-            registers.SetFlag(Flag.Carry, result > 0xffff);
+            Registers.SetFlag(Flag.Subtract, false);
+            Registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xfff);
+            Registers.SetFlag(Flag.Carry, result > 0xffff);
 
-            registers.HL = (ushort)result;
+            Registers.HL = (ushort)result;
             currentCycles += 4;
         }
         private void add_sp_i8()
         {
-            registers.SP = sp_i8();
+            Registers.SP = sp_i8();
             currentCycles += 8;
         }
 
@@ -435,133 +436,133 @@ namespace SharpBoy.Core
             // TL; DR: For ADD SP,n, the H-flag is set when carry occurs from bit 3 to bit 4.
 
             var value = (sbyte)ReadImmediate8Bit();
-            var result = registers.SP + value;
-            var carryResult = (registers.SP & 0xff) + (value & 0xff);
-            var halfCarryResult = (registers.SP & 0xf) + (value & 0xf);
+            var result = Registers.SP + value;
+            var carryResult = (Registers.SP & 0xff) + (value & 0xff);
+            var halfCarryResult = (Registers.SP & 0xf) + (value & 0xf);
 
-            registers.SetFlag(Flag.Zero, false);
-            registers.SetFlag(Flag.Subtract, false);
-            registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xf);
-            registers.SetFlag(Flag.Carry, carryResult > 0xff);
+            Registers.SetFlag(Flag.Zero, false);
+            Registers.SetFlag(Flag.Subtract, false);
+            Registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xf);
+            Registers.SetFlag(Flag.Carry, carryResult > 0xff);
 
             return (ushort)result;
         }
 
-        private void sub_a(Operand8Bit operand) => registers.A = AluOperations.sub(registers, registers.A, ReadValue(operand));
-        private void sbc_a(Operand8Bit operand) => registers.A = AluOperations.sbc(registers, registers.A, ReadValue(operand));
+        private void sub_a(Operand8Bit operand) => Registers.A = AluOperations.sub(Registers, Registers.A, ReadValue(operand));
+        private void sbc_a(Operand8Bit operand) => Registers.A = AluOperations.sbc(Registers, Registers.A, ReadValue(operand));
 
-        private void and_a(Operand8Bit operand) => registers.A = AluOperations.and(registers, registers.A, ReadValue(operand));
-        private void xor_a(Operand8Bit operand) => registers.A = AluOperations.xor(registers, registers.A, ReadValue(operand));
-        private void or_a(Operand8Bit operand) => registers.A = AluOperations.or(registers, registers.A, ReadValue(operand));
-        private void cp_a(Operand8Bit operand) => registers.A = AluOperations.cp(registers, registers.A, ReadValue(operand));
+        private void and_a(Operand8Bit operand) => Registers.A = AluOperations.and(Registers, Registers.A, ReadValue(operand));
+        private void xor_a(Operand8Bit operand) => Registers.A = AluOperations.xor(Registers, Registers.A, ReadValue(operand));
+        private void or_a(Operand8Bit operand) => Registers.A = AluOperations.or(Registers, Registers.A, ReadValue(operand));
+        private void cp_a(Operand8Bit operand) => Registers.A = AluOperations.cp(Registers, Registers.A, ReadValue(operand));
 
-        private void daa() => registers.A = AluOperations.daa(registers, registers.A);
+        private void daa() => Registers.A = AluOperations.daa(Registers, Registers.A);
 
-        private void ccf() => AluOperations.ccf(registers);
-        private void scf() => AluOperations.scf(registers);
-        private void cpl() => registers.A = AluOperations.cpl(registers, registers.A);
+        private void ccf() => AluOperations.ccf(Registers);
+        private void scf() => AluOperations.scf(Registers);
+        private void cpl() => Registers.A = AluOperations.cpl(Registers, Registers.A);
 
         private void jr_i8()
         {
             var increment = (sbyte)ReadImmediate8Bit();
-            registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + increment);
+            Registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + increment);
             currentCycles += 4;
-            branchTaken = true;
+            BranchTaken = true;
         }
 
         private void jr_i8(Flag flag, bool isSet)
         {
             var val = (sbyte)ReadImmediate8Bit();
-            if (registers.GetFlag(flag) == isSet)
+            if (Registers.GetFlag(flag) == isSet)
             {
-                registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + val);
-                branchTaken = true;
+                Registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + val);
+                BranchTaken = true;
                 currentCycles += 4;
             }
         }
 
         private void jp_i16()
         {
-            registers.PC = ReadImmediate16Bit();
+            Registers.PC = ReadImmediate16Bit();
             currentCycles += 4;
         }
 
-        private void jp_hl() => registers.PC = registers.HL;
+        private void jp_hl() => Registers.PC = Registers.HL;
 
         private void jp_i16(Flag flag, bool isSet)
         {
             ushort pc = ReadImmediate16Bit();
-            if (registers.GetFlag(flag) == isSet)
+            if (Registers.GetFlag(flag) == isSet)
             {
-                registers.PC = pc;
+                Registers.PC = pc;
                 currentCycles += 4;
-                branchTaken = true;
+                BranchTaken = true;
             }
         }
 
         private void call_i16()
         {
             ushort pc = ReadImmediate16Bit();
-            push(registers.PC);
-            registers.PC = pc;
+            push(Registers.PC);
+            Registers.PC = pc;
         }
 
         private void call_i16(Flag flag, bool isSet)
         {
             ushort pc = ReadImmediate16Bit();
 
-            if (registers.GetFlag(flag) == isSet)
+            if (Registers.GetFlag(flag) == isSet)
             {
-                push(registers.PC);
-                registers.PC = pc;
-                branchTaken = true;
+                push(Registers.PC);
+                Registers.PC = pc;
+                BranchTaken = true;
             }
         }
 
         private void ret()
         {
-            registers.PC = pop();
+            Registers.PC = pop();
             currentCycles += 4;
         }
 
         private void ret(Flag flag, bool isSet)
         {
             currentCycles += 4;
-            if (registers.GetFlag(flag) == isSet)
+            if (Registers.GetFlag(flag) == isSet)
             {
-                registers.PC = pop();
+                Registers.PC = pop();
                 currentCycles += 4;
-                branchTaken = true;
+                BranchTaken = true;
             }
         }
 
         private void rst(byte address)
         {
-            push(registers.PC);
-            registers.PC = address;
+            push(Registers.PC);
+            Registers.PC = address;
         }
 
         private void push(Operand16Bit operand) => push(ReadValue(operand));
         private void push(ushort value)
         {
-            registers.SP -= 2;
-            Write16BitValueToMemory(registers.SP, value);
+            Registers.SP -= 2;
+            Write16BitValueToMemory(Registers.SP, value);
             currentCycles += 4;
         }
 
         private void pop(Operand16Bit operand) => WriteValue(operand, pop());
-        private void pop_af() => registers.AF = (ushort)(pop() & 0xfff0); // ensure the low nibble is cleared for F 
+        private void pop_af() => Registers.AF = (ushort)(pop() & 0xfff0); // ensure the low nibble is cleared for F 
 
         ushort pop()
         {
-            var value = Read16BitValueFromMemory(registers.SP);
-            registers.SP += 2;
+            var value = Read16BitValueFromMemory(Registers.SP);
+            Registers.SP += 2;
             return value;
         }
 
         private void bit(Operand8Bit operand, int bit)
         {
-            AluOperations.bit(registers, ReadValue(operand), (byte)bit);
+            AluOperations.bit(Registers, ReadValue(operand), (byte)bit);
             if (operand == Operand8Bit.IndirectHL)
             {
                 currentCycles += 4;

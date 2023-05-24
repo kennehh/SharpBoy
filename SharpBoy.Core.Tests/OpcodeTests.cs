@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NUnit.Framework.Internal;
+using SharpBoy.Core.Cpu;
 using SharpBoy.Core.Tests.Mocks;
 
 namespace SharpBoy.Core.Tests
@@ -111,7 +112,7 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new Cpu(new MmuMock());
+            var cpu = new SharpSM83(new MmuMock());
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -127,7 +128,7 @@ namespace SharpBoy.Core.Tests
                         var cycles = cpu.Tick();
                         AssertCpuState(cpu, test);
 
-                        var expectedCycles = cpu.branchTaken ? expectedBranchCycles[opcode] : expectedNonBranchCycles[opcode];
+                        var expectedCycles = cpu.BranchTaken ? expectedBranchCycles[opcode] : expectedNonBranchCycles[opcode];
                         Assert.That(cycles, Is.EqualTo(expectedCycles), $"Cycles incorrect: {test.name}");
                     }
                 }
@@ -139,7 +140,7 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new Cpu(new MmuMock());
+            var cpu = new SharpSM83(new MmuMock());
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb_{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -161,28 +162,28 @@ namespace SharpBoy.Core.Tests
             }
         }
 
-        private static void SetupInitialValues(Cpu cpu, CpuTestData data)
+        private static void SetupInitialValues(SharpSM83 cpu, CpuTestData data)
         {
-            cpu.registers.A = Convert.ToByte(data.cpu.a, 16);
-            cpu.registers.B = Convert.ToByte(data.cpu.b, 16);
-            cpu.registers.C = Convert.ToByte(data.cpu.c, 16);
-            cpu.registers.D = Convert.ToByte(data.cpu.d, 16);
-            cpu.registers.E = Convert.ToByte(data.cpu.e, 16);
-            cpu.registers.F = Convert.ToByte(data.cpu.f, 16);
-            cpu.registers.H = Convert.ToByte(data.cpu.h, 16);
-            cpu.registers.L = Convert.ToByte(data.cpu.l, 16);
-            cpu.registers.PC = Convert.ToUInt16(data.cpu.pc, 16);
-            cpu.registers.SP = Convert.ToUInt16(data.cpu.sp, 16);
+            cpu.Registers.A = Convert.ToByte(data.cpu.a, 16);
+            cpu.Registers.B = Convert.ToByte(data.cpu.b, 16);
+            cpu.Registers.C = Convert.ToByte(data.cpu.c, 16);
+            cpu.Registers.D = Convert.ToByte(data.cpu.d, 16);
+            cpu.Registers.E = Convert.ToByte(data.cpu.e, 16);
+            cpu.Registers.F = (Flag)Convert.ToByte(data.cpu.f, 16);
+            cpu.Registers.H = Convert.ToByte(data.cpu.h, 16);
+            cpu.Registers.L = Convert.ToByte(data.cpu.l, 16);
+            cpu.Registers.PC = Convert.ToUInt16(data.cpu.pc, 16);
+            cpu.Registers.SP = Convert.ToUInt16(data.cpu.sp, 16);
 
             foreach (var addressValue in data.ram)
             {
                 var address = Convert.ToUInt16(addressValue[0], 16);
                 var value = Convert.ToByte(addressValue[1], 16);
-                cpu.memory.Write8Bit(address, value);
+                cpu.Mmu.Write8Bit(address, value);
             }
         }
 
-        private void AssertCpuState(Cpu cpu, CpuTest test)
+        private void AssertCpuState(SharpSM83 cpu, CpuTest test)
         {
             var data = test.final;
 
@@ -197,22 +198,22 @@ namespace SharpBoy.Core.Tests
             var pc =  Convert.ToUInt16(data.cpu.pc, 16);
             var sp =  Convert.ToUInt16(data.cpu.sp, 16);
 
-            Assert.That(cpu.registers.A, Is.EqualTo(a), $"A is incorrect: {test.name}");
-            Assert.That(cpu.registers.B, Is.EqualTo(b), $"B is incorrect: {test.name}");
-            Assert.That(cpu.registers.C, Is.EqualTo(c), $"C is incorrect: {test.name}");
-            Assert.That(cpu.registers.D, Is.EqualTo(d), $"D is incorrect: {test.name}");
-            Assert.That(cpu.registers.E, Is.EqualTo(e), $"E is incorrect: {test.name}");
-            Assert.That(cpu.registers.F, Is.EqualTo(f), $"F is incorrect: {test.name}");
-            Assert.That(cpu.registers.H, Is.EqualTo(h), $"H is incorrect: {test.name}");
-            Assert.That(cpu.registers.L, Is.EqualTo(l), $"L is incorrect: {test.name}");
-            Assert.That(cpu.registers.PC, Is.EqualTo(pc), $"PC is incorrect: {test.name}");
-            Assert.That(cpu.registers.SP, Is.EqualTo(sp), $"SP is incorrect: {test.name}");
+            Assert.That(cpu.Registers.A, Is.EqualTo(a), $"A is incorrect: {test.name}");
+            Assert.That(cpu.Registers.B, Is.EqualTo(b), $"B is incorrect: {test.name}");
+            Assert.That(cpu.Registers.C, Is.EqualTo(c), $"C is incorrect: {test.name}");
+            Assert.That(cpu.Registers.D, Is.EqualTo(d), $"D is incorrect: {test.name}");
+            Assert.That(cpu.Registers.E, Is.EqualTo(e), $"E is incorrect: {test.name}");
+            Assert.That((byte)cpu.Registers.F, Is.EqualTo(f), $"F is incorrect: {test.name}");
+            Assert.That(cpu.Registers.H, Is.EqualTo(h), $"H is incorrect: {test.name}");
+            Assert.That(cpu.Registers.L, Is.EqualTo(l), $"L is incorrect: {test.name}");
+            Assert.That(cpu.Registers.PC, Is.EqualTo(pc), $"PC is incorrect: {test.name}");
+            Assert.That(cpu.Registers.SP, Is.EqualTo(sp), $"SP is incorrect: {test.name}");
 
             foreach (var addressValue in data.ram)
             {
                 var address = Convert.ToUInt16(addressValue[0], 16);
                 var expected = Convert.ToByte(addressValue[1], 16);
-                var actual = cpu.memory.Read8Bit(address);
+                var actual = cpu.Mmu.Read8Bit(address);
                 Assert.That(actual, Is.EqualTo(expected), $"Value at memory address {address:x4} is incorrect: {test.name}");
             }
         }

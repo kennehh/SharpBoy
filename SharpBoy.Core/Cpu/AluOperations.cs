@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpBoy.Core
+namespace SharpBoy.Core.Cpu
 {
     internal static class AluOperations
     {
@@ -158,7 +158,7 @@ namespace SharpBoy.Core
 
         internal static byte sra(Registers registers, byte value)
         {
-            var result = (byte)((value >> 1) | (value & 0x80));
+            var result = (byte)(value >> 1 | value & 0x80);
             registers.SetFlag(Flag.Zero, result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
@@ -168,7 +168,7 @@ namespace SharpBoy.Core
 
         internal static byte srl(Registers registers, byte value)
         {
-            var result = (byte)((value >> 1) | (0 << 7));
+            var result = (byte)(value >> 1 | 0 << 7);
             registers.SetFlag(Flag.Zero, result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);

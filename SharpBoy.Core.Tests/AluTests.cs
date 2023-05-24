@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using SharpBoy.Core.Cpu;
 
 namespace SharpBoy.Core.Tests
 {
@@ -96,12 +97,12 @@ namespace SharpBoy.Core.Tests
                     {
                         int result = 0;
                         var test = serializer.Deserialize<AluTest>(reader);
-                        registers.F = Convert.ToByte(test.flags, 16);
+                        registers.F = (Flag)Convert.ToByte(test.flags, 16);
 
                         result = method(registers, Convert.ToByte(test.x, 16), Convert.ToByte(test.y, 16));
 
                         Assert.That(result, Is.EqualTo(Convert.ToByte(test.result.value, 16)), () => $"Value is incorrect, test {opType}: {JsonConvert.SerializeObject(test)}");
-                        Assert.That(registers.F, Is.EqualTo(Convert.ToByte(test.result.flags, 16)), () => $"Flags are incorrect, test {opType}: {JsonConvert.SerializeObject(test)}");
+                        Assert.That((byte)registers.F, Is.EqualTo(Convert.ToByte(test.result.flags, 16)), () => $"Flags are incorrect, test {opType}: {JsonConvert.SerializeObject(test)}");
                     }
                 }
             }
