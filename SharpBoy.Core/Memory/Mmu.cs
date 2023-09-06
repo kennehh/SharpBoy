@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpBoy.Core.Cpu;
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
@@ -31,9 +32,11 @@ namespace SharpBoy.Core.Memory
                 <= 0xfdff => wram[(ushort)(address & 0x1fff)], // copy of wram (echo ram) - use of this area should be prohibited
                 <= 0xfe9f => gameboy.Ppu.ReadOam((byte)(address & 0xff)),
                 <= 0xfeff => 0, // use of this area should be prohibited
+                <= 0xff0e => ioRegisters[address], // handle I/O registers here
+                <= 0xff0f => (byte)gameboy.Cpu.Registers.IF,
                 <= 0xff7f => ioRegisters[address], // handle I/O registers here
                 <= 0xfffe => hram[(byte)(address & 0x7f)],
-                <= 0xffff => gameboy.Cpu.Registers.IE
+                <= 0xffff => (byte)gameboy.Cpu.Registers.IE
             };
         }
 
@@ -75,6 +78,13 @@ namespace SharpBoy.Core.Memory
                 case <= 0xfeff:
                     // use of this area should be prohibited
                     break;
+                case <= 0xff0e:
+                    // handle I/O registers here
+                    ioRegisters[address] = value;
+                    break;
+                case <= 0xff0f:
+                    gameboy.Cpu.Registers.IF = (Interrupt)value;
+                    break;
                 case <= 0xff7f:
                     // handle I/O registers here
                     ioRegisters[address] = value;
@@ -83,7 +93,7 @@ namespace SharpBoy.Core.Memory
                     hram[(byte)(address & 0x7f)] = value;
                     break;
                 case 0xffff:
-                    gameboy.Cpu.Registers.IE = value;
+                    gameboy.Cpu.Registers.IE = (Interrupt)value;
                     break;
             }
         }

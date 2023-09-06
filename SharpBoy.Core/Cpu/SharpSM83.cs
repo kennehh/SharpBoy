@@ -33,6 +33,7 @@ namespace SharpBoy.Core.Cpu
 
             var opcode = ReadImmediate8Bit();
             ExecuteInstruction(opcode);
+            HandleInterrupts();
 
             return currentCycles;
         }
@@ -148,7 +149,7 @@ namespace SharpBoy.Core.Cpu
                 case 0xd6: sub_a(Operand8Bit.Immediate); break;
                 case 0xd7: rst(0x10); break;
                 case 0xd8: ret(Flag.Carry, true); break;
-                case 0xd9: ret(); break;
+                case 0xd9: reti(); break;
                 case 0xda: jp_i16(Flag.Carry, true); break;
                 // no 0xdb
                 case 0xdc: call_i16(Flag.Carry, true); break;
@@ -193,6 +194,26 @@ namespace SharpBoy.Core.Cpu
                 default: throw new ArgumentException($"Unknown opcode: 0x{opcode:x2}", nameof(opcode));
             }
 
+        }
+
+        private void HandleInterrupts()
+        {
+            if (Registers.IME && Registers.InterruptRequested)
+            {
+                var index = 0;
+                foreach (Interrupt interrupt in Enum.GetValues(typeof(Interrupt)))
+                {
+                    if (Registers.InterruptAllowed(interrupt))
+                    {
+                        Registers.IME = false;
+                        Registers.SetInterruptFlag(interrupt, false);
+
+                        var address = 0x40 + (index * 0x08);
+                        rst((byte)address);
+                    }
+                    index++;
+                }
+            }
         }
 
         private void ExecuteCBInstruction(byte cbOpcode)
@@ -349,6 +370,12 @@ namespace SharpBoy.Core.Cpu
 
         private void di() => Registers.IME = false;
         private void ei() => Registers.IME = true;
+
+        private void reti()
+        {
+            ei();
+            ret();
+        }
 
         private void inc_16(Operand16Bit operand)
         {
