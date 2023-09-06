@@ -13,6 +13,9 @@ namespace SharpBoy.Core
         internal IMmu Mmu { get; }
         internal Cartridge Cartridge { get; private set; }
 
+        private const int ClockSpeed = 4194304;
+        private const int RefreshRate = 60;
+
         public GameBoy()
         {
             Mmu = new Mmu(this);
@@ -20,9 +23,19 @@ namespace SharpBoy.Core
             Ppu = new Ppu();
         }
 
-        public void LoadCartridge()
+        public void LoadCartridge(string path)
         {
+            var rom = File.ReadAllBytes(path);
+            Cartridge = new Cartridge(rom);
+        }
 
+        public void Run()
+        {
+            var cycles = 0;
+            while (cycles < RefreshRate)
+            {
+                Cpu.Tick();
+            }
         }
     }
 }

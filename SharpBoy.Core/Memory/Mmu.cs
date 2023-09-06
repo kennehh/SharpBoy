@@ -12,6 +12,8 @@ namespace SharpBoy.Core.Memory
         private byte[] wram = new byte[0x2000];
         private byte[] hram = new byte[0x80];
 
+        private byte[] ioRegisters = new byte[0x10000];
+
         public Mmu(GameBoy gameboy)
         {
             this.gameboy = gameboy;
@@ -29,7 +31,7 @@ namespace SharpBoy.Core.Memory
                 <= 0xfdff => wram[(ushort)(address & 0x1fff)], // copy of wram (echo ram) - use of this area should be prohibited
                 <= 0xfe9f => gameboy.Ppu.ReadOam((byte)(address & 0xff)),
                 <= 0xfeff => 0, // use of this area should be prohibited
-                <= 0xff7f => 0, // handle I/O registers here
+                <= 0xff7f => ioRegisters[address], // handle I/O registers here
                 <= 0xfffe => hram[(byte)(address & 0x7f)],
                 <= 0xffff => gameboy.Cpu.Registers.IE
             };
@@ -75,6 +77,7 @@ namespace SharpBoy.Core.Memory
                     break;
                 case <= 0xff7f:
                     // handle I/O registers here
+                    ioRegisters[address] = value;
                     break;
                 case <= 0xfffe:
                     hram[(byte)(address & 0x7f)] = value;

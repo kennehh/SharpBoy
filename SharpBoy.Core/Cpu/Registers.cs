@@ -46,7 +46,7 @@ namespace SharpBoy.Core.Cpu
         [FieldOffset(13)]
         public bool IME;
 
-        public void SetFlag(Flag flag, bool val) => F = val ? F | flag : F & ~flag;
+        public void SetFlag(Flag flag, bool val) => F = (val ? F | flag : F & ~flag);
     }
 
     internal enum Flag : byte

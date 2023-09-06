@@ -9,6 +9,11 @@ namespace SharpBoy.Core
         private byte[] rom = new byte[0x8000];
         private byte[] eram = new byte[0x2000];
 
+        public Cartridge(byte[] rom)
+        {
+            Buffer.BlockCopy(rom, 0, this.rom, 0, rom.Length);
+        }
+
         public byte ReadRom(ushort address)
         {
             return rom[address];

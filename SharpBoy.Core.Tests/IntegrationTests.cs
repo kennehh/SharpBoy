@@ -1,7 +1,9 @@
 ﻿using SharpBoy.Core.Cpu;
+using SharpBoy.Core.Memory;
 using SharpBoy.Core.Tests.Mocks;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
@@ -13,36 +15,35 @@ namespace SharpBoy.Core.Tests
     {
         private static IEnumerable<string> GetCpuInstrRoms()
         {
-            return Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual").Select(x => Path.GetFileName(x));
+            return Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual").Select(x => Path.GetFileName(x).Replace("(hl)", "[hl]"));
         }
 
-        [Test, TestCaseSource(nameof(GetCpuInstrRoms))]
+        [Test, TestCaseSource(nameof(GetCpuInstrRoms)), Parallelizable(ParallelScope.All)]
         public void BlargCpuInstrTests(string filename)
         {
-            var rom = File.ReadAllBytes($"TestRoms/blargg/cpu_instrs/individual/{filename}");
-            var memory = new byte[0x10000];
-            rom.CopyTo(memory, 0);
+            var gb = new GameBoy();
+            gb.LoadCartridge($"TestRoms/blargg/cpu_instrs/individual/{filename.Replace("[hl]", "(hl)")}");
 
-            var cpu = new SharpSM83(new MmuMock(memory));
             var lastPC = 0;
-            cpu.Registers.PC = 101;
+            gb.Cpu.Registers.PC = 0x101;
             var characters = new List<byte>();            
 
-            while (lastPC != cpu.Registers.PC)
+            while (lastPC != gb.Cpu.Registers.PC)
             {
-                lastPC = cpu.Registers.PC;
+                lastPC = gb.Cpu.Registers.PC;
 
-                cpu.Tick();
+                gb.Cpu.Tick();
                 
-                if (memory[0xff02] == 0x81)
+                if (gb.Cpu.Mmu.Read8Bit(0xff02) == 0x81)
                 {
-                    characters.Add(memory[0xff01]);
-                    memory[0xff02] = 0x01;
+                    characters.Add(gb.Cpu.Mmu.Read8Bit(0xff01));
+                    gb.Cpu.Mmu.Write8Bit(0xff02, 0x01);
                 }
             }
 
             var message = Encoding.Default.GetString(characters.ToArray());
-            Assert.That(message.Contains("Passed") && !message.Contains("Failed"), "message: " + message);
+            var passed = message.Contains("Passed") && !message.Contains("Failed");
+            Assert.That(passed, "Message: " + message);
         }
     }
 }
