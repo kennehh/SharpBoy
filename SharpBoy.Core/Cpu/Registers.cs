@@ -42,20 +42,19 @@ namespace SharpBoy.Core.Cpu
 
         [FieldOffset(12)]
         public Interrupt IE;
-
         [FieldOffset(13)]
         public Interrupt IF;
 
         [FieldOffset(14)]
         public bool IME;
 
-        public bool InterruptRequested => IF != 0;
+        public bool AnyInterruptRequested => (IE & IF) != 0;
 
         public void SetFlag(Flag flag, bool val) => F = (val ? F | flag : F & ~flag);
 
         public void SetInterruptFlag(Interrupt flag, bool val) => IF = (val ? IF | flag : IF & ~flag);
 
-        public bool InterruptAllowed(Interrupt flag) => IME && IE.HasFlag(flag) && IF.HasFlag(flag);
+        public bool InterruptRequested(Interrupt flag) => IE.HasFlag(flag) && IF.HasFlag(flag);
     }
 
     [Flags]

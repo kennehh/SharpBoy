@@ -26,10 +26,12 @@ namespace SharpBoy.Core.Tests
 
             var lastPC = 0;
             gb.Cpu.Registers.PC = 0x101;
-            var characters = new List<byte>();            
+            var characters = new List<byte>();
 
-            while (lastPC != gb.Cpu.Registers.PC)
+            var isHalted = false;
+            while (!(lastPC == gb.Cpu.Registers.PC && !isHalted))
             {
+                isHalted = gb.Cpu.Halted;
                 lastPC = gb.Cpu.Registers.PC;
 
                 gb.Cpu.Tick();

@@ -16,7 +16,8 @@ namespace SharpBoy.Core.Cpu
 
         internal IMmu Mmu { get; }
         internal Registers Registers { get; }
-        
+        internal Timer Timer { get; }
+
 
         private int currentCycles;
 
@@ -24,6 +25,7 @@ namespace SharpBoy.Core.Cpu
         {
             Mmu = mmu;
             Registers = new Registers();
+            Timer = new Timer(Registers);
         }
 
         public int Tick()
@@ -31,8 +33,17 @@ namespace SharpBoy.Core.Cpu
             currentCycles = 0;
             BranchTaken = false;
 
-            var opcode = ReadImmediate8Bit();
-            ExecuteInstruction(opcode);
+            if (!Halted)
+            {
+                var opcode = ReadImmediate8Bit();
+                ExecuteInstruction(opcode);
+            }
+            else
+            {
+                currentCycles += 4;
+            }
+
+            Timer.Step(currentCycles);
             HandleInterrupts();
 
             return currentCycles;
@@ -196,26 +207,6 @@ namespace SharpBoy.Core.Cpu
 
         }
 
-        private void HandleInterrupts()
-        {
-            if (Registers.IME && Registers.InterruptRequested)
-            {
-                var index = 0;
-                foreach (Interrupt interrupt in Enum.GetValues(typeof(Interrupt)))
-                {
-                    if (Registers.InterruptAllowed(interrupt))
-                    {
-                        Registers.IME = false;
-                        Registers.SetInterruptFlag(interrupt, false);
-
-                        var address = 0x40 + (index * 0x08);
-                        rst((byte)address);
-                    }
-                    index++;
-                }
-            }
-        }
-
         private void ExecuteCBInstruction(byte cbOpcode)
         {
             var operand = (Operand8Bit)(cbOpcode & 0x07);
@@ -234,6 +225,38 @@ namespace SharpBoy.Core.Cpu
                 case <= 0xbf: res(operand, cbOpcode >> 3 & 0x07); break;
                 case <= 0xff: set(operand, cbOpcode >> 3 & 0x07); break;
                 default: throw new ArgumentException($"Unknown CB opcode: 0x{cbOpcode:x2}", nameof(cbOpcode));
+            }
+        }
+
+        private void HandleInterrupts()
+        {
+            if (Registers.AnyInterruptRequested)
+            {
+                if (Halted)
+                {
+                    Halted = false;
+                }
+
+                if (Registers.IME)
+                {
+                    var index = 0;
+                    foreach (Interrupt interrupt in Enum.GetValues(typeof(Interrupt)))
+                    {
+                        if (Registers.InterruptRequested(interrupt))
+                        {
+                            Registers.IME = false;
+                            Registers.SetInterruptFlag(interrupt, false);
+
+                            var address = 0x40 + (index * 0x08);
+
+                            currentCycles += 8;
+                            rst((byte)address);
+
+                            break;
+                        }
+                        index++;
+                    }
+                }
             }
         }
 
@@ -361,7 +384,19 @@ namespace SharpBoy.Core.Cpu
             };
         }
 
-        private void halt() => Halted = true;
+        private void halt()
+        {
+            if (!Registers.IME)
+            {
+                //if ((Registers.IE & Registers.IF) != 0)
+                //{
+
+                //}
+                Halted = true;
+                //Registers.PC--;
+            }
+        }
+
         private void stop()
         {
             Stopped = true;

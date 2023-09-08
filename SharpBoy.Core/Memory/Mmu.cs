@@ -32,6 +32,8 @@ namespace SharpBoy.Core.Memory
                 <= 0xfdff => wram[(ushort)(address & 0x1fff)], // copy of wram (echo ram) - use of this area should be prohibited
                 <= 0xfe9f => gameboy.Ppu.ReadOam((byte)(address & 0xff)),
                 <= 0xfeff => 0, // use of this area should be prohibited
+                <= 0xff03 => ioRegisters[address], // handle I/O registers here
+                <= 0xff07 => gameboy.Cpu.Timer.ReadRegister(address),
                 <= 0xff0e => ioRegisters[address], // handle I/O registers here
                 <= 0xff0f => (byte)gameboy.Cpu.Registers.IF,
                 <= 0xff7f => ioRegisters[address], // handle I/O registers here
@@ -77,6 +79,13 @@ namespace SharpBoy.Core.Memory
                     break;
                 case <= 0xfeff:
                     // use of this area should be prohibited
+                    break;
+                case <= 0xff03:
+                    // handle I/O registers here
+                    ioRegisters[address] = value;
+                    break;
+                case <= 0xff07:
+                    gameboy.Cpu.Timer.WriteRegister(address, value);
                     break;
                 case <= 0xff0e:
                     // handle I/O registers here
