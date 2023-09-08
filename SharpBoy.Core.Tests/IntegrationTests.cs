@@ -11,18 +11,20 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Tests
 {
+    [Parallelizable(ParallelScope.All)]
     public class IntegrationTests
     {
         private static IEnumerable<string> GetCpuInstrRoms()
         {
-            return Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual").Select(x => Path.GetFileName(x).Replace("(hl)", "[hl]"));
+            // (hl) breaks the test explorer
+            return Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual");
         }
 
-        [Test, TestCaseSource(nameof(GetCpuInstrRoms)), Parallelizable(ParallelScope.All)]
-        public void BlargCpuInstrTests(string filename)
+        [Test, TestCaseSource(nameof(GetCpuInstrRoms))]
+        public void BlargCpuInstrTests(string path)
         {
             var gb = new GameBoy();
-            gb.LoadCartridge($"TestRoms/blargg/cpu_instrs/individual/{filename.Replace("[hl]", "(hl)")}");
+            gb.LoadCartridge(path);
 
             var lastPC = 0;
             gb.Cpu.Registers.PC = 0x101;
@@ -35,7 +37,7 @@ namespace SharpBoy.Core.Tests
                 lastPC = gb.Cpu.Registers.PC;
 
                 gb.Cpu.Tick();
-                
+
                 if (gb.Cpu.Mmu.Read8Bit(0xff02) == 0x81)
                 {
                     characters.Add(gb.Cpu.Mmu.Read8Bit(0xff01));
@@ -47,5 +49,10 @@ namespace SharpBoy.Core.Tests
             var passed = message.Contains("Passed") && !message.Contains("Failed");
             Assert.That(passed, "Message: " + message);
         }
+
+        //[Test]
+        //public void BlargCpuInstrTests()
+        //{
+        //}
     }
 }

@@ -5,6 +5,7 @@ using SharpBoy.Core.Tests.Mocks;
 
 namespace SharpBoy.Core.Tests
 {
+    [Parallelizable(ParallelScope.All)]
     public class OpcodeTests
     {
         private readonly static string[] opcodes = new string[]
@@ -107,7 +108,7 @@ namespace SharpBoy.Core.Tests
             8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8,
         };
 
-        [Test, TestCaseSource(nameof(opcodes)), Parallelizable(ParallelScope.All)]
+        [Test, TestCaseSource(nameof(opcodes))]
         public void OpcodeTest(string opcodeString)
         {
             var opcode = Convert.ToByte(opcodeString, 16);
@@ -135,7 +136,7 @@ namespace SharpBoy.Core.Tests
             }
         }
 
-        [Test, TestCaseSource(nameof(cbOpcodes)), Parallelizable(ParallelScope.All)]
+        [Test, TestCaseSource(nameof(cbOpcodes))]
         public void CBOpcodeTest(string opcodeString)
         {
             var opcode = Convert.ToByte(opcodeString, 16);
@@ -174,6 +175,8 @@ namespace SharpBoy.Core.Tests
             cpu.Registers.L = Convert.ToByte(data.cpu.l, 16);
             cpu.Registers.PC = Convert.ToUInt16(data.cpu.pc, 16);
             cpu.Registers.SP = Convert.ToUInt16(data.cpu.sp, 16);
+            cpu.Halted = false;
+            cpu.Stopped = false;
 
             foreach (var addressValue in data.ram)
             {

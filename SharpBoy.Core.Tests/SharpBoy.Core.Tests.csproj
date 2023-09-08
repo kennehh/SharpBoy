@@ -31,10 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="TestRoms\blargg\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="TestRoms\blargg\**\*.gb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

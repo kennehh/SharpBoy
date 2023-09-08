@@ -9,8 +9,8 @@ namespace SharpBoy.Core.Cpu
 {
     public class SharpSM83
     {
-        public bool Halted { get; private set; }
-        public bool Stopped { get; private set; }
+        public bool Halted { get; internal set; }
+        public bool Stopped { get; internal set; }
 
         internal bool BranchTaken { get; private set; } = false;
 
@@ -386,15 +386,8 @@ namespace SharpBoy.Core.Cpu
 
         private void halt()
         {
-            if (!Registers.IME)
-            {
-                //if ((Registers.IE & Registers.IF) != 0)
-                //{
-
-                //}
-                Halted = true;
-                //Registers.PC--;
-            }
+            Halted = true;
+            //Registers.PC++;
         }
 
         private void stop()

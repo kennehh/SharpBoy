@@ -1,77 +1,79 @@
 using Newtonsoft.Json;
 using SharpBoy.Core.Cpu;
+using System.Reflection;
 
 namespace SharpBoy.Core.Tests
 {
+    [Parallelizable(ParallelScope.All)]
     public class AluTests
     {
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_adc() => RunAluTests("adc", AluOperations.adc);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_add() => RunAluTests("add", AluOperations.add);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_and() => RunAluTests("and", AluOperations.and);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_bit() => RunAluTests("bit", AluOperations.bit);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_ccf() => RunAluTests("ccf", AluOperations.ccf);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_cp() => RunAluTests("cp", AluOperations.cp);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_cpl() => RunAluTests("cpl", AluOperations.cpl);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_daa() => RunAluTests("daa", AluOperations.daa);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_or() => RunAluTests("or", AluOperations.or);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_res() => RunAluTests("res", AluOperations.res);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_rl() => RunAluTests("rl", AluOperations.rl);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_rlc() => RunAluTests("rlc", AluOperations.rlc);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_rr() => RunAluTests("rr", AluOperations.rr);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_rrc() => RunAluTests("rrc", AluOperations.rrc);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_sbc() => RunAluTests("sbc", AluOperations.sbc);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_scf() => RunAluTests("scf", AluOperations.scf);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_set() => RunAluTests("set", AluOperations.set);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_sla() => RunAluTests("sla", AluOperations.sla);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_sra() => RunAluTests("sra", AluOperations.sra);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_srl() => RunAluTests("srl", AluOperations.srl);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_sub() => RunAluTests("sub", AluOperations.sub);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_swap() => RunAluTests("swap", AluOperations.swap);
 
-        [Test, Parallelizable]
+        [Test]
         public void AluTest_xor() => RunAluTests("xor", AluOperations.xor);
 
         private void RunAluTests(string opType, Func<Registers, byte, byte> method) => RunAluTests(opType, (r, a, b) => method(r, a));
