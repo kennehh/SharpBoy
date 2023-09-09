@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Cpu;
+﻿using SharpBoy.Core.Processor;
 using SharpBoy.Core.Memory;
 using SharpBoy.Core.Tests.Mocks;
 using System;
@@ -14,13 +14,9 @@ namespace SharpBoy.Core.Tests
     [Parallelizable(ParallelScope.All)]
     public class IntegrationTests
     {
-        private static IEnumerable<string> GetCpuInstrRoms()
-        {
-            // (hl) breaks the test explorer
-            return Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual");
-        }
+        private static IEnumerable<string> CpuInstrRoms => Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual");
 
-        [Test, TestCaseSource(nameof(GetCpuInstrRoms))]
+        [Test, TestCaseSource(nameof(CpuInstrRoms))]
         public void BlargCpuInstrTests(string path)
         {
             var gb = new GameBoy();
@@ -36,7 +32,9 @@ namespace SharpBoy.Core.Tests
                 isHalted = gb.Cpu.Halted;
                 lastPC = gb.Cpu.Registers.PC;
 
-                gb.Cpu.Tick();
+                var cycles = gb.Cpu.Step();
+                gb.Timer.Step(cycles);
+                gb.InterruptManager.Step();
 
                 if (gb.Cpu.Mmu.Read8Bit(0xff02) == 0x81)
                 {
@@ -49,10 +47,5 @@ namespace SharpBoy.Core.Tests
             var passed = message.Contains("Passed") && !message.Contains("Failed");
             Assert.That(passed, "Message: " + message);
         }
-
-        //[Test]
-        //public void BlargCpuInstrTests()
-        //{
-        //}
     }
 }

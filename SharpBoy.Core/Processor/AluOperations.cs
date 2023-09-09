@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpBoy.Core.Cpu
+namespace SharpBoy.Core.Processor
 {
     internal static class AluOperations
     {

@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using SharpBoy.Core.Cpu;
+using SharpBoy.Core.Processor;
 using System.Reflection;
 
 namespace SharpBoy.Core.Tests

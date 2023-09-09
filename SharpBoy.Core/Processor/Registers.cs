@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SharpBoy.Core.Cpu
+namespace SharpBoy.Core.Processor
 {
     [StructLayout(LayoutKind.Explicit)]
     internal class Registers
@@ -41,20 +41,9 @@ namespace SharpBoy.Core.Cpu
         public ushort PC;
 
         [FieldOffset(12)]
-        public Interrupt IE;
-        [FieldOffset(13)]
-        public Interrupt IF;
-
-        [FieldOffset(14)]
         public bool IME;
 
-        public bool AnyInterruptRequested => (IE & IF) != 0;
-
         public void SetFlag(Flag flag, bool val) => F = (val ? F | flag : F & ~flag);
-
-        public void SetInterruptFlag(Interrupt flag, bool val) => IF = (val ? IF | flag : IF & ~flag);
-
-        public bool InterruptRequested(Interrupt flag) => IE.HasFlag(flag) && IF.HasFlag(flag);
     }
 
     [Flags]
@@ -64,15 +53,5 @@ namespace SharpBoy.Core.Cpu
         Subtract = 1 << 6,
         HalfCarry = 1 << 5,
         Carry = 1 << 4
-    }
-
-    [Flags]
-    internal enum Interrupt : byte
-    {
-        VBlank = 1 << 0,
-        LcdStat = 1 << 1,
-        Timer = 1 << 2,
-        Serial = 1 << 3,
-        Joypad = 1 << 4,
     }
 }

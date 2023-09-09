@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Cpu;
+﻿using SharpBoy.Core.Processor;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -33,12 +33,12 @@ namespace SharpBoy.Core.Memory
                 <= 0xfe9f => gameboy.Ppu.ReadOam((byte)(address & 0xff)),
                 <= 0xfeff => 0, // use of this area should be prohibited
                 <= 0xff03 => ioRegisters[address], // handle I/O registers here
-                <= 0xff07 => gameboy.Cpu.Timer.ReadRegister(address),
+                <= 0xff07 => gameboy.Timer.ReadRegister(address),
                 <= 0xff0e => ioRegisters[address], // handle I/O registers here
-                <= 0xff0f => (byte)gameboy.Cpu.Registers.IF,
+                <= 0xff0f => (byte)gameboy.InterruptManager.IF,
                 <= 0xff7f => ioRegisters[address], // handle I/O registers here
                 <= 0xfffe => hram[(byte)(address & 0x7f)],
-                <= 0xffff => (byte)gameboy.Cpu.Registers.IE
+                <= 0xffff => (byte)gameboy.InterruptManager.IE
             };
         }
 
@@ -85,14 +85,14 @@ namespace SharpBoy.Core.Memory
                     ioRegisters[address] = value;
                     break;
                 case <= 0xff07:
-                    gameboy.Cpu.Timer.WriteRegister(address, value);
+                    gameboy.Timer.WriteRegister(address, value);
                     break;
                 case <= 0xff0e:
                     // handle I/O registers here
                     ioRegisters[address] = value;
                     break;
                 case <= 0xff0f:
-                    gameboy.Cpu.Registers.IF = (Interrupt)value;
+                    gameboy.InterruptManager.IF = (Interrupt)value;
                     break;
                 case <= 0xff7f:
                     // handle I/O registers here
@@ -102,7 +102,7 @@ namespace SharpBoy.Core.Memory
                     hram[(byte)(address & 0x7f)] = value;
                     break;
                 case 0xffff:
-                    gameboy.Cpu.Registers.IE = (Interrupt)value;
+                    gameboy.InterruptManager.IE = (Interrupt)value;
                     break;
             }
         }
@@ -112,5 +112,11 @@ namespace SharpBoy.Core.Memory
             Write8Bit(address, Utils.GetLowByte(value));
             Write8Bit((ushort)(address + 1), Utils.GetHighByte(value));
         }
+    }
+
+    public enum MemoryMappedRegister : ushort
+    {
+        IF = 0xff0f,
+        IE = 0xffff
     }
 }

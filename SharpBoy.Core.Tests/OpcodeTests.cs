@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NUnit.Framework.Internal;
-using SharpBoy.Core.Cpu;
+using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
 
 namespace SharpBoy.Core.Tests
@@ -113,7 +113,7 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new SharpSM83(new MmuMock());
+            var cpu = new Cpu(new MmuMock());
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -126,7 +126,7 @@ namespace SharpBoy.Core.Tests
                         var test = serializer.Deserialize<CpuTest>(reader);
                         SetupInitialValues(cpu, test.initial);
 
-                        var cycles = cpu.Tick();
+                        var cycles = cpu.Step();
                         AssertCpuState(cpu, test);
 
                         var expectedCycles = cpu.BranchTaken ? expectedBranchCycles[opcode] : expectedNonBranchCycles[opcode];
@@ -141,7 +141,7 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new SharpSM83(new MmuMock());
+            var cpu = new Cpu(new MmuMock());
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb_{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -154,7 +154,7 @@ namespace SharpBoy.Core.Tests
                         var test = serializer.Deserialize<CpuTest>(reader);
                         SetupInitialValues(cpu, test.initial);
 
-                        var cycles = cpu.Tick();
+                        var cycles = cpu.Step();
                         AssertCpuState(cpu, test);
 
                         Assert.That(cycles, Is.EqualTo(expectedCBCycles[opcode]), $"Cycles incorrect: {test.name}");
@@ -163,7 +163,7 @@ namespace SharpBoy.Core.Tests
             }
         }
 
-        private static void SetupInitialValues(SharpSM83 cpu, CpuTestData data)
+        private static void SetupInitialValues(Cpu cpu, CpuTestData data)
         {
             cpu.Registers.A = Convert.ToByte(data.cpu.a, 16);
             cpu.Registers.B = Convert.ToByte(data.cpu.b, 16);
@@ -186,7 +186,7 @@ namespace SharpBoy.Core.Tests
             }
         }
 
-        private void AssertCpuState(SharpSM83 cpu, CpuTest test)
+        private void AssertCpuState(Cpu cpu, CpuTest test)
         {
             var data = test.final;
 

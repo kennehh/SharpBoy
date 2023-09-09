@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.Cpu
+namespace SharpBoy.Core.Processor
 {
     internal class Timer
     {
@@ -22,15 +22,15 @@ namespace SharpBoy.Core.Cpu
             64,   // 10: CPU Clock / 64   (DMG, SGB2, CGB Single Speed Mode:  65536 Hz, SGB1:  ~67110 Hz, CGB Double Speed Mode: 131072 Hz)
             256,  // 11: CPU Clock / 256  (DMG, SGB2, CGB Single Speed Mode:  16384 Hz, SGB1:  ~16780 Hz, CGB Double Speed Mode:  32768 Hz)
         };
-        private readonly Registers registers;
+        private readonly InterruptManager interruptManager;
         private int divCycles = 0;
         private int timaCycles = 0;
 
         private bool isTimerEnabled => Utils.IsBitSet(TAC, 2);
 
-        public Timer(Registers registers)
+        public Timer(InterruptManager interruptManager)
         {
-            this.registers = registers;
+            this.interruptManager = interruptManager;
         }
 
         public void Step(int cycles)
@@ -59,6 +59,7 @@ namespace SharpBoy.Core.Cpu
                 case 0xff05: TIMA = value; break;
                 case 0xff06: TMA = value; break;
                 case 0xff07: TAC = value; break;
+                default: throw new NotImplementedException();
             }           
         }
 
@@ -90,13 +91,12 @@ namespace SharpBoy.Core.Cpu
                     if (TIMA >= 0xff)
                     {
                         TIMA = TMA;
-                        registers.SetInterruptFlag(Interrupt.Timer, true);
+                        interruptManager.SetInterruptFlag(Interrupt.Timer, true);
                     }
                     else
                     {
                         TIMA++;
                     }
-
                     timaCycles -= tacClock;
                 }
             }

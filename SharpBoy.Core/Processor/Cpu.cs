@@ -5,9 +5,9 @@ using System.Reflection.Metadata;
 using System.Text;
 using SharpBoy.Core.Memory;
 
-namespace SharpBoy.Core.Cpu
+namespace SharpBoy.Core.Processor
 {
-    public class SharpSM83
+    public class Cpu
     {
         public bool Halted { get; internal set; }
         public bool Stopped { get; internal set; }
@@ -16,19 +16,18 @@ namespace SharpBoy.Core.Cpu
 
         internal IMmu Mmu { get; }
         internal Registers Registers { get; }
-        internal Timer Timer { get; }
+        
 
 
         private int currentCycles;
 
-        public SharpSM83(IMmu mmu)
+        public Cpu(IMmu mmu)
         {
             Mmu = mmu;
             Registers = new Registers();
-            Timer = new Timer(Registers);
         }
 
-        public int Tick()
+        public int Step()
         {
             currentCycles = 0;
             BranchTaken = false;
@@ -42,9 +41,6 @@ namespace SharpBoy.Core.Cpu
             {
                 currentCycles += 4;
             }
-
-            Timer.Step(currentCycles);
-            HandleInterrupts();
 
             return currentCycles;
         }
@@ -228,36 +224,10 @@ namespace SharpBoy.Core.Cpu
             }
         }
 
-        private void HandleInterrupts()
+        internal void HandleInterrupt(ushort address)
         {
-            if (Registers.AnyInterruptRequested)
-            {
-                if (Halted)
-                {
-                    Halted = false;
-                }
-
-                if (Registers.IME)
-                {
-                    var index = 0;
-                    foreach (Interrupt interrupt in Enum.GetValues(typeof(Interrupt)))
-                    {
-                        if (Registers.InterruptRequested(interrupt))
-                        {
-                            Registers.IME = false;
-                            Registers.SetInterruptFlag(interrupt, false);
-
-                            var address = 0x40 + (index * 0x08);
-
-                            currentCycles += 8;
-                            rst((byte)address);
-
-                            break;
-                        }
-                        index++;
-                    }
-                }
-            }
+            currentCycles += 8;
+            rst((byte)address);
         }
 
         private byte ReadImmediate8Bit()
