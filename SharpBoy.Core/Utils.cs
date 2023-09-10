@@ -8,6 +8,7 @@ namespace SharpBoy.Core
     {
         public static byte SetBit(byte x, int n) => (byte)(x | (1 << n));
         public static byte ClearBit(byte x, int n) => (byte)(x & ~(1 << n));
+
         public static bool IsBitSet(byte x, int n) => BitValue(x, n) == 1;
         public static int BitValue(byte x, int n) => (x >>> n) & 1;
 

@@ -15,13 +15,6 @@ namespace SharpBoy.Core.Processor
         public byte TAC { get; private set; }
 
         private const int DivClock = 256;
-        private static readonly int[] TacInputClocks = new[]
-        {
-            1024, // 00: CPU Clock / 1024 (DMG, SGB2, CGB Single Speed Mode:   4096 Hz, SGB1:   ~4194 Hz, CGB Double Speed Mode:   8192 Hz)
-            16,   // 01: CPU Clock / 16   (DMG, SGB2, CGB Single Speed Mode: 262144 Hz, SGB1: ~268400 Hz, CGB Double Speed Mode: 524288 Hz)
-            64,   // 10: CPU Clock / 64   (DMG, SGB2, CGB Single Speed Mode:  65536 Hz, SGB1:  ~67110 Hz, CGB Double Speed Mode: 131072 Hz)
-            256,  // 11: CPU Clock / 256  (DMG, SGB2, CGB Single Speed Mode:  16384 Hz, SGB1:  ~16780 Hz, CGB Double Speed Mode:  32768 Hz)
-        };
         private readonly InterruptManager interruptManager;
         private int divCycles = 0;
         private int timaCycles = 0;
@@ -84,14 +77,15 @@ namespace SharpBoy.Core.Processor
         {
             if (isTimerEnabled)
             {
-                var tacClock = GetSelectedTacInputClock();
+                var tacClock = GetCurrentTacClock();
                 timaCycles += cycles;
+
                 while (timaCycles >= tacClock)
                 {
                     if (TIMA >= 0xff)
                     {
                         TIMA = TMA;
-                        interruptManager.SetInterruptFlag(Interrupt.Timer, true);
+                        interruptManager.RequestInterrupt(InterruptFlag.Timer);
                     }
                     else
                     {
@@ -102,6 +96,17 @@ namespace SharpBoy.Core.Processor
             }
         }
 
-        private int GetSelectedTacInputClock() => TacInputClocks[TAC & 0x3];
+        private int GetCurrentTacClock()
+        {
+            var bit = TAC & 0x3;
+            return bit switch
+            {
+                0b00 => 1024, // 00: CPU Clock / 1024 (DMG, SGB2, CGB Single Speed Mode:   4096 Hz, SGB1:   ~4194 Hz, CGB Double Speed Mode:   8192 Hz)
+                0b01 => 16,   // 01: CPU Clock / 16   (DMG, SGB2, CGB Single Speed Mode: 262144 Hz, SGB1: ~268400 Hz, CGB Double Speed Mode: 524288 Hz)
+                0b10 => 64,   // 10: CPU Clock / 64   (DMG, SGB2, CGB Single Speed Mode:  65536 Hz, SGB1:  ~67110 Hz, CGB Double Speed Mode: 131072 Hz)
+                0b11 => 256,  // 11: CPU Clock / 256  (DMG, SGB2, CGB Single Speed Mode:  16384 Hz, SGB1:  ~16780 Hz, CGB Double Speed Mode:  32768 Hz)
+                _ => throw new NotImplementedException()
+            };
+        }
     }
 }

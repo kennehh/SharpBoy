@@ -16,8 +16,6 @@ namespace SharpBoy.Core.Processor
 
         internal IMmu Mmu { get; }
         internal Registers Registers { get; }
-        
-
 
         private int currentCycles;
 
@@ -43,6 +41,12 @@ namespace SharpBoy.Core.Processor
             }
 
             return currentCycles;
+        }
+
+        internal void HandleInterrupt(ushort address)
+        {
+            currentCycles += 8;
+            rst((byte)address);
         }
 
         private void ExecuteInstruction(byte opcode)
@@ -224,12 +228,6 @@ namespace SharpBoy.Core.Processor
             }
         }
 
-        internal void HandleInterrupt(ushort address)
-        {
-            currentCycles += 8;
-            rst((byte)address);
-        }
-
         private byte ReadImmediate8Bit()
         {
             var val = Read8BitValueFromMemory(Registers.PC);
@@ -313,15 +311,9 @@ namespace SharpBoy.Core.Processor
             };
         }
 
-        private void ReadWriteValue(Operand8Bit operand, Func<Registers, byte, byte> func)
-        {
-            WriteValue(operand, func(Registers, ReadValue(operand)));
-        }
+        private void ReadWriteValue(Operand8Bit operand, Func<Registers, byte, byte> func) => WriteValue(operand, func(Registers, ReadValue(operand)));
 
-        private void ReadWriteValue(Operand8Bit operand, byte value2, Func<Registers, byte, byte, byte> func)
-        {
-            WriteValue(operand, func(Registers, ReadValue(operand), value2));
-        }
+        private void ReadWriteValue(Operand8Bit operand, byte value2, Func<byte, byte, byte> func) => WriteValue(operand, func(ReadValue(operand), value2));
 
         private ushort ReadValue(Operand16Bit operand)
         {
@@ -357,7 +349,6 @@ namespace SharpBoy.Core.Processor
         private void halt()
         {
             Halted = true;
-            //Registers.PC++;
         }
 
         private void stop()
@@ -588,10 +579,6 @@ namespace SharpBoy.Core.Processor
         private void bit(Operand8Bit operand, int bit)
         {
             AluOperations.bit(Registers, ReadValue(operand), (byte)bit);
-            if (operand == Operand8Bit.IndirectHL)
-            {
-                currentCycles += 4;
-            }
         }
 
         private void res(Operand8Bit operand, int bit) => ReadWriteValue(operand, (byte)bit, AluOperations.res);

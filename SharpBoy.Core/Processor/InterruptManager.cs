@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,11 +11,17 @@ namespace SharpBoy.Core.Processor
 {
     internal class InterruptManager
     {
-        public Interrupt IE { get; set; }
-        public Interrupt IF { get; set; }
+        public InterruptFlag IE { get; set; }
+        public InterruptFlag IF { get; set; }
 
 
         private readonly Cpu cpu;
+        private readonly static Interrupt[] interrupts = Enum
+            .GetValues(typeof(InterruptFlag))
+            .Cast<InterruptFlag>()
+            .Select((x, i) => new Interrupt(x, (ushort)(0x40 + (i * 0x08))))
+            .ToArray();
+
         private bool AnyInterruptRequested => (IE & IF) != 0;
 
         public InterruptManager(Cpu cpu)
@@ -34,15 +41,13 @@ namespace SharpBoy.Core.Processor
                 if (cpu.Registers.IME)
                 {
                     var index = 0;
-                    foreach (Interrupt interrupt in Enum.GetValues(typeof(Interrupt)))
+                    foreach (var interrupt in interrupts)
                     {
-                        if (InterruptRequested(interrupt))
+                        if (InterruptRequested(interrupt.Flag))
                         {
                             cpu.Registers.IME = false;
-                            SetInterruptFlag(interrupt, false);
-
-                            var address = (ushort)(0x40 + (index * 0x08));
-                            cpu.HandleInterrupt(address);
+                            SetInterruptFlag(interrupt.Flag, false);
+                            cpu.HandleInterrupt(interrupt.Address);
 
                             break;
                         }
@@ -52,13 +57,26 @@ namespace SharpBoy.Core.Processor
             }
         }
 
-        public void SetInterruptFlag(Interrupt flag, bool val) => IF = (val ? IF | flag : IF & ~flag);
+        public void RequestInterrupt(InterruptFlag flag) => SetInterruptFlag(flag, true);
 
-        private bool InterruptRequested(Interrupt flag) => IE.HasFlag(flag) && IF.HasFlag(flag);
+        private void SetInterruptFlag(InterruptFlag flag, bool val) => IF = (val ? IF | flag : IF & ~flag);
+        private bool InterruptRequested(InterruptFlag flag) => IE.HasFlag(flag) && IF.HasFlag(flag);
+
+        private class Interrupt
+        {
+            public InterruptFlag Flag { get; }
+            public ushort Address { get; }
+
+            public Interrupt(InterruptFlag flag, ushort address) 
+            {
+                Flag = flag;
+                Address = address;
+            }
+        }
     }
 
     [Flags]
-    internal enum Interrupt : byte
+    internal enum InterruptFlag : byte
     {
         VBlank = 1 << 0,
         LcdStat = 1 << 1,

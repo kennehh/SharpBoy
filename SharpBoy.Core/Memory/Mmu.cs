@@ -92,7 +92,7 @@ namespace SharpBoy.Core.Memory
                     ioRegisters[address] = value;
                     break;
                 case <= 0xff0f:
-                    gameboy.InterruptManager.IF = (Interrupt)value;
+                    gameboy.InterruptManager.IF = (InterruptFlag)value;
                     break;
                 case <= 0xff7f:
                     // handle I/O registers here
@@ -102,7 +102,7 @@ namespace SharpBoy.Core.Memory
                     hram[(byte)(address & 0x7f)] = value;
                     break;
                 case 0xffff:
-                    gameboy.InterruptManager.IE = (Interrupt)value;
+                    gameboy.InterruptManager.IE = (InterruptFlag)value;
                     break;
             }
         }

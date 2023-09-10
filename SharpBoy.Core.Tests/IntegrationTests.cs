@@ -15,9 +15,18 @@ namespace SharpBoy.Core.Tests
     public class IntegrationTests
     {
         private static IEnumerable<string> CpuInstrRoms => Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual");
+        private static IEnumerable<string> MemTimingRoms => Directory.GetFiles("TestRoms/blargg/mem_timing/individual");
 
         [Test, TestCaseSource(nameof(CpuInstrRoms))]
-        public void BlargCpuInstrTests(string path)
+        public void BlargCpuInstrTest(string path) => TestRom(path);
+
+        [Test]
+        public void BlargInstrTimingTest() => TestRom("TestRoms/blargg/instr_timing/instr_timing.gb");
+
+        [Test, TestCaseSource(nameof(MemTimingRoms))]
+        public void BlargMemTimingTest(string path) => TestRom(path);
+
+        private void TestRom(string path)
         {
             var gb = new GameBoy();
             gb.LoadCartridge(path);
