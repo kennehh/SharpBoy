@@ -113,7 +113,8 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new Cpu(new MmuMock());
+            var im = new InterruptManager();
+            var cpu = new Cpu(new MmuMock(), im, new Processor.Timer(im));
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -141,7 +142,8 @@ namespace SharpBoy.Core.Tests
         {
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
-            var cpu = new Cpu(new MmuMock());
+            var im = new InterruptManager();
+            var cpu = new Cpu(new MmuMock(), im, new Processor.Timer(im));
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb_{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))

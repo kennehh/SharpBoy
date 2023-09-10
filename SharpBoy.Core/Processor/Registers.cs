@@ -40,9 +40,6 @@ namespace SharpBoy.Core.Processor
         [FieldOffset(10)]
         public ushort PC;
 
-        [FieldOffset(12)]
-        public bool IME;
-
         public void SetFlag(Flag flag, bool val) => F = (val ? F | flag : F & ~flag);
     }
 

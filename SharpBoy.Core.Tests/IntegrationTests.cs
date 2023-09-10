@@ -15,7 +15,8 @@ namespace SharpBoy.Core.Tests
     public class IntegrationTests
     {
         private static IEnumerable<string> CpuInstrRoms => Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual");
-        private static IEnumerable<string> MemTimingRoms => Directory.GetFiles("TestRoms/blargg/mem_timing/individual");
+        private static IEnumerable<string> MemTimingRoms => Directory.GetFiles("TestRoms/blargg/mem_timing/individual")
+            .Concat(Directory.GetFiles("TestRoms/blargg/mem_timing-2/rom_singles"));
 
         [Test, TestCaseSource(nameof(CpuInstrRoms))]
         public void BlargCpuInstrTest(string path) => TestRom(path);
@@ -41,14 +42,34 @@ namespace SharpBoy.Core.Tests
                 isHalted = gb.Cpu.Halted;
                 lastPC = gb.Cpu.Registers.PC;
 
-                var cycles = gb.Cpu.Step();
-                gb.Timer.Step(cycles);
-                gb.InterruptManager.Step();
+                gb.Cpu.Step();
 
                 if (gb.Cpu.Mmu.Read8Bit(0xff02) == 0x81)
                 {
                     characters.Add(gb.Cpu.Mmu.Read8Bit(0xff01));
                     gb.Cpu.Mmu.Write8Bit(0xff02, 0x01);
+                }
+            }
+            
+            if (!characters.Any())
+            {
+                // test message should be stored at 0xa004
+                Assert.That(gb.Mmu.Read8Bit(0xa001), Is.EqualTo(0xde));
+                Assert.That(gb.Mmu.Read8Bit(0xa002), Is.EqualTo(0xb0));
+                Assert.That(gb.Mmu.Read8Bit(0xa003), Is.EqualTo(0x61));
+
+                ushort address = 0xa004;
+                while (true)
+                {
+                    var character = gb.Mmu.Read8Bit(address++);
+                    if (character != 0)
+                    {
+                        characters.Add(character);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
 

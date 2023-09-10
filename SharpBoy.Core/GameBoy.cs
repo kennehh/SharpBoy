@@ -15,8 +15,8 @@ namespace SharpBoy.Core
         internal Cpu Cpu { get; }
         internal Ppu Ppu { get; }
         internal IMmu Mmu { get; }
-        internal InterruptManager InterruptManager { get; }
-        internal Processor.Timer Timer { get; }
+        internal IInterruptManager InterruptManager { get; }
+        internal ITimer Timer { get; }
         internal Cartridge Cartridge { get; private set; }
 
         private const double RefreshRateHz = 59.7275;
@@ -25,15 +25,15 @@ namespace SharpBoy.Core
         private const int ExpectedMillisecondsPerUpdate = (int)(1000 / RefreshRateHz);
         private const int ExpectedCpuCyclesPerUpdate = ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond;
 
-        private readonly Stopwatch timer = new Stopwatch();
+        private readonly Stopwatch stopwatch = new Stopwatch();
 
         public GameBoy()
         {
             Mmu = new Mmu(this);
-            Cpu = new Cpu(Mmu);
-            Ppu = new Ppu();
-            InterruptManager = new InterruptManager(Cpu);
+            InterruptManager = new InterruptManager();
             Timer = new Processor.Timer(InterruptManager);
+            Cpu = new Cpu(Mmu, InterruptManager, Timer);
+            Ppu = new Ppu();
         }
 
         public void LoadCartridge(string path)
@@ -47,17 +47,17 @@ namespace SharpBoy.Core
             var totalCycles = 0;
             while (PowerOn)
             {
-                timer.Start();
+                stopwatch.Start();
 
                 while (totalCycles < ExpectedCpuCyclesPerUpdate)
                 {
                     var cycles = Cpu.Step();
-                    Timer.Step(cycles);
-                    InterruptManager.Step();
+                    //Timer.Step(cycles);
+                    //InterruptManager.Step();
                     totalCycles += cycles;
                 }
 
-                var timeElapsed = timer.ElapsedMilliseconds;
+                var timeElapsed = stopwatch.ElapsedMilliseconds;
                 if (totalCycles < ExpectedMillisecondsPerUpdate)
                 {
                     var sleep = ExpectedMillisecondsPerUpdate - timeElapsed;
@@ -65,7 +65,7 @@ namespace SharpBoy.Core
                 }
 
                 totalCycles -= ExpectedCpuCyclesPerUpdate;
-                timer.Reset();
+                stopwatch.Reset();
             }
         }
     }

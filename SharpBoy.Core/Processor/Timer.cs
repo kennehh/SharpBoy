@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Processor
 {
-    internal class Timer
+    internal class Timer : ITimer
     {
         public byte DIV { get; private set; }
         public byte TIMA { get; private set; }
@@ -15,18 +15,18 @@ namespace SharpBoy.Core.Processor
         public byte TAC { get; private set; }
 
         private const int DivClock = 256;
-        private readonly InterruptManager interruptManager;
+        private readonly IInterruptManager interruptManager;
         private int divCycles = 0;
         private int timaCycles = 0;
 
         private bool isTimerEnabled => Utils.IsBitSet(TAC, 2);
 
-        public Timer(InterruptManager interruptManager)
+        public Timer(IInterruptManager interruptManager)
         {
             this.interruptManager = interruptManager;
         }
 
-        public void Step(int cycles)
+        public void Update(int cycles)
         {
             HandleDivider(cycles);
             HandleTimer(cycles);
