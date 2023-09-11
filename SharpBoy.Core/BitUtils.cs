@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SharpBoy.Core
+﻿namespace SharpBoy.Core
 {
-    internal static class Utils
+    internal static class BitUtils
     {
+        public static byte SetBit(byte x, int n, bool value) => value ? SetBit(x, n) : ClearBit(x, n);
         public static byte SetBit(byte x, int n) => (byte)(x | (1 << n));
         public static byte ClearBit(byte x, int n) => (byte)(x & ~(1 << n));
 

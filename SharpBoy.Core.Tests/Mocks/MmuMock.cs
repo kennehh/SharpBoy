@@ -22,15 +22,15 @@ namespace SharpBoy.Core.Tests.Mocks
         {
             var low = memory[address];
             var high = memory[(ushort)(address + 1)];
-            return Utils.Get16BitValue(high, low);
+            return BitUtils.Get16BitValue(high, low);
         }
 
         public void Write8Bit(ushort address, byte value) => memory[address] = value;
 
         public void Write16Bit(ushort address, ushort value)
         {
-            memory[address] = Utils.GetLowByte(value);
-            memory[(ushort)(address + 1)] = Utils.GetHighByte(value);
+            memory[address] = BitUtils.GetLowByte(value);
+            memory[(ushort)(address + 1)] = BitUtils.GetHighByte(value);
         }
     }
 }

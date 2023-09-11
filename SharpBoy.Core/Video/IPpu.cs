@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.Graphics
+namespace SharpBoy.Core.Video
 {
     internal interface IPpu
     {
         byte ReadVram(ushort address);
-        byte ReadOam(byte address);
+        byte ReadOam(ushort address);
+        byte ReadRegister(ushort address);
         void WriteVram(ushort address, byte value);
         void WriteOam(ushort address, byte value);
+        void WriteRegister(ushort address, byte value);
     }
 }

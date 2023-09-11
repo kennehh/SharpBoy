@@ -3,33 +3,39 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using SharpBoy.Core.Graphics;
 
-namespace SharpBoy.Core.Graphics
+namespace SharpBoy.Core.Video
 {
 
     internal class Ppu : IPpu
     {
-        private TileBlock tileBlock1 = new TileBlock();
-        private TileBlock tileBlock2 = new TileBlock();
-        private TileBlock tileBlock3 = new TileBlock();
-
-        private TileMap tileMap1 = new TileMap();
-        private TileMap tileMap2 = new TileMap();
-
         private byte[] vram = new byte[0x2000];
         private byte[] oam = new byte[0xa0];
 
+        private byte lcdc = 0;
+        private byte ly = 0x90;
+        private byte lyc = 0;
+        private byte stat = 0;
+
+        private byte scy = 0;
+        private byte scx = 0;
+
+        private byte wy = 0;
+        private byte wx = 0;
+
+        private byte bgp = 0;
+
+        private byte obp0 = 0;
+        private byte obp1 = 0;
+
+        private byte dma = 0;
+
+
         public Ppu()
         {
-            for (int i = 0; i < 32; i++)
-            {
-                tileMap1[i] = tileBlock1[0];
-                tileMap2[i] = tileBlock1[0];
-            }
         }
 
-        public int Step()
+        public int Step(int cpuCyles)
         {
             var cycles = 0;
             return cycles;
@@ -40,7 +46,7 @@ namespace SharpBoy.Core.Graphics
             return vram[address];
         }
 
-        public byte ReadOam(byte address)
+        public byte ReadOam(ushort address)
         {
             return oam[address];
         }
@@ -53,6 +59,46 @@ namespace SharpBoy.Core.Graphics
         public void WriteOam(ushort address, byte value)
         {
             oam[address] = value;
+        }
+
+        public byte ReadRegister(ushort address)
+        {
+            return address switch
+            {
+                0xff40 => lcdc,
+                0xff41 => stat,
+                0xff42 => scy,
+                0xff43 => scx,
+                0xff44 => ly,
+                0xff45 => lyc,
+                0xff46 => dma,
+                0xff47 => bgp,
+                0xff48 => obp0,
+                0xff49 => obp1,
+                0xff4a => wy,
+                0xff4b => wx,
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        public void WriteRegister(ushort address, byte value)
+        {
+            switch (address)
+            {
+                case 0xff40: lcdc = value; break;
+                case 0xff41: stat = value; break;
+                case 0xff42: scy = value; break;
+                case 0xff43: scx = value; break;
+                case 0xff44: break;
+                case 0xff45: lyc = value; break;
+                case 0xff46: dma = value; break;
+                case 0xff47: bgp = value; break;
+                case 0xff48: obp0 = value; break;
+                case 0xff49: obp1 = value; break;
+                case 0xff4a: wy = value; break;
+                case 0xff4b: wx = value; break;
+                default: throw new NotImplementedException();
+            }
         }
     }
 

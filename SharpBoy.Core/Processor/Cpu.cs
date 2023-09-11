@@ -4,17 +4,16 @@ using System.Net;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Text;
-using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Video;
 using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Processor
 {
     internal class Cpu
     {
-        public bool Halted { get; internal set; }
-        public bool Stopped { get; internal set; }
+        public CpuState State { get; set; }
 
-        internal bool BranchTaken { get; private set; } = false;
+        internal bool BranchTaken { get; private set; }
 
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
@@ -22,6 +21,7 @@ namespace SharpBoy.Core.Processor
         internal Registers Registers { get; }
 
         private int currentCycles;
+        private bool haltBug = false;
 
         public Cpu(IMmu mmu, IInterruptManager interruptManager, ITimer timer)
         {
@@ -36,7 +36,7 @@ namespace SharpBoy.Core.Processor
             currentCycles = 0;
             BranchTaken = false;
 
-            if (!Halted)
+            if (State == CpuState.Running)
             {
                 var opcode = ReadImmediate8Bit();
                 ExecuteInstruction(opcode);
@@ -48,16 +48,23 @@ namespace SharpBoy.Core.Processor
 
             HandleInterrupts();
 
+            if (haltBug)
+            {
+                Registers.PC -= 1;
+                haltBug = false;
+            }
+
             return currentCycles;
         }
 
-        public void HandleInterrupts()
+        private void HandleInterrupts()
         {
             if (InterruptManager.AnyInterruptRequested)
             {
-                if (Halted)
+                if (State == CpuState.Halted)
                 {
-                    Halted = false;
+                    State = CpuState.Running;
+                    //IncrementCycles(4);
                 }
 
                 if (InterruptManager.IME)
@@ -380,12 +387,13 @@ namespace SharpBoy.Core.Processor
 
         private void halt()
         {
-            Halted = true;
+            State = CpuState.Halted;
+            haltBug = !InterruptManager.IME && InterruptManager.AnyInterruptRequested;
         }
 
         private void stop()
         {
-            Stopped = true;
+            State = CpuState.Stopped;
             Registers.PC++;
         }
 
@@ -646,5 +654,12 @@ namespace SharpBoy.Core.Processor
             Immediate = 6,
             IndirectImmediate = 7
         }
+    }
+
+    internal enum CpuState
+    {
+        Running,
+        Halted,
+        Stopped
     }
 }

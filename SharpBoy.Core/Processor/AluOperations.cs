@@ -135,16 +135,16 @@ namespace SharpBoy.Core.Processor
 
         internal static byte bit(Registers registers, byte value, byte bitPosition)
         {
-            var result = Utils.BitValue(value, bitPosition);
+            var result = BitUtils.BitValue(value, bitPosition);
             registers.SetFlag(Flag.Zero, result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, true);
             return value;
         }
 
-        internal static byte set(byte value, byte bitPosition) => Utils.SetBit(value, bitPosition);
+        internal static byte set(byte value, byte bitPosition) => BitUtils.SetBit(value, bitPosition);
 
-        internal static byte res(byte value, byte bitPosition) => Utils.ClearBit(value, bitPosition);
+        internal static byte res(byte value, byte bitPosition) => BitUtils.ClearBit(value, bitPosition);
 
         internal static byte sla(Registers registers, byte value)
         {
@@ -152,7 +152,7 @@ namespace SharpBoy.Core.Processor
             registers.SetFlag(Flag.Zero, result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
-            registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 7));
+            registers.SetFlag(Flag.Carry, BitUtils.IsBitSet(value, 7));
             return result;
         }
 
@@ -162,7 +162,7 @@ namespace SharpBoy.Core.Processor
             registers.SetFlag(Flag.Zero, result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
-            registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 0));
+            registers.SetFlag(Flag.Carry, BitUtils.IsBitSet(value, 0));
             return result;
         }
 
@@ -172,7 +172,7 @@ namespace SharpBoy.Core.Processor
             registers.SetFlag(Flag.Zero, result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
-            registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 0));
+            registers.SetFlag(Flag.Carry, BitUtils.IsBitSet(value, 0));
             return result;
         }
 
@@ -230,7 +230,7 @@ namespace SharpBoy.Core.Processor
         {
             var result = (byte)(value << 1 | registers.F.HasFlag(Flag.Carry).ToBit());
 
-            registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 7));
+            registers.SetFlag(Flag.Carry, BitUtils.IsBitSet(value, 7));
             registers.SetFlag(Flag.Zero, !clearZero && result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
@@ -240,7 +240,7 @@ namespace SharpBoy.Core.Processor
 
         private static byte rlc(Registers registers, byte value, bool clearZero)
         {
-            var bit7 = Utils.BitValue(value, 7);
+            var bit7 = BitUtils.BitValue(value, 7);
             var result = (byte)(value << 1 | bit7);
 
             registers.SetFlag(Flag.Carry, bit7 == 1);
@@ -255,7 +255,7 @@ namespace SharpBoy.Core.Processor
         {
             var result = (byte)(value >> 1 | registers.F.HasFlag(Flag.Carry).ToBit() << 7);
 
-            registers.SetFlag(Flag.Carry, Utils.IsBitSet(value, 0));
+            registers.SetFlag(Flag.Carry, BitUtils.IsBitSet(value, 0));
             registers.SetFlag(Flag.Zero, !clearZero && result == 0);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
@@ -265,7 +265,7 @@ namespace SharpBoy.Core.Processor
 
         internal static byte rrc(Registers registers, byte value, bool clearZero)
         {
-            var bit0 = Utils.BitValue(value, 0);
+            var bit0 = BitUtils.BitValue(value, 0);
             var result = (byte)(value >> 1 | bit0 << 7);
 
             registers.SetFlag(Flag.Carry, bit0 == 1);

@@ -1,10 +1,10 @@
 ﻿using SharpBoy.Core.Processor;
-using SharpBoy.Core.Graphics;
 using SharpBoy.Core.Memory;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using SharpBoy.Core.Video;
 
 namespace SharpBoy.Core
 {
@@ -31,7 +31,7 @@ namespace SharpBoy.Core
         {
             Mmu = new Mmu(this);
             InterruptManager = new InterruptManager();
-            Timer = new Processor.Timer(InterruptManager);
+            Timer = new Timer(InterruptManager);
             Cpu = new Cpu(Mmu, InterruptManager, Timer);
             Ppu = new Ppu();
         }

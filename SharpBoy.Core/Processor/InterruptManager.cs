@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Graphics;
+﻿using SharpBoy.Core.Video;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace SharpBoy.Core.Processor
             .Select((x, i) => new Interrupt(x, (ushort)(0x40 + (i * 0x08))))
             .ToArray();
 
-        public bool AnyInterruptRequested => (IE & IF) != 0;
+        public bool AnyInterruptRequested => ((byte)IE & (byte)IF & 0x1f) != 0;
 
         public void RequestInterrupt(InterruptFlag flag) => SetInterruptFlag(flag, true);
         public void ClearInterrupt(InterruptFlag flag) => SetInterruptFlag(flag, false);

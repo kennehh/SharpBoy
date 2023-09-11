@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.Graphics
+namespace SharpBoy.Core.Video
 {
     internal class TileMap
     {
@@ -26,7 +26,7 @@ namespace SharpBoy.Core.Graphics
     {
         private readonly Tile[] tiles;
 
-        public TileBlock() 
+        public TileBlock()
         {
             tiles = new Tile[128];
             Array.Fill(tiles, new Tile());

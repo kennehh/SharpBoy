@@ -1,25 +1,32 @@
-﻿using SharpBoy.Core.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SharpBoy.Core.Processor;
 
-namespace SharpBoy.Core.Processor
+namespace SharpBoy.Core
 {
     internal class Timer : ITimer
     {
         public byte DIV { get; private set; }
         public byte TIMA { get; private set; }
         public byte TMA { get; private set; }
-        public byte TAC { get; private set; }
+
+        private byte tac = 0;
+        public byte TAC
+        {
+            get => tac;
+            set
+            {
+                tac = value;
+                isTimerEnabled = BitUtils.IsBitSet(value, 2);
+                currentTacClock = GetTacClock(value);
+            }
+        }
+
+        private bool isTimerEnabled = false;
+        private int currentTacClock = 1024;
 
         private const int DivClock = 256;
         private readonly IInterruptManager interruptManager;
         private int divCycles = 0;
         private int timaCycles = 0;
-
-        private bool isTimerEnabled => Utils.IsBitSet(TAC, 2);
 
         public Timer(IInterruptManager interruptManager)
         {
@@ -53,7 +60,7 @@ namespace SharpBoy.Core.Processor
                 case 0xff06: TMA = value; break;
                 case 0xff07: TAC = value; break;
                 default: throw new NotImplementedException();
-            }           
+            }
         }
 
         private void UpdateDivider(int cycles)
@@ -77,10 +84,9 @@ namespace SharpBoy.Core.Processor
         {
             if (isTimerEnabled)
             {
-                var tacClock = GetCurrentTacClock();
                 timaCycles += cycles;
 
-                while (timaCycles >= tacClock)
+                while (timaCycles >= currentTacClock)
                 {
                     if (TIMA >= 0xff)
                     {
@@ -91,14 +97,14 @@ namespace SharpBoy.Core.Processor
                     {
                         TIMA++;
                     }
-                    timaCycles -= tacClock;
+                    timaCycles -= currentTacClock;
                 }
             }
         }
 
-        private int GetCurrentTacClock()
+        private int GetTacClock(byte tac)
         {
-            var val = TAC & 0x3;
+            var val = tac & 0x3;
             return val switch
             {
                 0b00 => 1024, // 00: CPU Clock / 1024 (DMG, SGB2, CGB Single Speed Mode:   4096 Hz, SGB1:   ~4194 Hz, CGB Double Speed Mode:   8192 Hz)

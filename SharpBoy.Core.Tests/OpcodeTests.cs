@@ -114,7 +114,7 @@ namespace SharpBoy.Core.Tests
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
             var im = new InterruptManager();
-            var cpu = new Cpu(new MmuMock(), im, new Processor.Timer(im));
+            var cpu = new Cpu(new MmuMock(), im, new Timer(im));
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -143,7 +143,7 @@ namespace SharpBoy.Core.Tests
             var opcode = Convert.ToByte(opcodeString, 16);
             var serializer = new JsonSerializer();
             var im = new InterruptManager();
-            var cpu = new Cpu(new MmuMock(), im, new Processor.Timer(im));
+            var cpu = new Cpu(new MmuMock(), im, new Timer(im));
 
             using (var s = File.Open($"gameboy-test-data/cpu_tests/v1/cb_{opcode:x2}.json", FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -177,8 +177,7 @@ namespace SharpBoy.Core.Tests
             cpu.Registers.L = Convert.ToByte(data.cpu.l, 16);
             cpu.Registers.PC = Convert.ToUInt16(data.cpu.pc, 16);
             cpu.Registers.SP = Convert.ToUInt16(data.cpu.sp, 16);
-            cpu.Halted = false;
-            cpu.Stopped = false;
+            cpu.State = CpuState.Running;
 
             foreach (var addressValue in data.ram)
             {

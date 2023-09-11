@@ -36,6 +36,8 @@ namespace SharpBoy.Core.Memory
                 <= 0xff07 => gameboy.Timer.ReadRegister(address),
                 <= 0xff0e => ioRegisters[address], // handle I/O registers here
                 <= 0xff0f => (byte)gameboy.InterruptManager.IF,
+                <= 0xff3f => ioRegisters[address], // handle I/O registers here
+                <= 0xff4b => gameboy.Ppu.ReadRegister(address),
                 <= 0xff7f => ioRegisters[address], // handle I/O registers here
                 <= 0xfffe => hram[(byte)(address & 0x7f)],
                 <= 0xffff => (byte)gameboy.InterruptManager.IE
@@ -46,7 +48,7 @@ namespace SharpBoy.Core.Memory
         {
             var low = Read8Bit(address);
             var high = Read8Bit((ushort)(address + 1));
-            return Utils.Get16BitValue(high, low);
+            return BitUtils.Get16BitValue(high, low);
         }
 
         public void Write8Bit(ushort address, byte value)
@@ -94,6 +96,13 @@ namespace SharpBoy.Core.Memory
                 case <= 0xff0f:
                     gameboy.InterruptManager.IF = (InterruptFlag)value;
                     break;
+                case <= 0xff3f:
+                    // handle I/O registers here
+                    ioRegisters[address] = value;
+                    break;
+                case <= 0xff4b:
+                    gameboy.Ppu.WriteRegister(address, value);
+                    break;
                 case <= 0xff7f:
                     // handle I/O registers here
                     ioRegisters[address] = value;
@@ -109,8 +118,8 @@ namespace SharpBoy.Core.Memory
 
         public void Write16Bit(ushort address, ushort value)
         {
-            Write8Bit(address, Utils.GetLowByte(value));
-            Write8Bit((ushort)(address + 1), Utils.GetHighByte(value));
+            Write8Bit(address, BitUtils.GetLowByte(value));
+            Write8Bit((ushort)(address + 1), BitUtils.GetHighByte(value));
         }
     }
 }
