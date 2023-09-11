@@ -28,8 +28,8 @@ namespace SharpBoy.Core.Processor
 
         public void Update(int cycles)
         {
-            HandleDivider(cycles);
-            HandleTimer(cycles);
+            UpdateDivider(cycles);
+            UpdateTimer(cycles);
         }
 
         public byte ReadRegister(ushort address)
@@ -56,7 +56,7 @@ namespace SharpBoy.Core.Processor
             }           
         }
 
-        private void HandleDivider(int cycles)
+        private void UpdateDivider(int cycles)
         {
             divCycles += cycles;
             while (divCycles >= DivClock)
@@ -73,7 +73,7 @@ namespace SharpBoy.Core.Processor
             }
         }
 
-        private void HandleTimer(int cycles)
+        private void UpdateTimer(int cycles)
         {
             if (isTimerEnabled)
             {
@@ -98,8 +98,8 @@ namespace SharpBoy.Core.Processor
 
         private int GetCurrentTacClock()
         {
-            var bit = TAC & 0x3;
-            return bit switch
+            var val = TAC & 0x3;
+            return val switch
             {
                 0b00 => 1024, // 00: CPU Clock / 1024 (DMG, SGB2, CGB Single Speed Mode:   4096 Hz, SGB1:   ~4194 Hz, CGB Double Speed Mode:   8192 Hz)
                 0b01 => 16,   // 01: CPU Clock / 16   (DMG, SGB2, CGB Single Speed Mode: 262144 Hz, SGB1: ~268400 Hz, CGB Double Speed Mode: 524288 Hz)

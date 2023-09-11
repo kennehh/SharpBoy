@@ -52,8 +52,6 @@ namespace SharpBoy.Core
                 while (totalCycles < ExpectedCpuCyclesPerUpdate)
                 {
                     var cycles = Cpu.Step();
-                    //Timer.Step(cycles);
-                    //InterruptManager.Step();
                     totalCycles += cycles;
                 }
 

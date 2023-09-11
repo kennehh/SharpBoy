@@ -113,10 +113,4 @@ namespace SharpBoy.Core.Memory
             Write8Bit((ushort)(address + 1), Utils.GetHighByte(value));
         }
     }
-
-    public enum MemoryMappedRegister : ushort
-    {
-        IF = 0xff0f,
-        IE = 0xffff
-    }
 }

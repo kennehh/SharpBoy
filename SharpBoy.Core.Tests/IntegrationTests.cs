@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace SharpBoy.Core.Tests
 {
@@ -19,15 +20,18 @@ namespace SharpBoy.Core.Tests
             .Concat(Directory.GetFiles("TestRoms/blargg/mem_timing-2/rom_singles"));
 
         [Test, TestCaseSource(nameof(CpuInstrRoms))]
-        public void BlargCpuInstrTest(string path) => TestRom(path);
+        public void BlarggCpuInstrTest(string path) => TestBlarggRom(path);
 
         [Test]
-        public void BlargInstrTimingTest() => TestRom("TestRoms/blargg/instr_timing/instr_timing.gb");
+        public void BlarggInstrTimingTest() => TestBlarggRom("TestRoms/blargg/instr_timing/instr_timing.gb");
 
         [Test, TestCaseSource(nameof(MemTimingRoms))]
-        public void BlargMemTimingTest(string path) => TestRom(path);
+        public void BlarggMemTimingTest(string path) => TestBlarggRom(path);
 
-        private void TestRom(string path)
+        [Test]
+        public void BlarggHaltBugTest() => TestBlarggRom("TestRoms/blargg/halt_bug.gb");
+
+        private void TestBlarggRom(string path)
         {
             var gb = new GameBoy();
             gb.LoadCartridge(path);
@@ -35,6 +39,9 @@ namespace SharpBoy.Core.Tests
             var lastPC = 0;
             gb.Cpu.Registers.PC = 0x101;
             var characters = new List<byte>();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             var isHalted = false;
             while (!(lastPC == gb.Cpu.Registers.PC && !isHalted))
@@ -49,8 +56,12 @@ namespace SharpBoy.Core.Tests
                     characters.Add(gb.Cpu.Mmu.Read8Bit(0xff01));
                     gb.Cpu.Mmu.Write8Bit(0xff02, 0x01);
                 }
+
+                Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(30), "Test took too long");
             }
-            
+
+            stopwatch.Reset();
+
             if (!characters.Any())
             {
                 // test message should be stored at 0xa004
