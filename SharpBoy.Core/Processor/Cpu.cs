@@ -394,7 +394,6 @@ namespace SharpBoy.Core.Processor
         private void stop()
         {
             State = CpuState.Stopped;
-            Registers.PC++;
         }
 
         private void di() => InterruptManager.IME = false;

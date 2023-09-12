@@ -21,7 +21,7 @@ namespace SharpBoy.Core
         }
 
         private bool isTimerEnabled = false;
-        private int currentTacClock = 1024;
+        private int currentTacClock = GetTacClock(0);
 
         private const int DivClock = 256;
         private readonly IInterruptManager interruptManager;
@@ -102,7 +102,7 @@ namespace SharpBoy.Core
             }
         }
 
-        private int GetTacClock(byte tac)
+        private static int GetTacClock(byte tac)
         {
             var val = tac & 0x3;
             return val switch
