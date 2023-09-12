@@ -6,7 +6,7 @@ namespace SharpBoy.Core.Processor
 {
     internal static class AluOperations
     {
-        public static byte cp(Registers registers, byte a, byte b)
+        public static byte cp(CpuRegisters registers, byte a, byte b)
         {
             var result = a - b;
             var halfCarryResult = (a & 0xf) - (b & 0xf);
@@ -17,7 +17,7 @@ namespace SharpBoy.Core.Processor
             return a;
         }
 
-        public static byte or(Registers registers, byte a, byte b)
+        public static byte or(CpuRegisters registers, byte a, byte b)
         {
             var result = a | b;
             var byteResult = (byte)result;
@@ -28,7 +28,7 @@ namespace SharpBoy.Core.Processor
             return byteResult;
         }
 
-        public static byte xor(Registers registers, byte a, byte b)
+        public static byte xor(CpuRegisters registers, byte a, byte b)
         {
             var result = a ^ b;
             var byteResult = (byte)result;
@@ -39,7 +39,7 @@ namespace SharpBoy.Core.Processor
             return byteResult;
         }
 
-        public static byte and(Registers registers, byte a, byte b)
+        public static byte and(CpuRegisters registers, byte a, byte b)
         {
             var result = a & b;
             var byteResult = (byte)result;
@@ -50,19 +50,19 @@ namespace SharpBoy.Core.Processor
             return byteResult;
         }
 
-        public static byte add(Registers registers, byte a, byte b) => add(registers, a, b, false, true);
+        public static byte add(CpuRegisters registers, byte a, byte b) => add(registers, a, b, false, true);
 
-        public static byte adc(Registers registers, byte a, byte b) => add(registers, a, b, true, true);
+        public static byte adc(CpuRegisters registers, byte a, byte b) => add(registers, a, b, true, true);
 
-        public static byte sub(Registers registers, byte a, byte b) => sub(registers, a, b, false, true);
+        public static byte sub(CpuRegisters registers, byte a, byte b) => sub(registers, a, b, false, true);
 
-        public static byte sbc(Registers registers, byte a, byte b) => sub(registers, a, b, true, true);
+        public static byte sbc(CpuRegisters registers, byte a, byte b) => sub(registers, a, b, true, true);
 
-        public static byte inc(Registers registers, byte a) => add(registers, a, 1, false, false);
+        public static byte inc(CpuRegisters registers, byte a) => add(registers, a, 1, false, false);
 
-        public static byte dec(Registers registers, byte a) => sub(registers, a, 1, false, false);
+        public static byte dec(CpuRegisters registers, byte a) => sub(registers, a, 1, false, false);
 
-        public static byte daa(Registers registers, byte a)
+        public static byte daa(CpuRegisters registers, byte a)
         {
             // Check the condition flags to determine the adjustment needed
             var carryFlag = registers.F.HasFlag(Flag.Carry);
@@ -101,21 +101,21 @@ namespace SharpBoy.Core.Processor
             return a;
         }
 
-        public static void ccf(Registers registers)
+        public static void ccf(CpuRegisters registers)
         {
             registers.F ^= Flag.Carry;
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
         }
 
-        public static void scf(Registers registers)
+        public static void scf(CpuRegisters registers)
         {
             registers.SetFlag(Flag.Carry, true);
             registers.SetFlag(Flag.Subtract, false);
             registers.SetFlag(Flag.HalfCarry, false);
         }
 
-        public static byte cpl(Registers registers, byte value)
+        public static byte cpl(CpuRegisters registers, byte value)
         {
             var result = ~value;
             registers.SetFlag(Flag.Subtract, true);
@@ -123,7 +123,7 @@ namespace SharpBoy.Core.Processor
             return (byte)result;
         }
 
-        public static byte swap(Registers registers, byte value)
+        public static byte swap(CpuRegisters registers, byte value)
         {
             var result = value >> 4 | value << 4;
             registers.SetFlag(Flag.Zero, result == 0);
@@ -133,7 +133,7 @@ namespace SharpBoy.Core.Processor
             return (byte)result;
         }
 
-        public static byte bit(Registers registers, byte value, byte bitPosition)
+        public static byte bit(CpuRegisters registers, byte value, byte bitPosition)
         {
             var result = BitUtils.BitValue(value, bitPosition);
             registers.SetFlag(Flag.Zero, result == 0);
@@ -146,7 +146,7 @@ namespace SharpBoy.Core.Processor
 
         public static byte res(byte value, byte bitPosition) => BitUtils.ClearBit(value, bitPosition);
 
-        public static byte sla(Registers registers, byte value)
+        public static byte sla(CpuRegisters registers, byte value)
         {
             var result = (byte)(value << 1);
             registers.SetFlag(Flag.Zero, result == 0);
@@ -156,7 +156,7 @@ namespace SharpBoy.Core.Processor
             return result;
         }
 
-        public static byte sra(Registers registers, byte value)
+        public static byte sra(CpuRegisters registers, byte value)
         {
             var result = (byte)(value >> 1 | value & 0x80);
             registers.SetFlag(Flag.Zero, result == 0);
@@ -166,7 +166,7 @@ namespace SharpBoy.Core.Processor
             return result;
         }
 
-        public static byte srl(Registers registers, byte value)
+        public static byte srl(CpuRegisters registers, byte value)
         {
             var result = (byte)(value >> 1 | 0 << 7);
             registers.SetFlag(Flag.Zero, result == 0);
@@ -176,19 +176,19 @@ namespace SharpBoy.Core.Processor
             return result;
         }
 
-        public static byte rl(Registers registers, byte value) => rl(registers, value, true);
-        public static byte rl_cb(Registers registers, byte value) => rl(registers, value, false);
+        public static byte rl(CpuRegisters registers, byte value) => rl(registers, value, true);
+        public static byte rl_cb(CpuRegisters registers, byte value) => rl(registers, value, false);
 
-        public static byte rlc(Registers registers, byte value) => rlc(registers, value, true);
-        public static byte rlc_cb(Registers registers, byte value) => rlc(registers, value, false);
+        public static byte rlc(CpuRegisters registers, byte value) => rlc(registers, value, true);
+        public static byte rlc_cb(CpuRegisters registers, byte value) => rlc(registers, value, false);
 
-        public static byte rr(Registers registers, byte value) => rr(registers, value, true);
-        public static byte rr_cb(Registers registers, byte value) => rr(registers, value, false);
+        public static byte rr(CpuRegisters registers, byte value) => rr(registers, value, true);
+        public static byte rr_cb(CpuRegisters registers, byte value) => rr(registers, value, false);
 
-        public static byte rrc(Registers registers, byte value) => rrc(registers, value, true);
-        public static byte rrc_cb(Registers registers, byte value) => rrc(registers, value, false);
+        public static byte rrc(CpuRegisters registers, byte value) => rrc(registers, value, true);
+        public static byte rrc_cb(CpuRegisters registers, byte value) => rrc(registers, value, false);
 
-        private static byte add(Registers registers, byte a, byte b, bool isCarry, bool setCarry)
+        private static byte add(CpuRegisters registers, byte a, byte b, bool isCarry, bool setCarry)
         {
             var cy = (registers.F.HasFlag(Flag.Carry) && isCarry).ToBit();
             var result = a + b + cy;
@@ -207,7 +207,7 @@ namespace SharpBoy.Core.Processor
             return byteResult;
         }
 
-        private static byte sub(Registers registers, byte a, byte b, bool isBorrow, bool setCarry)
+        private static byte sub(CpuRegisters registers, byte a, byte b, bool isBorrow, bool setCarry)
         {
             var cy = (registers.F.HasFlag(Flag.Carry) && isBorrow).ToBit();
             var result = a - b - cy;
@@ -226,7 +226,7 @@ namespace SharpBoy.Core.Processor
             return byteResult;
         }
 
-        private static byte rl(Registers registers, byte value, bool clearZero)
+        private static byte rl(CpuRegisters registers, byte value, bool clearZero)
         {
             var result = (byte)(value << 1 | registers.F.HasFlag(Flag.Carry).ToBit());
 
@@ -238,7 +238,7 @@ namespace SharpBoy.Core.Processor
             return result;
         }
 
-        private static byte rlc(Registers registers, byte value, bool clearZero)
+        private static byte rlc(CpuRegisters registers, byte value, bool clearZero)
         {
             var bit7 = BitUtils.BitValue(value, 7);
             var result = (byte)(value << 1 | bit7);
@@ -251,7 +251,7 @@ namespace SharpBoy.Core.Processor
             return result;
         }
 
-        internal static byte rr(Registers registers, byte value, bool clearZero)
+        internal static byte rr(CpuRegisters registers, byte value, bool clearZero)
         {
             var result = (byte)(value >> 1 | registers.F.HasFlag(Flag.Carry).ToBit() << 7);
 
@@ -263,7 +263,7 @@ namespace SharpBoy.Core.Processor
             return result;
         }
 
-        internal static byte rrc(Registers registers, byte value, bool clearZero)
+        internal static byte rrc(CpuRegisters registers, byte value, bool clearZero)
         {
             var bit0 = BitUtils.BitValue(value, 0);
             var result = (byte)(value >> 1 | bit0 << 7);

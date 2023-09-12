@@ -33,7 +33,7 @@ namespace SharpBoy.Core
             this.interruptManager = interruptManager;
         }
 
-        public void Update(int cycles)
+        public void Sync(int cycles)
         {
             UpdateDivider(cycles);
             UpdateTimer(cycles);

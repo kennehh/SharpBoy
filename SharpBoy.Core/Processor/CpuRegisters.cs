@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace SharpBoy.Core.Processor
 {
     [StructLayout(LayoutKind.Explicit)]
-    internal class Registers
+    internal class CpuRegisters
     {
         [FieldOffset(1)]
         public byte A;

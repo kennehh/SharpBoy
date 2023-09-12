@@ -19,7 +19,7 @@ namespace SharpBoy.Core
         public const double ExpectedCpuCyclesPerUpdate = ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond;
 
         internal Cpu Cpu { get; }
-        internal Ppu Ppu { get; }
+        internal IPpu Ppu { get; }
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
         internal ITimer Timer { get; }
@@ -30,8 +30,8 @@ namespace SharpBoy.Core
             Mmu = new Mmu(this);
             InterruptManager = new InterruptManager();
             Timer = new Timer(InterruptManager);
-            Cpu = new Cpu(Mmu, InterruptManager, Timer);
             Ppu = new Ppu(InterruptManager);
+            Cpu = new Cpu(Mmu, InterruptManager, Timer, Ppu);
         }
 
         public void LoadCartridge(string path)
@@ -43,7 +43,6 @@ namespace SharpBoy.Core
         public int Step()
         {
             var cycles = Cpu.Step();
-            Ppu.Sync(cycles);
             return cycles;
         }
     }

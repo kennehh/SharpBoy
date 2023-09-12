@@ -21,11 +21,11 @@ namespace SharpBoy.Core.Tests
             {
                 RunAluTests(opType, (r, a, b) =>
                 {
-                    method.Invoke(null, new[] { r });
+                    method.Invoke(null, new[] { (object)r });
                     return a;
                 });
             }
-            else if (parameters[0].ParameterType != typeof(Registers))
+            else if (parameters[0].ParameterType != typeof(CpuRegisters))
             {
                 RunAluTests(opType, (r, a, b) => (byte)method.Invoke(null, new object[] { a, b }));
             }
@@ -39,10 +39,10 @@ namespace SharpBoy.Core.Tests
             }
         }
 
-        private void RunAluTests(string opType, Func<Registers, byte, byte, byte> method)
+        private void RunAluTests(string opType, Func<CpuRegisters, byte, byte, byte> method)
         {
             var serializer = new JsonSerializer();
-            var registers = new Registers();
+            var registers = new CpuRegisters();
 
             using (var s = File.Open(Path.Combine(DirectoryPath, $"{opType}.json"), FileMode.Open))
             using (var sr = new StreamReader(s))

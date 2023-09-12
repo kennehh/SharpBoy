@@ -14,5 +14,6 @@ namespace SharpBoy.Core.Video
         void WriteVram(ushort address, byte value);
         void WriteOam(ushort address, byte value);
         void WriteRegister(ushort address, byte value);
+        void Sync(int cycles);
     }
 }

@@ -2,6 +2,7 @@
 using NUnit.Framework.Internal;
 using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
+using SharpBoy.Core.Video;
 
 namespace SharpBoy.Core.Tests
 {
@@ -16,7 +17,7 @@ namespace SharpBoy.Core.Tests
         {
             var serializer = new JsonSerializer();
             var im = new InterruptManager();
-            var cpu = new Cpu(new MmuMock(), im, new Timer(im));
+            var cpu = new Cpu(new MmuMock(), im, new Timer(im), new Ppu(im));
 
             using (var s = File.Open(Path.Combine(DirectoryPath, $"{opcode}.json"), FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -55,7 +56,7 @@ namespace SharpBoy.Core.Tests
             {
                 var address = addressValue[0];
                 var value = addressValue[1];
-                cpu.Mmu.Write8Bit(address, (byte)value);
+                cpu.Mmu.WriteValue(address, (byte)value);
             }
         }
 
@@ -79,7 +80,7 @@ namespace SharpBoy.Core.Tests
             {
                 var address = addressValue[0];
                 var expected = addressValue[1];
-                var actual = cpu.Mmu.Read8Bit(address);
+                var actual = cpu.Mmu.ReadValue(address);
                 Assert.That(actual, Is.EqualTo(expected), $"Value at memory address {address:x4} is incorrect: {test.name}");
             }
 

@@ -16,7 +16,6 @@ namespace SharpBoy.Core.Processor
         public InterruptFlag IF { get; set; }
         public bool IME { get; set; }
 
-
         private readonly static Interrupt[] interrupts = Enum
             .GetValues(typeof(InterruptFlag))
             .Cast<InterruptFlag>()

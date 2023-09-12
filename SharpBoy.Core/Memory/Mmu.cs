@@ -20,7 +20,7 @@ namespace SharpBoy.Core.Memory
             this.gameboy = gameboy;
         }
 
-        public byte Read8Bit(ushort address)
+        public byte ReadValue(ushort address)
         {
             return address switch
             {
@@ -44,14 +44,7 @@ namespace SharpBoy.Core.Memory
             };
         }
 
-        public ushort Read16Bit(ushort address)
-        {
-            var low = Read8Bit(address);
-            var high = Read8Bit((ushort)(address + 1));
-            return BitUtils.Get16BitValue(high, low);
-        }
-
-        public void Write8Bit(ushort address, byte value)
+        public void WriteValue(ushort address, byte value)
         {
             switch (address)
             {
@@ -114,12 +107,6 @@ namespace SharpBoy.Core.Memory
                     gameboy.InterruptManager.IE = (InterruptFlag)value;
                     break;
             }
-        }
-
-        public void Write16Bit(ushort address, ushort value)
-        {
-            Write8Bit(address, BitUtils.GetLowByte(value));
-            Write8Bit((ushort)(address + 1), BitUtils.GetHighByte(value));
         }
     }
 }

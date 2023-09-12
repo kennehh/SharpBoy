@@ -2,7 +2,7 @@
 {
     internal interface ITimer
     {
-        void Update(int cycles);
+        void Sync(int cycles);
         byte ReadRegister(ushort address);
         void WriteRegister(ushort address, byte value);
     }

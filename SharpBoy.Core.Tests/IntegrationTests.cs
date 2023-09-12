@@ -51,10 +51,10 @@ namespace SharpBoy.Core.Tests
 
                 gb.Step();
 
-                if (gb.Cpu.Mmu.Read8Bit(0xff02) == 0x81)
+                if (gb.Cpu.Mmu.ReadValue(0xff02) == 0x81)
                 {
-                    characters.Add(gb.Cpu.Mmu.Read8Bit(0xff01));
-                    gb.Cpu.Mmu.Write8Bit(0xff02, 0x01);
+                    characters.Add(gb.Cpu.Mmu.ReadValue(0xff01));
+                    gb.Cpu.Mmu.WriteValue(0xff02, 0x01);
                 }
 
                 //Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(30), "Test took too long");
@@ -65,14 +65,14 @@ namespace SharpBoy.Core.Tests
             if (!characters.Any())
             {
                 // test message should be stored at 0xa004
-                Assert.That(gb.Mmu.Read8Bit(0xa001), Is.EqualTo(0xde));
-                Assert.That(gb.Mmu.Read8Bit(0xa002), Is.EqualTo(0xb0));
-                Assert.That(gb.Mmu.Read8Bit(0xa003), Is.EqualTo(0x61));
+                Assert.That(gb.Mmu.ReadValue(0xa001), Is.EqualTo(0xde));
+                Assert.That(gb.Mmu.ReadValue(0xa002), Is.EqualTo(0xb0));
+                Assert.That(gb.Mmu.ReadValue(0xa003), Is.EqualTo(0x61));
 
                 ushort address = 0xa004;
                 while (true)
                 {
-                    var character = gb.Mmu.Read8Bit(address++);
+                    var character = gb.Mmu.ReadValue(address++);
                     if (character != 0)
                     {
                         characters.Add(character);

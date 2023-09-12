@@ -17,17 +17,19 @@ namespace SharpBoy.Core.Processor
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
         internal ITimer Timer { get; }
-        internal Registers Registers { get; }
+        internal IPpu Ppu { get; }
+        internal CpuRegisters Registers { get; }
 
         private int cycles = 0;
         private bool causeHaltBug = false;
 
-        public Cpu(IMmu mmu, IInterruptManager interruptManager, ITimer timer)
+        public Cpu(IMmu mmu, IInterruptManager interruptManager, ITimer timer, IPpu ppu)
         {
             Mmu = mmu;
             InterruptManager = interruptManager;
             Timer = timer;
-            Registers = new Registers();
+            Ppu = ppu;
+            Registers = new CpuRegisters();
         }
 
         public int Step()
@@ -42,7 +44,7 @@ namespace SharpBoy.Core.Processor
             }
             else
             {
-                IncrementCycles(4);
+                CycleTick();
             }
 
             HandleInterrupts();
@@ -54,11 +56,8 @@ namespace SharpBoy.Core.Processor
         {
             if (InterruptManager.AnyInterruptRequested)
             {
-                if (State == CpuState.Halted)
-                {
-                    State = CpuState.Running;
-                    //IncrementCycles(4);
-                }
+                State = CpuState.Running;
+                CycleTick();
 
                 if (InterruptManager.IME)
                 {
@@ -68,17 +67,18 @@ namespace SharpBoy.Core.Processor
                         InterruptManager.IME = false;
                         InterruptManager.ClearInterrupt(interrupt.Flag);
 
-                        IncrementCycles(8);
+                        CycleTick();
                         rst(interrupt.Address);
                     }
                 }
             }
         }
 
-        private void IncrementCycles(int cycles)
+        private void CycleTick()
         {
-            Timer.Update(cycles);
-            this.cycles += cycles;
+            cycles += 4;
+            Timer.Sync(4);
+            Ppu.Sync(4);
         }
 
         private void ExecuteInstruction(byte opcode)
@@ -274,40 +274,35 @@ namespace SharpBoy.Core.Processor
 
         private ushort ReadImmediate16Bit()
         {
-            var val = Read16BitValueFromMemory(Registers.PC);
-            Registers.PC += 2;
-            if (causeHaltBug)
-            {
-                Registers.PC -= 1;
-                causeHaltBug = false;
-            }
-            return val;
+            var low = ReadImmediate8Bit();
+            var high = ReadImmediate8Bit();
+            return BitUtils.Get16BitValue(high, low);
         }
 
         private byte Read8BitValueFromMemory(ushort address)
         {
-            var val = Mmu.Read8Bit(address);
-            IncrementCycles(4);
+            var val = Mmu.ReadValue(address);
+            CycleTick();
             return val;
         }
 
         private ushort Read16BitValueFromMemory(ushort address)
         {
-            var val = Mmu.Read16Bit(address);
-            IncrementCycles(8);
-            return val;
+            var low = Read8BitValueFromMemory(address);
+            var high = Read8BitValueFromMemory((ushort)(address + 1));
+            return BitUtils.Get16BitValue(high, low);
         }
 
         private void Write8BitValueToMemory(ushort address, byte value)
         {
-            Mmu.Write8Bit(address, value);
-            IncrementCycles(4);
+            Mmu.WriteValue(address, value);
+            CycleTick();
         }
 
         private void Write16BitValueToMemory(ushort address, ushort value)
         {
-            Mmu.Write16Bit(address, value);
-            IncrementCycles(8);
+            Write8BitValueToMemory(address, BitUtils.GetLowByte(value));
+            Write8BitValueToMemory((ushort)(address + 1), BitUtils.GetHighByte(value));
         }
 
         private byte ReadValue(Operand8Bit operand)
@@ -353,7 +348,7 @@ namespace SharpBoy.Core.Processor
             };
         }
 
-        private void ReadWriteValue(Operand8Bit operand, Func<Registers, byte, byte> func) => WriteValue(operand, func(Registers, ReadValue(operand)));
+        private void ReadWriteValue(Operand8Bit operand, Func<CpuRegisters, byte, byte> func) => WriteValue(operand, func(Registers, ReadValue(operand)));
 
         private void ReadWriteValue(Operand8Bit operand, byte value2, Func<byte, byte, byte> func) => WriteValue(operand, func(ReadValue(operand), value2));
 
@@ -417,13 +412,13 @@ namespace SharpBoy.Core.Processor
         private void inc_16(Operand16Bit operand)
         {
             WriteValue(operand, (ushort)(ReadValue(operand) + 1));
-            IncrementCycles(4);
+            CycleTick();
         }
 
         private void dec_16(Operand16Bit operand)
         {
             WriteValue(operand, (ushort)(ReadValue(operand) - 1));
-            IncrementCycles(4);
+            CycleTick();
         }
 
         private void inc_8(Operand8Bit operand) => ReadWriteValue(operand, AluOperations.inc);
@@ -434,7 +429,7 @@ namespace SharpBoy.Core.Processor
         private void ld_sp_hl()
         {
             ld_16_16(Operand16Bit.SP, Operand16Bit.HL);
-            IncrementCycles(4);
+            CycleTick();
         }
 
         private void ld_hl_a(int increment)
@@ -452,7 +447,6 @@ namespace SharpBoy.Core.Processor
         private void ld_hl_spi8()
         {
             Registers.HL = sp_i8();
-            IncrementCycles(4);
         }
 
         private void rla() => Registers.A = AluOperations.rl(Registers, Registers.A);
@@ -486,12 +480,12 @@ namespace SharpBoy.Core.Processor
             Registers.SetFlag(Flag.Carry, result > 0xffff);
 
             Registers.HL = (ushort)result;
-            IncrementCycles(4);
+            CycleTick();
         }
         private void add_sp_i8()
         {
             Registers.SP = sp_i8();
-            IncrementCycles(8);
+            CycleTick();
         }
 
         private ushort sp_i8()
@@ -508,6 +502,8 @@ namespace SharpBoy.Core.Processor
             Registers.SetFlag(Flag.Subtract, false);
             Registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xf);
             Registers.SetFlag(Flag.Carry, carryResult > 0xff);
+
+            CycleTick();
 
             return (ushort)result;
         }
@@ -530,7 +526,7 @@ namespace SharpBoy.Core.Processor
         {
             var increment = (sbyte)ReadImmediate8Bit();
             Registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + increment);
-            IncrementCycles(4);
+            CycleTick();
             BranchTaken = true;
         }
 
@@ -541,14 +537,14 @@ namespace SharpBoy.Core.Processor
             {
                 Registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + val);
                 BranchTaken = true;
-                IncrementCycles(4);
+                CycleTick();
             }
         }
 
         private void jp_i16()
         {
             Registers.PC = ReadImmediate16Bit();
-            IncrementCycles(4);
+            CycleTick();
         }
 
         private void jp_hl() => Registers.PC = Registers.HL;
@@ -559,7 +555,7 @@ namespace SharpBoy.Core.Processor
             if (Registers.F.HasFlag(flag) == isSet)
             {
                 Registers.PC = pc;
-                IncrementCycles(4);
+                CycleTick();
                 BranchTaken = true;
             }
         }
@@ -586,16 +582,16 @@ namespace SharpBoy.Core.Processor
         private void ret()
         {
             Registers.PC = pop();
-            IncrementCycles(4);
+            CycleTick();
         }
 
         private void ret(Flag flag, bool isSet)
         {
-            IncrementCycles(4);
+            CycleTick();
             if (Registers.F.HasFlag(flag) == isSet)
             {
                 Registers.PC = pop();
-                IncrementCycles(4);
+                CycleTick();
                 BranchTaken = true;
             }
         }
@@ -611,7 +607,7 @@ namespace SharpBoy.Core.Processor
         {
             Registers.SP -= 2;
             Write16BitValueToMemory(Registers.SP, value);
-            IncrementCycles(4);
+            CycleTick();
         }
 
         private void pop(Operand16Bit operand) => WriteValue(operand, pop());
