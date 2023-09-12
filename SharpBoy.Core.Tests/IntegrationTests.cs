@@ -28,7 +28,7 @@ namespace SharpBoy.Core.Tests
         [Test, TestCaseSource(nameof(MemTimingRoms))]
         public void BlarggMemTimingTest(string path) => TestBlarggRom(path);
 
-        //[Test]
+        [Test]
         public void BlarggHaltBugTest() => TestBlarggRom("TestRoms/blargg/halt_bug.gb");
 
         private void TestBlarggRom(string path)
@@ -45,11 +45,11 @@ namespace SharpBoy.Core.Tests
 
             var isHalted = false;
             while (!(lastPC == gb.Cpu.Registers.PC && !isHalted))
-             {
+            {
                 isHalted = gb.Cpu.State == CpuState.Halted;
                 lastPC = gb.Cpu.Registers.PC;
 
-                gb.Cpu.Step();
+                gb.Step();
 
                 if (gb.Cpu.Mmu.Read8Bit(0xff02) == 0x81)
                 {

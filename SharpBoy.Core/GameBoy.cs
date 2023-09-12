@@ -12,6 +12,12 @@ namespace SharpBoy.Core
     {
         public bool PowerOn { get; set; }
 
+        public const double RefreshRateHz = 59.7275;
+        public const int CpuSpeedHz = 4194304;
+        public const double CpuCyclesPerMillisecond = CpuSpeedHz / 1000;
+        public const double ExpectedMillisecondsPerUpdate = 1000 / RefreshRateHz;
+        public const double ExpectedCpuCyclesPerUpdate = ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond;
+
         internal Cpu Cpu { get; }
         internal Ppu Ppu { get; }
         internal IMmu Mmu { get; }
@@ -19,21 +25,13 @@ namespace SharpBoy.Core
         internal ITimer Timer { get; }
         internal Cartridge Cartridge { get; private set; }
 
-        private const double RefreshRateHz = 59.7275;
-        private const int CpuSpeedHz = 4194304;
-        private const int CpuCyclesPerMillisecond = CpuSpeedHz / 1000;
-        private const int ExpectedMillisecondsPerUpdate = (int)(1000 / RefreshRateHz);
-        private const int ExpectedCpuCyclesPerUpdate = ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond;
-
-        private readonly Stopwatch stopwatch = new Stopwatch();
-
         public GameBoy()
         {
             Mmu = new Mmu(this);
             InterruptManager = new InterruptManager();
             Timer = new Timer(InterruptManager);
             Cpu = new Cpu(Mmu, InterruptManager, Timer);
-            Ppu = new Ppu();
+            Ppu = new Ppu(InterruptManager);
         }
 
         public void LoadCartridge(string path)
@@ -42,29 +40,11 @@ namespace SharpBoy.Core
             Cartridge = new Cartridge(rom);
         }
 
-        public void Run()
+        public int Step()
         {
-            var totalCycles = 0;
-            while (PowerOn)
-            {
-                stopwatch.Start();
-
-                while (totalCycles < ExpectedCpuCyclesPerUpdate)
-                {
-                    var cycles = Cpu.Step();
-                    totalCycles += cycles;
-                }
-
-                var timeElapsed = stopwatch.ElapsedMilliseconds;
-                if (totalCycles < ExpectedMillisecondsPerUpdate)
-                {
-                    var sleep = ExpectedMillisecondsPerUpdate - timeElapsed;
-                    Thread.Sleep((int)sleep);
-                }
-
-                totalCycles -= ExpectedCpuCyclesPerUpdate;
-                stopwatch.Reset();
-            }
+            var cycles = Cpu.Step();
+            Ppu.Sync(cycles);
+            return cycles;
         }
     }
 }

@@ -2,9 +2,10 @@
 {
     internal static class BitUtils
     {
-        public static byte SetBit(byte x, int n, bool value) => value ? SetBit(x, n) : ClearBit(x, n);
+        public static byte SetBits(byte value, byte newValue, byte mask) => (byte)((value & ~mask) | (newValue & mask));
         public static byte SetBit(byte x, int n) => (byte)(x | (1 << n));
         public static byte ClearBit(byte x, int n) => (byte)(x & ~(1 << n));
+        public static byte ToggleBit(byte x, int n, bool value) => value ? SetBit(x, n) : ClearBit(x, n);
 
         public static bool IsBitSet(byte x, int n) => BitValue(x, n) == 1;
         public static int BitValue(byte x, int n) => (x >>> n) & 1;

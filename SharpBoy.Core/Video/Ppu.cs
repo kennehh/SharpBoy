@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpBoy.Core.Processor;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -9,11 +10,28 @@ namespace SharpBoy.Core.Video
 
     internal class Ppu : IPpu
     {
+        protected byte Stat
+        {
+            get => (byte)((byte)statInterruptSource | (byte)currentStatus | (lyEqualsLyc.ToBit() << 2));
+            private set
+            {
+                statInterruptSource = (StatInterruptSourceFlag)(value & 0b01111000);
+                lyEqualsLyc = BitUtils.IsBitSet(value, 2);
+                currentStatus = (PpuStatus)(value & 0b00000011);
+            }
+        }
+
+        private StatInterruptSourceFlag statInterruptSource = StatInterruptSourceFlag.None;
+        private bool lyEqualsLyc = false;
+        private PpuStatus currentStatus = PpuStatus.HorizontalBlank;
+
         private byte[] vram = new byte[0x2000];
         private byte[] oam = new byte[0xa0];
 
+        private byte[] frameBuffer = new byte[160 * 144];
+
         private byte lcdc = 0;
-        private byte ly = 0x90;
+        private byte ly = 0;
         private byte lyc = 0;
         private byte stat = 0;
 
@@ -31,14 +49,95 @@ namespace SharpBoy.Core.Video
         private byte dma = 0;
 
 
-        public Ppu()
+        private int cycles;
+        private readonly IInterruptManager interruptManager;
+
+        public Ppu(IInterruptManager interruptManager)
         {
+            this.interruptManager = interruptManager;
         }
 
-        public int Step(int cpuCyles)
+        public void Sync(int cpuCyles)
         {
-            var cycles = 0;
-            return cycles;
+            var previousStatus = currentStatus;
+            cycles += cpuCyles;            
+
+            if (ly <= 143)
+            {
+                switch (cycles)
+                {
+                    case < 80:
+                        currentStatus = PpuStatus.SearchingOam;                        
+                        break;
+                    case < 252:
+                        // could take from 172 to 289 cycles, defaulting to 172 for now
+                        currentStatus = PpuStatus.Drawing;
+                        break;
+                    case < 456:
+                        // could take from 87 to 204 cycles, defaulting to 204 for now
+                        currentStatus = PpuStatus.HorizontalBlank;
+                        break;
+                    default:
+                        ly++;
+                        cycles -= 456;
+                        break;
+                }
+            }
+            else
+            {
+                currentStatus = PpuStatus.VerticalBlank;
+                if (currentStatus != previousStatus)
+                {
+                    interruptManager.RequestInterrupt(InterruptFlag.VBlank);
+                }
+
+                if (cycles >= 456)
+                {
+                    if (ly >= 153)
+                    {
+                        ly = 0;
+                    }
+                    else
+                    {
+                        ly++;
+                    }
+                    cycles -= 456;
+                }
+            }
+
+            lyEqualsLyc = ly == lyc;
+            HandleStatInterrupt();
+        }
+
+        private void HandleStatInterrupt()
+        {
+            if (statInterruptSource != StatInterruptSourceFlag.None)
+            {
+                StatInterruptSourceFlag? interrupt = null;
+
+                if (currentStatus == PpuStatus.HorizontalBlank && statInterruptSource.HasFlag(StatInterruptSourceFlag.HorizontalBlank))
+                {
+                    interrupt = StatInterruptSourceFlag.HorizontalBlank;
+                }
+                else if (currentStatus == PpuStatus.VerticalBlank && statInterruptSource.HasFlag(StatInterruptSourceFlag.VerticalBlank))
+                {
+                    interrupt = StatInterruptSourceFlag.VerticalBlank;
+                }
+                else if (currentStatus == PpuStatus.SearchingOam && statInterruptSource.HasFlag(StatInterruptSourceFlag.SearchingOam))
+                {
+                    interrupt = StatInterruptSourceFlag.SearchingOam;
+                }
+                else if (lyEqualsLyc && statInterruptSource.HasFlag(StatInterruptSourceFlag.LyEqualsLyc))
+                {
+                    interrupt = StatInterruptSourceFlag.LyEqualsLyc;
+                }
+
+                if (interrupt.HasValue)
+                {
+                    statInterruptSource &= ~interrupt.Value;
+                    interruptManager.RequestInterrupt(InterruptFlag.LcdStat);
+                }
+            }
         }
 
         public byte ReadVram(ushort address)
@@ -86,7 +185,7 @@ namespace SharpBoy.Core.Video
             switch (address)
             {
                 case 0xff40: lcdc = value; break;
-                case 0xff41: stat = value; break;
+                case 0xff41: BitUtils.SetBits(stat, value, 0b01111000); break;
                 case 0xff42: scy = value; break;
                 case 0xff43: scx = value; break;
                 case 0xff44: break;
@@ -102,13 +201,21 @@ namespace SharpBoy.Core.Video
         }
     }
 
-    internal enum PpuMode
+    internal enum PpuStatus : byte
     {
         HorizontalBlank = 0,
         VerticalBlank = 1,
-        ScanlineOam = 2,
-        ScanlineVram = 3,
-        OneLine,
-        FullFrame
+        SearchingOam = 2,
+        Drawing = 3,
+    }
+
+    [Flags]
+    internal enum StatInterruptSourceFlag : byte
+    { 
+        None = 0,
+        HorizontalBlank = 1 << 3,
+        VerticalBlank = 1 << 4,
+        SearchingOam = 1 << 5,
+        LyEqualsLyc = 1 << 6
     }
 }

@@ -12,16 +12,15 @@ namespace SharpBoy.Core.Processor
     internal class Cpu
     {
         public CpuState State { get; set; }
-
-        internal bool BranchTaken { get; private set; }
+        internal bool BranchTaken { get; private set; }        
 
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
         internal ITimer Timer { get; }
         internal Registers Registers { get; }
 
-        private int currentCycles;
-        private bool haltBug = false;
+        private int cycles = 0;
+        private bool causeHaltBug = false;
 
         public Cpu(IMmu mmu, IInterruptManager interruptManager, ITimer timer)
         {
@@ -33,7 +32,7 @@ namespace SharpBoy.Core.Processor
 
         public int Step()
         {
-            currentCycles = 0;
+            cycles = 0;
             BranchTaken = false;
 
             if (State == CpuState.Running)
@@ -48,13 +47,7 @@ namespace SharpBoy.Core.Processor
 
             HandleInterrupts();
 
-            if (haltBug)
-            {
-                Registers.PC -= 1;
-                haltBug = false;
-            }
-
-            return currentCycles;
+            return cycles;
         }
 
         private void HandleInterrupts()
@@ -85,7 +78,7 @@ namespace SharpBoy.Core.Processor
         private void IncrementCycles(int cycles)
         {
             Timer.Update(cycles);
-            currentCycles += cycles;
+            this.cycles += cycles;
         }
 
         private void ExecuteInstruction(byte opcode)
@@ -271,6 +264,11 @@ namespace SharpBoy.Core.Processor
         {
             var val = Read8BitValueFromMemory(Registers.PC);
             Registers.PC += 1;
+            if (causeHaltBug)
+            {
+                Registers.PC -= 1;
+                causeHaltBug = false;
+            }
             return val;
         }
 
@@ -278,6 +276,11 @@ namespace SharpBoy.Core.Processor
         {
             var val = Read16BitValueFromMemory(Registers.PC);
             Registers.PC += 2;
+            if (causeHaltBug)
+            {
+                Registers.PC -= 1;
+                causeHaltBug = false;
+            }
             return val;
         }
 
@@ -387,8 +390,14 @@ namespace SharpBoy.Core.Processor
 
         private void halt()
         {
-            State = CpuState.Halted;
-            haltBug = !InterruptManager.IME && InterruptManager.AnyInterruptRequested;
+            if (!InterruptManager.IME && InterruptManager.AnyInterruptRequested)
+            {
+                causeHaltBug = true;
+            }
+            else
+            {
+                State = CpuState.Halted;
+            }
         }
 
         private void stop()
