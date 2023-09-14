@@ -10,7 +10,7 @@ namespace SharpBoy.Core.Video
     {
         public byte STAT
         {
-            get => (byte)((byte)StatInterruptSource | (byte)CurrentStatus | (LyCompareFlag.ToBit() << 2));
+            get => (byte)((byte)StatInterruptSource | (LyCompareFlag.ToBit() << 2) | (byte)CurrentStatus);
             set
             {
                 StatInterruptSource = (StatInterruptSourceFlag)(value & 0b01111000);
@@ -23,7 +23,8 @@ namespace SharpBoy.Core.Video
         public bool LyCompareFlag => LY == LYC;
         public PpuStatus CurrentStatus = PpuStatus.HorizontalBlank;
 
-        public byte LCDC = 0;
+        public LcdcFlags LCDC = 0;
+
         public byte LY = 0;
         public byte LYC = 0;
 
@@ -39,5 +40,36 @@ namespace SharpBoy.Core.Video
         public byte OBP1 = 0;
 
         public byte DMA = 0;
+    }
+
+    [Flags]
+    internal enum LcdcFlags
+    {
+        LcdEnable = 1 << 7,
+        WindowTileMapArea = 1 << 6,
+        WindowEnable = 1 << 5,
+        TileDataArea = 1 << 4,
+        BgTileMapArea = 1 << 3,
+        ObjSize = 1 << 2,
+        ObjEnable = 1 << 1,
+        BgWindowPriority = 1 << 0,
+    }
+
+    internal enum PpuStatus : byte
+    {
+        HorizontalBlank = 0,
+        VerticalBlank = 1,
+        SearchingOam = 2,
+        Drawing = 3,
+    }
+
+    [Flags]
+    internal enum StatInterruptSourceFlag : byte
+    {
+        None = 0,
+        HorizontalBlank = 1 << 3,
+        VerticalBlank = 1 << 4,
+        SearchingOam = 1 << 5,
+        LyEqualsLyc = 1 << 6
     }
 }

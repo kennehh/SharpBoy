@@ -21,7 +21,7 @@ namespace SharpBoy.Core.Processor
         internal CpuRegisters Registers { get; }
 
         private int cycles = 0;
-        private bool causeHaltBug = false;
+        private bool haltBugTriggered = false;
 
         public Cpu(IMmu mmu, IInterruptManager interruptManager, ITimer timer, IPpu ppu)
         {
@@ -234,7 +234,10 @@ namespace SharpBoy.Core.Processor
                 case 0xfe: cp_a(Operand8Bit.Immediate); break;
                 case 0xff: rst(0x38); break;
 
-                default: throw new ArgumentException($"Unknown opcode: 0x{opcode:x2}", nameof(opcode));
+                default:
+                    throw new ArgumentException($"Unknown opcode: 0x{opcode:x2}", nameof(opcode));
+                    //CycleTick();
+                    //break;
             }
 
         }
@@ -263,11 +266,13 @@ namespace SharpBoy.Core.Processor
         private byte ReadImmediate8Bit()
         {
             var val = Read8BitValueFromMemory(Registers.PC);
-            Registers.PC += 1;
-            if (causeHaltBug)
+            if (haltBugTriggered)
             {
-                Registers.PC -= 1;
-                causeHaltBug = false;
+                haltBugTriggered = false;
+            }
+            else
+            {
+                Registers.PC += 1;
             }
             return val;
         }
@@ -387,7 +392,7 @@ namespace SharpBoy.Core.Processor
         {
             if (!InterruptManager.IME && InterruptManager.AnyInterruptRequested)
             {
-                causeHaltBug = true;
+                haltBugTriggered = true;
             }
             else
             {

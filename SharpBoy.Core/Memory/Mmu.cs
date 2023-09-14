@@ -1,6 +1,7 @@
 ﻿using SharpBoy.Core.Processor;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,22 +10,30 @@ namespace SharpBoy.Core.Memory
     public class Mmu : IMmu
     {
         private GameBoy gameboy;
-        private byte[] bios = new byte[0x100];
+        private byte[] bootRom = new byte[0x100];
         private byte[] wram = new byte[0x2000];
         private byte[] hram = new byte[0x80];
 
         private byte[] ioRegisters = new byte[0x10000];
+
+        private bool inBootRom = false;
 
         public Mmu(GameBoy gameboy)
         {
             this.gameboy = gameboy;
         }
 
+        public void LoadBootRom(byte[] rom)
+        {
+            Buffer.BlockCopy(rom, 0, bootRom, 0, rom.Length);
+            inBootRom = true;
+        }
+
         public byte ReadValue(ushort address)
         {
             return address switch
             {
-                <= 0x7fff => gameboy.Cartridge.ReadRom(address),
+                <= 0x7fff => ReadRom(address),
                 <= 0x9fff => gameboy.Ppu.ReadVram((ushort)(address & 0x1fff)),
                 <= 0xbfff => gameboy.Cartridge.ReadERam((ushort)(address & 0x1fff)),
                 <= 0xcfff => wram[(ushort)(address & 0x1fff)],
@@ -49,7 +58,6 @@ namespace SharpBoy.Core.Memory
             switch (address)
             {
                 case <= 0x7fff:
-                    gameboy.Cartridge.WriteRom(address, value);
                     break;
                 case <= 0x9fff:
                     // In CGB mode, switchable bank 0/1
@@ -96,6 +104,9 @@ namespace SharpBoy.Core.Memory
                 case <= 0xff4b:
                     gameboy.Ppu.WriteRegister(address, value);
                     break;
+                case 0xff50:
+                    inBootRom = false;
+                    break;
                 case <= 0xff7f:
                     // handle I/O registers here
                     ioRegisters[address] = value;
@@ -107,6 +118,15 @@ namespace SharpBoy.Core.Memory
                     gameboy.InterruptManager.IE = (InterruptFlag)value;
                     break;
             }
+        }
+
+        private byte ReadRom(ushort address)
+        {
+            if (inBootRom && address < 0x100)
+            {
+                return bootRom[address];
+            }
+            return gameboy.Cartridge.ReadRom(address);
         }
     }
 }
