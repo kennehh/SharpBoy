@@ -7,7 +7,7 @@
 
         public Cartridge()
         {
-            Array.Fill<byte>(rom, 0);
+            Array.Fill<byte>(rom, 0xff);
         }
 
         public Cartridge(byte[] rom)

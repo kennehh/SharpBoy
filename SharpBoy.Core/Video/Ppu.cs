@@ -12,7 +12,7 @@ namespace SharpBoy.Core.Video
     internal class Ppu : IPpu
     {
         internal PpuRegisters Registers { get; }
-        public  ReadOnlySpan<PixelValue> FrameBuffer => frameBuffer;
+        public ReadOnlySpan<PixelValue> FrameBuffer => frameBuffer;
 
         private byte[] vram = new byte[0x2000];
         private byte[] oam = new byte[0xa0];
@@ -30,14 +30,14 @@ namespace SharpBoy.Core.Video
         public void Sync(int cpuCyles)
         {
             var previousStatus = Registers.CurrentStatus;
-            cycles += cpuCyles;            
+            cycles += cpuCyles;
 
             if (Registers.LY <= 143)
             {
                 switch (cycles)
                 {
                     case < 80:
-                        Registers.CurrentStatus = PpuStatus.SearchingOam;                        
+                        Registers.CurrentStatus = PpuStatus.SearchingOam;
                         break;
                     case < 252:
                         // could take from 172 to 289 cycles, defaulting to 172 for now
@@ -173,92 +173,54 @@ namespace SharpBoy.Core.Video
             }
         }
 
-        private void RenderScanline2()
-        {
-            var y = Registers.LY;
-            var tileMapAddress = Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea) ? 0x9c00 : 0x9800;
-
-            for (var x = 0; x < 160; x++)
-            {
-                var effectiveY = y + Registers.SCY;
-                var effectiveX = x + Registers.SCX;
-
-                var tileIdAddress = tileMapAddress + (effectiveY / 8 * 32) + (effectiveY / 8);
-                var tileId = vram[tileIdAddress & 0x1fff];
-
-                int tileDataAddress;
-                if(!Registers.LCDC.HasFlag(LcdcFlags.TileDataArea))
-                {
-                    var tileDataStartAddress = 0x8000;
-                    tileDataAddress = tileDataStartAddress + (tileId * 16) + (effectiveY % 8) * 2;
-                }
-                else
-                {
-                    var tileDataStartAddress = 0x8800;
-                    tileDataAddress = tileDataStartAddress + ((sbyte)tileId * 16) + (effectiveY % 8) * 2;
-                }
-
-                var tileValue = BitUtils.Get16BitValue(vram[tileDataAddress & 0x1fff + 1], vram[tileDataAddress & 0x1fff]);
-
-                tileDataAddress &= 0x1fff;
-                byte lowByte = vram[tileDataAddress];
-                byte highByte = vram[tileDataAddress + 1];
-
-                // Determine the color
-                int pixelBitIndex = 7 - (effectiveX % 8);
-                int colorNum = ((highByte >> pixelBitIndex) & 1) << 1 | ((lowByte >> pixelBitIndex) & 1);
-                var color = (PixelValue)colorNum;
-
-                // Draw pixel to the framebuffer
-                frameBuffer[y * 160 + x] = color;
-            }
-        }
-
         private void RenderScanline()
         {
-            var y = Registers.LY;
-
-            // Assume a 160x144 screen size (the Game Boy's screen size)
-            for (int x = 0; x < 160; x++)
+            if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
             {
-                // Calculate the effective coordinates, considering the scroll
-                int effectiveY = (y + Registers.SCY) % 256;
-                int effectiveX = (x + Registers.SCX) % 256;
+                return;
+            }
 
-                // Calculate tile row and column
-                int tileRow = effectiveY / 8;
-                int tileCol = effectiveX / 8;
+            var line = Registers.LY;
 
-                // Fetch tile ID from tile map
-                var tileMapStartAddress = Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea) ? 0x9C00 : 0x9800;
-                var tileAddress = (tileMapStartAddress + tileRow * 32 + tileCol) & 0x1fff;
-                byte tileID = vram[tileAddress + tileRow * 32 + tileCol];
+            int tileDataAddress = Registers.LCDC.HasFlag(LcdcFlags.TileDataArea) ? 0x8000 : 0x8800;
+            int bgMapAddress = Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea) ? 0x9C00 : 0x9800;
 
-                // Fetch pixel data from tile data
-                int tileDataAddress;
+            int yPos = line + Registers.SCY; // y position of the current scanline
+            int tileRow = (yPos / 8) * 32; // Each tile is 8x8 pixels, and each row has 32 tiles
 
-                if (!Registers.LCDC.HasFlag(LcdcFlags.TileDataArea))
+            for (int pixel = 0; pixel < 160; pixel++)
+            {
+                int xPos = pixel + Registers.SCX;
+                int tileCol = xPos / 8;
+
+                int tileNum;
+                int tileAddress = bgMapAddress + tileRow + tileCol;
+
+                if (tileDataAddress == 0x8000)
                 {
-                    var tileDataStartAddress = 0x8000;
-                    tileDataAddress = tileDataStartAddress + (tileID * 16) + (effectiveY % 8) * 2;
+                    tileNum = vram[tileAddress & 0x1fff];
                 }
                 else
                 {
-                    var tileDataStartAddress = 0x8800;
-                    tileDataAddress = tileDataStartAddress + ((sbyte)tileID * 16) + (effectiveY % 8) * 2;
+                    tileNum = (sbyte)vram[tileAddress & 0x1fff]; // signed
                 }
 
-                tileDataAddress &= 0x1fff;
-                byte lowByte = vram[tileDataAddress];
-                byte highByte = vram[tileDataAddress + 1];
+                int tileLocation = tileDataAddress + (tileNum * 16);
+                int lineOffset = (yPos % 8) * 2; // Each line in a tile takes up 2 bytes
 
-                // Determine the color
-                int pixelBitIndex = 7 - (effectiveX % 8);
-                int colorNum = ((highByte >> pixelBitIndex) & 1) << 1 | ((lowByte >> pixelBitIndex) & 1);
-                var color = (PixelValue)colorNum;
+                byte data1 = vram[(tileLocation + lineOffset) & 0x1fff];
+                byte data2 = vram[(tileLocation + lineOffset + 1) & 0x1fff];
 
-                // Draw pixel to the framebuffer
-                frameBuffer[y * 160 + x] = color;
+                // Find the correct pixel within the tile
+                int colorBitIndex = 7 - (xPos % 8);
+
+                // Combine data from two bytes to get the color index
+                int colorNum = ((data2 >> colorBitIndex) & 1) << 1;
+                colorNum |= (data1 >> colorBitIndex) & 1;
+
+
+                // Set pixel color in the screen buffer
+                frameBuffer[line * 144 + pixel] = (PixelValue)colorNum;
             }
         }
     }

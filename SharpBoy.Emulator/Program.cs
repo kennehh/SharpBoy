@@ -7,7 +7,7 @@ internal class Program
     private static void Main(string[] args)
     {
         var romPath = "C:\\Projects\\Tetris (World) (Rev A).gb";
-        var bootPath = "Z:\\games\\bios\\gb\\dmg0_rom.bin";
+        var bootPath = "Z:\\games\\bios\\gb\\gb_bios.bin";
         var gb = new GameBoy();
         gb.LoadBootRom(bootPath);
         gb.LoadCartridge(romPath);
