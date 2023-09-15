@@ -76,7 +76,7 @@ namespace SharpBoy.Core.Video
         {
             window.Render += deltaTime =>
             {
-                renderQueue.FrameReady.WaitOne();
+                renderQueue.WaitForNextFrame();
                 if (renderQueue.TryDequeue(out var fb))
                 {
                     Render(fb);
@@ -220,13 +220,10 @@ void main()
             gl.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        private unsafe void Render(byte[] frameBuffer)
+        private unsafe void Render(ReadOnlySpan<byte> frameBuffer)
         {
             gl.BindTexture(TextureTarget.Texture2D, texture);
-            fixed (byte* fb = frameBuffer)
-            {
-                gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, 160, 144, 0, PixelFormat.Rgba, PixelType.UnsignedByte, fb);
-            }
+            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, 160, 144, 0, PixelFormat.Rgba, PixelType.UnsignedByte, frameBuffer);
             gl.BindTexture(TextureTarget.Texture2D, 0);
 
             gl.Clear(ClearBufferMask.ColorBufferBit);

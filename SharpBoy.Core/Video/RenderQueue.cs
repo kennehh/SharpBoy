@@ -4,18 +4,26 @@ namespace SharpBoy.Core.Video
 {
     public class RenderQueue
     {
-        public AutoResetEvent FrameReady { get; } = new AutoResetEvent(false);
-        private ConcurrentQueue<byte[]> queue = new ConcurrentQueue<byte[]>();
+        private AutoResetEvent frameReady = new AutoResetEvent(false);
+        private ConcurrentQueue<ReadOnlyMemory<byte>> queue = new ConcurrentQueue<ReadOnlyMemory<byte>>();
 
         public void Enqueue(byte[] frame)
         {
             queue.Enqueue(frame);
-            FrameReady.Set();
+            frameReady.Set();
         }
 
-        public bool TryDequeue(out byte[] frame)
+        public bool TryDequeue(out ReadOnlySpan<byte> frameBuffer)
         {
-            return queue.TryDequeue(out frame);
+            if (queue.TryDequeue(out var fb))
+            {
+                frameBuffer = fb.Span;
+                return true;
+            }
+            frameBuffer = default;
+            return false;
         }
+
+        public void WaitForNextFrame() => frameReady.WaitOne();
     }
 }
