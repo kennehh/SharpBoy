@@ -59,7 +59,6 @@ namespace SharpBoy.Core.Video
                 var viewX = Convert.ToInt32((width - LcdWidth * ratio) / 2);
                 var viewY = Convert.ToInt32((height - LcdHeight * ratio) / 2);
 
-
                 gl.Viewport(viewX, viewY, viewWidth, viewHeight);
             };
         }
