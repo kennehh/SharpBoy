@@ -1,6 +1,7 @@
 ﻿using SharpBoy.Core.Processor;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -11,7 +12,6 @@ namespace SharpBoy.Core.Video
     internal class Ppu : IPpu
     {
         internal PpuRegisters Registers { get; }
-        public ReadOnlySpan<byte> FrameBuffer => frameBuffer;
 
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
@@ -22,11 +22,13 @@ namespace SharpBoy.Core.Video
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
+        private readonly RenderQueue renderQueue;
 
-        public Ppu(IInterruptManager interruptManager)
+        public Ppu(IInterruptManager interruptManager, RenderQueue renderQueue)
         {
             Registers = new PpuRegisters();
             this.interruptManager = interruptManager;
+            this.renderQueue = renderQueue;
         }
 
         public void Sync(int cpuCyles)
@@ -65,6 +67,7 @@ namespace SharpBoy.Core.Video
                 if (Registers.CurrentStatus != previousStatus)
                 {
                     interruptManager.RequestInterrupt(InterruptFlag.VBlank);
+                    renderQueue.Enqueue(frameBuffer);
                 }
 
                 if (cycles >= 456)

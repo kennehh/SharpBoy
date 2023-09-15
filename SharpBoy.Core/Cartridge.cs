@@ -20,11 +20,6 @@
             return rom[address];
         }
 
-        internal void WriteRom(ushort address, byte value)
-        {
-            rom[address] = value;
-        }
-
         public byte ReadERam(ushort address)
         {
             return eram[address];

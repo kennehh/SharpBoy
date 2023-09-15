@@ -8,6 +8,7 @@ using SharpBoy.Core.Video;
 
 namespace SharpBoy.Core
 {
+
     public class GameBoy
     {
         public bool PowerOn { get; set; }
@@ -26,14 +27,16 @@ namespace SharpBoy.Core
         private const double ExpectedMillisecondsPerUpdate = 1000 / RefreshRateHz;
         private const int ExpectedCpuCyclesPerUpdate = (int)(ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond);
 
+        private readonly RenderQueue renderQueue = new RenderQueue();
+
         public GameBoy()
         {
             Mmu = new Mmu(this);
             InterruptManager = new InterruptManager();
             Timer = new Timer(InterruptManager);
-            Ppu = new Ppu(InterruptManager);
+            Ppu = new Ppu(InterruptManager, renderQueue);
             Cpu = new Cpu(Mmu, InterruptManager, Timer, Ppu);
-            Renderer = new SilkRenderer();
+            Renderer = new SilkRenderer(renderQueue);
         }
 
         public void LoadBootRom(string path)
@@ -48,44 +51,34 @@ namespace SharpBoy.Core
             Cartridge = new Cartridge(rom);
         }
 
-        //public void Run()
-        //{
-        //    Renderer.OpenWindow();
-        //    var cycles = 0;
-        //    var stopwatch = Stopwatch.StartNew();
-
-        //    while (Renderer.IsWindowOpen())
-        //    {
-        //        stopwatch.Restart();
-        //        while (cycles < ExpectedCpuCyclesPerUpdate)
-        //        {
-        //            cycles += Step();
-        //        }
-        //        cycles -= ExpectedCpuCyclesPerUpdate;
-
-        //        Renderer.Render();
-
-        //        var elapsedMilliseconds = stopwatch.ElapsedTicks / 10000d;
-        //        if (elapsedMilliseconds < ExpectedMillisecondsPerUpdate)
-        //        {
-        //            var sleep = (int)(ExpectedMillisecondsPerUpdate - elapsedMilliseconds);
-        //            Thread.Sleep(sleep);
-        //        }
-        //    }
-        //}
-
         public void Run()
         {
+            Renderer.Initialise();
+
+            var emulationThread = new Thread(RunEmulator);
+            var renderThread = new Thread(Renderer.Run);
+
+            emulationThread.Start();
+            renderThread.Start();
+        }
+
+        internal int Step()
+        {
+            var cycles = Cpu.Step();
+            return cycles;
+        }
+
+        private void RunEmulator()
+        {
+            var stopwatch = Stopwatch.StartNew();
             var cyclesEmulated = 0L;
             var targetCyclesPerSecond = CpuSpeedHz;
+            var windowClosing = false;
 
-            Renderer.Initialise();
-            var stopwatch = Stopwatch.StartNew();
+            Renderer.OnClose += () => windowClosing = true;
 
-            Renderer.Run(() =>
+            while (!windowClosing)
             {
-                Renderer.Render(Ppu.FrameBuffer);
-
                 var elapsedTime = stopwatch.ElapsedMilliseconds;
                 var expectedCycles = targetCyclesPerSecond * elapsedTime / 1000;
                 var cyclesToEmulate = expectedCycles - cyclesEmulated;
@@ -102,13 +95,7 @@ namespace SharpBoy.Core
                 {
                     Thread.Sleep(1);
                 }
-            });
-        }
-
-        internal int Step()
-        {
-            var cycles = Cpu.Step();
-            return cycles;
+            }
         }
     }
 }

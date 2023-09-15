@@ -14,7 +14,7 @@ namespace SharpBoy.Core.Video
     {
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
-
+        private readonly RenderQueue renderQueue;
         private bool disposed = false;
 
         private IWindow window = null;
@@ -23,6 +23,13 @@ namespace SharpBoy.Core.Video
         private uint texture;
         private uint shaderProgram;
         private uint vao, vbo, ebo;
+
+        public event Action OnClose;
+
+        public SilkRenderer(RenderQueue renderQueue)
+        {
+            this.renderQueue = renderQueue;
+        }
 
         public void Initialise()
         {
@@ -61,29 +68,21 @@ namespace SharpBoy.Core.Video
 
                 gl.Viewport(viewX, viewY, viewWidth, viewHeight);
             };
+
+            window.Closing += () => OnClose?.Invoke();
         }
 
-        public void Run(Action onFrame)
+        public void Run()
         {
-            window.Update += deltaTime => onFrame();
+            window.Render += deltaTime =>
+            {
+                renderQueue.FrameReady.WaitOne();
+                if (renderQueue.TryDequeue(out var fb))
+                {
+                    Render(fb);
+                }
+            };
             window.Run();
-        }
-
-        public unsafe void Render(ReadOnlySpan<byte> frameBuffer)
-        {
-            gl.BindTexture(TextureTarget.Texture2D, texture);
-            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, 160, 144, 0, PixelFormat.Rgba, PixelType.UnsignedByte, frameBuffer);
-            gl.BindTexture(TextureTarget.Texture2D, 0);
-
-            gl.Clear(ClearBufferMask.ColorBufferBit);
-
-            gl.BindVertexArray(vao);
-            gl.UseProgram(shaderProgram);
-
-            gl.ActiveTexture(TextureUnit.Texture0);
-            gl.BindTexture(TextureTarget.Texture2D, texture);
-
-            gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
         }
 
         public void Dispose()
@@ -219,6 +218,26 @@ void main()
             gl.TextureParameter(texture, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
 
             gl.BindTexture(TextureTarget.Texture2D, 0);
+        }
+
+        private unsafe void Render(byte[] frameBuffer)
+        {
+            gl.BindTexture(TextureTarget.Texture2D, texture);
+            fixed (byte* fb = frameBuffer)
+            {
+                gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, 160, 144, 0, PixelFormat.Rgba, PixelType.UnsignedByte, fb);
+            }
+            gl.BindTexture(TextureTarget.Texture2D, 0);
+
+            gl.Clear(ClearBufferMask.ColorBufferBit);
+
+            gl.BindVertexArray(vao);
+            gl.UseProgram(shaderProgram);
+
+            gl.ActiveTexture(TextureUnit.Texture0);
+            gl.BindTexture(TextureTarget.Texture2D, texture);
+
+            gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
         }
     }
 }

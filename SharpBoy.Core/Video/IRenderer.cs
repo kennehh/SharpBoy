@@ -8,8 +8,8 @@ namespace SharpBoy.Core.Video
 {
     internal interface IRenderer
     {
+        event Action OnClose;
         void Initialise();
-        void Run(Action onFrame);
-        void Render(ReadOnlySpan<byte> frameBuffer);
+        void Run();
     }
 }
