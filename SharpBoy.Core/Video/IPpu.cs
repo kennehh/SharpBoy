@@ -8,7 +8,7 @@ namespace SharpBoy.Core.Video
 {
     internal interface IPpu
     {
-        ReadOnlySpan<PixelValue> FrameBuffer { get; }
+        ReadOnlySpan<byte> FrameBuffer { get; }
         byte ReadVram(ushort address);
         byte ReadOam(ushort address);
         byte ReadRegister(ushort address);

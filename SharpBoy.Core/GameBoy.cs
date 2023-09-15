@@ -33,7 +33,7 @@ namespace SharpBoy.Core
             Timer = new Timer(InterruptManager);
             Ppu = new Ppu(InterruptManager);
             Cpu = new Cpu(Mmu, InterruptManager, Timer, Ppu);
-            Renderer = new Renderer();
+            Renderer = new SilkRenderer();
         }
 
         public void LoadBootRom(string path)
@@ -79,10 +79,10 @@ namespace SharpBoy.Core
             var cyclesEmulated = 0L;
             var targetCyclesPerSecond = CpuSpeedHz;
 
-            Renderer.OpenWindow();
+            Renderer.Initialise();
             var stopwatch = Stopwatch.StartNew();
 
-            while (Renderer.IsWindowOpen())
+            Renderer.Run(() =>
             {
                 Renderer.Render(Ppu.FrameBuffer);
 
@@ -102,7 +102,7 @@ namespace SharpBoy.Core
                 {
                     Thread.Sleep(1);
                 }
-            }
+            });
         }
 
         internal int Step()

@@ -12,11 +12,14 @@ namespace SharpBoy.Core.Video
     internal class Ppu : IPpu
     {
         internal PpuRegisters Registers { get; }
-        public ReadOnlySpan<PixelValue> FrameBuffer => frameBuffer;
+        public ReadOnlySpan<byte> FrameBuffer => frameBuffer;
+
+        private const int LcdWidth = 160;
+        private const int LcdHeight = 144;
 
         private byte[] vram = new byte[0x2000];
         private byte[] oam = new byte[0xa0];
-        private PixelValue[] frameBuffer = new PixelValue[160 * 144];
+        private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 4];
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
@@ -188,7 +191,7 @@ namespace SharpBoy.Core.Video
             int yPos = line + Registers.SCY; // y position of the current scanline
             int tileRow = (yPos / 8) * 32; // Each tile is 8x8 pixels, and each row has 32 tiles
 
-            for (int pixel = 0; pixel < 160; pixel++)
+            for (int pixel = 0; pixel < LcdWidth; pixel++)
             {
                 int xPos = pixel + Registers.SCX;
                 int tileCol = xPos / 8;
@@ -220,9 +223,23 @@ namespace SharpBoy.Core.Video
 
 
                 // Set pixel color in the screen buffer
-                frameBuffer[line * 144 + pixel] = (PixelValue)colorNum;
+                var color = GetColor((PixelValue)colorNum);
+                var index = ((line * LcdWidth) + pixel) * 4;
+                frameBuffer[index] = color.Red;
+                frameBuffer[index + 1] = color.Green;
+                frameBuffer[index + 2] = color.Blue;
+                frameBuffer[index + 3] = color.Alpha;
             }
         }
+
+        private ColorRgba GetColor(PixelValue pixelValue) => pixelValue switch
+        {
+            PixelValue.Zero => new ColorRgba(15, 56, 15, 255),
+            PixelValue.One => new ColorRgba(139, 172, 15, 255),
+            PixelValue.Two => new ColorRgba(48, 98, 48, 255),
+            PixelValue.Three => new ColorRgba(155, 188, 15, 255),
+            _ => new ColorRgba(155, 188, 15, 255),
+        };
     }
 
     public enum PixelValue : byte
@@ -233,10 +250,19 @@ namespace SharpBoy.Core.Video
         Three = 1 << 3
     }
 
-    public struct ColorRgb
+    public struct ColorRgba
     {
         public byte Red;
         public byte Green;
         public byte Blue;
+        public byte Alpha;
+
+        public ColorRgba(byte red, byte green, byte blue, byte alpha)
+        {
+            Red = red;
+            Green = green;
+            Blue = blue;
+            Alpha = alpha;
+        }
     }
 }

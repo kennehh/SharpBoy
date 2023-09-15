@@ -8,9 +8,8 @@ namespace SharpBoy.Core.Video
 {
     internal interface IRenderer
     {
-        void OpenWindow();
-        void CloseWindow();
-        bool IsWindowOpen();
-        void Render(ReadOnlySpan<PixelValue> frameBuffer);
+        void Initialise();
+        void Run(Action onFrame);
+        void Render(ReadOnlySpan<byte> frameBuffer);
     }
 }
