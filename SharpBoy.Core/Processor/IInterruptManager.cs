@@ -31,12 +31,12 @@ namespace SharpBoy.Core.Processor
     internal class Interrupt
     {
         public InterruptFlag Flag { get; }
-        public ushort Address { get; }
+        public ushort Vector { get; }
 
-        public Interrupt(InterruptFlag flag, ushort address)
+        public Interrupt(InterruptFlag flag, ushort vector)
         {
             Flag = flag;
-            Address = address;
+            Vector = vector;
         }
     }
 }

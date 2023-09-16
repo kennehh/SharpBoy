@@ -4,7 +4,7 @@ using System.Net;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Text;
-using SharpBoy.Core.Video;
+using SharpBoy.Core.Graphics;
 using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Processor
@@ -12,7 +12,6 @@ namespace SharpBoy.Core.Processor
     internal class Cpu
     {
         public CpuState State { get; set; }
-        internal bool BranchTaken { get; private set; }        
 
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
@@ -35,7 +34,6 @@ namespace SharpBoy.Core.Processor
         public int Step()
         {
             cycles = 0;
-            BranchTaken = false;
 
             if (State == CpuState.Running)
             {
@@ -68,7 +66,7 @@ namespace SharpBoy.Core.Processor
                         InterruptManager.ClearInterrupt(interrupt.Flag);
 
                         CycleTick();
-                        rst(interrupt.Address);
+                        rst(interrupt.Vector);
                     }
                 }
             }
@@ -532,7 +530,6 @@ namespace SharpBoy.Core.Processor
             var increment = (sbyte)ReadImmediate8Bit();
             Registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + increment);
             CycleTick();
-            BranchTaken = true;
         }
 
         private void jr_i8(Flag flag, bool isSet)
@@ -541,7 +538,6 @@ namespace SharpBoy.Core.Processor
             if (Registers.F.HasFlag(flag) == isSet)
             {
                 Registers.PC = (ushort)(ReadValue(Operand16Bit.PC) + val);
-                BranchTaken = true;
                 CycleTick();
             }
         }
@@ -561,7 +557,6 @@ namespace SharpBoy.Core.Processor
             {
                 Registers.PC = pc;
                 CycleTick();
-                BranchTaken = true;
             }
         }
 
@@ -580,7 +575,6 @@ namespace SharpBoy.Core.Processor
             {
                 push(Registers.PC);
                 Registers.PC = pc;
-                BranchTaken = true;
             }
         }
 
@@ -597,7 +591,6 @@ namespace SharpBoy.Core.Processor
             {
                 Registers.PC = pop();
                 CycleTick();
-                BranchTaken = true;
             }
         }
 

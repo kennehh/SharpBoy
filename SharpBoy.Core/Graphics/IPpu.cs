@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.Video
+namespace SharpBoy.Core.Graphics
 {
     internal interface IPpu
     {

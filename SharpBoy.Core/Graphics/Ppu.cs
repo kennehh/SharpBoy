@@ -1,4 +1,5 @@
 ﻿using SharpBoy.Core.Processor;
+using SharpBoy.Core.Rendering;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace SharpBoy.Core.Video
+namespace SharpBoy.Core.Graphics
 {
 
     internal class Ppu : IPpu
@@ -15,10 +16,17 @@ namespace SharpBoy.Core.Video
 
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
+        private static readonly ColorRgb[] Colors =
+        {
+            new ColorRgb(154, 158, 63),
+            new ColorRgb(73, 107, 34),
+            new ColorRgb(14, 69, 11),
+            new ColorRgb(27, 42, 9)
+        };
 
         private byte[] vram = new byte[0x2000];
         private byte[] oam = new byte[0xa0];
-        private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 4];
+        private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 3];
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
@@ -220,51 +228,36 @@ namespace SharpBoy.Core.Video
                 int colorBitIndex = 7 - (xPos % 8);
 
                 // Combine data from two bytes to get the color index
-                int colorNum = ((data2 >> colorBitIndex) & 1) << 1;
-                colorNum |= (data1 >> colorBitIndex) & 1;
-
+                int colorIndex = ((data2 >> colorBitIndex) & 1) << 1;
+                colorIndex |= (data1 >> colorBitIndex) & 1;
 
                 // Set pixel color in the screen buffer
-                var color = GetColor((PixelValue)colorNum);
-                var index = ((line * LcdWidth) + pixel) * 4;
+                var color = GetColor(colorIndex);
+                var index = ((line * LcdWidth) + pixel) * 3;
                 frameBuffer[index] = color.Red;
                 frameBuffer[index + 1] = color.Green;
                 frameBuffer[index + 2] = color.Blue;
-                frameBuffer[index + 3] = color.Alpha;
             }
         }
 
-        private ColorRgba GetColor(PixelValue pixelValue) => pixelValue switch
+        private ColorRgb GetColor(int pixelIndex)
         {
-            PixelValue.Zero => new ColorRgba(15, 56, 15, 255),
-            PixelValue.One => new ColorRgba(139, 172, 15, 255),
-            PixelValue.Two => new ColorRgba(48, 98, 48, 255),
-            PixelValue.Three => new ColorRgba(155, 188, 15, 255),
-            _ => new ColorRgba(155, 188, 15, 255),
-        };
+            var colorValue = Registers.BGP >>> (pixelIndex * 2) & 3;
+            return Colors[colorValue];
+        }
     }
 
-    public enum PixelValue : byte
-    {
-        Zero = 1 << 0,
-        One = 1 << 1,
-        Two = 1 << 2,
-        Three = 1 << 3
-    }
-
-    public struct ColorRgba
+    public struct ColorRgb
     {
         public byte Red;
         public byte Green;
         public byte Blue;
-        public byte Alpha;
 
-        public ColorRgba(byte red, byte green, byte blue, byte alpha)
+        public ColorRgb(byte red, byte green, byte blue)
         {
             Red = red;
             Green = green;
             Blue = blue;
-            Alpha = alpha;
         }
     }
 }

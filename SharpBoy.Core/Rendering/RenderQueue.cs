@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace SharpBoy.Core.Video
+namespace SharpBoy.Core.Rendering
 {
     public class RenderQueue
     {
@@ -9,7 +9,10 @@ namespace SharpBoy.Core.Video
 
         public void Enqueue(byte[] frame)
         {
-            queue.Enqueue(frame);
+            if (queue.Count <= 0xff)
+            {
+                queue.Enqueue(frame);
+            }
             frameReady.Set();
         }
 

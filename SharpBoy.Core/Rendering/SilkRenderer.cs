@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
-namespace SharpBoy.Core.Video
+namespace SharpBoy.Core.Rendering
 {
     internal class SilkRenderer : IRenderer, IDisposable
     {
@@ -35,7 +35,7 @@ namespace SharpBoy.Core.Video
         {
             var options = WindowOptions.Default with
             {
-                Size = new Vector2D<int>(LcdWidth * 8, LcdHeight * 8), 
+                Size = new Vector2D<int>(LcdWidth * 4, LcdHeight * 4),
                 Title = "Game Boy Emulator"
             };
             window = Window.Create(options);
@@ -194,7 +194,7 @@ void main()
                 gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * sizeof(uint)), buf, BufferUsageARB.StaticDraw);
             }
 
-            const uint stride = (3 * sizeof(float)) + (2 * sizeof(float));
+            const uint stride = 3 * sizeof(float) + 2 * sizeof(float);
             // position attribute
             gl.EnableVertexAttribArray(0);
             gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, (void*)0);
@@ -223,7 +223,7 @@ void main()
         private unsafe void Render(ReadOnlySpan<byte> frameBuffer)
         {
             gl.BindTexture(TextureTarget.Texture2D, texture);
-            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, 160, 144, 0, PixelFormat.Rgba, PixelType.UnsignedByte, frameBuffer);
+            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, 160, 144, 0, PixelFormat.Rgb, PixelType.UnsignedByte, frameBuffer);
             gl.BindTexture(TextureTarget.Texture2D, 0);
 
             gl.Clear(ClearBufferMask.ColorBufferBit);

@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using SharpBoy.Core.Video;
+using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Rendering;
 
 namespace SharpBoy.Core
 {

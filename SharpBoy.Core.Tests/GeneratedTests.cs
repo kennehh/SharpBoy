@@ -2,7 +2,7 @@
 using NUnit.Framework.Internal;
 using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
-using SharpBoy.Core.Video;
+using SharpBoy.Core.Graphics;
 
 namespace SharpBoy.Core.Tests
 {
