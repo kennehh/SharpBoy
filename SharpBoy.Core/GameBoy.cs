@@ -12,15 +12,10 @@ namespace SharpBoy.Core
 
     public class GameBoy
     {
-        public bool PowerOn { get; set; }
+        public event Action Stopped;
 
-        internal Cpu Cpu { get; }
-        internal IPpu Ppu { get; }
+        internal ICpu Cpu { get; }
         internal IMmu Mmu { get; }
-        internal IInterruptManager InterruptManager { get; }
-        internal ITimer Timer { get; }
-        internal IRenderer Renderer { get; }
-        internal Cartridge Cartridge { get; private set; } = new Cartridge();
 
         private const double RefreshRateHz = 59.7275;
         private const int CpuSpeedHz = 4194304;
@@ -28,16 +23,15 @@ namespace SharpBoy.Core
         private const double ExpectedMillisecondsPerUpdate = 1000 / RefreshRateHz;
         private const int ExpectedCpuCyclesPerUpdate = (int)(ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond);
 
-        private readonly RenderQueue renderQueue = new RenderQueue();
+        private readonly IRenderer renderer;
+        private readonly ICartridgeReader cartridgeReader;
 
-        public GameBoy()
+        public GameBoy(ICpu cpu, IMmu mmu, IRenderer renderer, ICartridgeReader cartridgeReader)
         {
-            Mmu = new Mmu(this);
-            InterruptManager = new InterruptManager();
-            Timer = new Timer(InterruptManager);
-            Ppu = new Ppu(InterruptManager, renderQueue);
-            Cpu = new Cpu(Mmu, InterruptManager, Timer, Ppu);
-            Renderer = new SilkRenderer(renderQueue);
+            Cpu = cpu;
+            Mmu = mmu;
+            this.renderer = renderer;
+            this.cartridgeReader = cartridgeReader;
         }
 
         public void LoadBootRom(string path)
@@ -49,15 +43,15 @@ namespace SharpBoy.Core
         public void LoadCartridge(string path)
         {
             var rom = File.ReadAllBytes(path);
-            Cartridge = new Cartridge(rom);
+            cartridgeReader.LoadCartridge(rom);
         }
 
         public void Run()
         {
-            Renderer.Initialise();
+            renderer.Initialise();
 
             var emulationThread = new Thread(RunEmulator);
-            var renderThread = new Thread(Renderer.Run);
+            var renderThread = new Thread(renderer.Run);
 
             emulationThread.Start();
             renderThread.Start();
@@ -76,7 +70,7 @@ namespace SharpBoy.Core
             var targetCyclesPerSecond = CpuSpeedHz;
             var windowClosing = false;
 
-            Renderer.OnClose += () => windowClosing = true;
+            renderer.Closing += () => windowClosing = true;
 
             while (!windowClosing)
             {
@@ -97,6 +91,8 @@ namespace SharpBoy.Core
                     Thread.Sleep(1);
                 }
             }
+
+            Stopped?.Invoke();
         }
     }
 }

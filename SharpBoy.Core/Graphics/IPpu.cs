@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Graphics
 {
-    internal interface IPpu
+    public interface IPpu : ITicker
     {
         byte ReadVram(ushort address);
         byte ReadOam(ushort address);
@@ -14,6 +14,5 @@ namespace SharpBoy.Core.Graphics
         void WriteVram(ushort address, byte value);
         void WriteOam(ushort address, byte value);
         void WriteRegister(ushort address, byte value);
-        void Sync(int cycles);
     }
 }

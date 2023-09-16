@@ -18,8 +18,8 @@ namespace SharpBoy.Core.Tests.Mocks
 
         public void LoadBootRom(byte[] rom) { }
 
-        public byte ReadValue(ushort address) => memory[address];
+        public byte Read(int address) => memory[address];
 
-        public void WriteValue(ushort address, byte value) => memory[address] = value;
+        public void Write(int address, byte value) => memory[address] = value;
     }
 }

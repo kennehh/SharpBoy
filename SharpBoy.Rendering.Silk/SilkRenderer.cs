@@ -10,11 +10,11 @@ using System.Runtime.InteropServices;
 
 namespace SharpBoy.Core.Rendering
 {
-    internal class SilkRenderer : IRenderer, IDisposable
+    public class SilkRenderer : IRenderer, IDisposable
     {
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
-        private readonly RenderQueue renderQueue;
+        private readonly IRenderQueue renderQueue;
         private bool disposed = false;
 
         private IWindow window = null;
@@ -24,9 +24,9 @@ namespace SharpBoy.Core.Rendering
         private uint shaderProgram;
         private uint vao, vbo, ebo;
 
-        public event Action OnClose;
+        public event Action Closing;
 
-        public SilkRenderer(RenderQueue renderQueue)
+        public SilkRenderer(IRenderQueue renderQueue)
         {
             this.renderQueue = renderQueue;
         }
@@ -69,7 +69,7 @@ namespace SharpBoy.Core.Rendering
                 gl.Viewport(viewX, viewY, viewWidth, viewHeight);
             };
 
-            window.Closing += () => OnClose?.Invoke();
+            window.Closing += () => Closing?.Invoke();
         }
 
         public void Run()

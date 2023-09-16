@@ -2,12 +2,12 @@
 
 namespace SharpBoy.Core.Rendering
 {
-    public class RenderQueue
+    public class RenderQueue : IRenderQueue
     {
         private AutoResetEvent frameReady = new AutoResetEvent(false);
         private ConcurrentQueue<ReadOnlyMemory<byte>> queue = new ConcurrentQueue<ReadOnlyMemory<byte>>();
 
-        public void Enqueue(byte[] frame)
+        public void Enqueue(ReadOnlyMemory<byte> frame)
         {
             if (queue.Count <= 0xff)
             {

@@ -3,6 +3,9 @@ using NUnit.Framework.Internal;
 using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
 using SharpBoy.Core.Graphics;
+using Microsoft.Extensions.DependencyInjection;
+using SharpBoy.Core.Rendering;
+using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Tests
 {
@@ -10,14 +13,13 @@ namespace SharpBoy.Core.Tests
     public class InstructionTests
     {
         private const string DirectoryPath = "GeneratedTests/InstructionTests";
-        private static IEnumerable<string> Tests => Directory.GetFiles(DirectoryPath).Select(x => Path.GetFileNameWithoutExtension(x));
+        private static IEnumerable<string> Tests => Directory.GetFiles(DirectoryPath).Select(Path.GetFileNameWithoutExtension);
 
         [Test, TestCaseSource(nameof(Tests))]
         public void InstructionTest(string opcode)
         {
             var serializer = new JsonSerializer();
-            var im = new InterruptManager();
-            var cpu = new Cpu(new MmuMock(), im, new Timer(im), new Ppu(im));
+            var cpu = CreateCpu();
 
             using (var s = File.Open(Path.Combine(DirectoryPath, $"{opcode}.json"), FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var sr = new StreamReader(s))
@@ -35,6 +37,17 @@ namespace SharpBoy.Core.Tests
                     }
                 }
             }
+        }
+
+        private static Cpu CreateCpu()
+        {
+            var serviceProvider = new ServiceCollection()
+                .RegisterCoreServices()
+                .AddSingleton<IRenderer, RendererMock>()
+                .AddSingleton<IMmu, MmuMock>()
+                .BuildServiceProvider();
+
+            return (Cpu)serviceProvider.GetService<ICpu>();
         }
 
         private static void SetupInitialValues(Cpu cpu, CpuTestData data)
@@ -56,7 +69,7 @@ namespace SharpBoy.Core.Tests
             {
                 var address = addressValue[0];
                 var value = addressValue[1];
-                cpu.Mmu.WriteValue(address, (byte)value);
+                cpu.Mmu.Write(address, (byte)value);
             }
         }
 
@@ -80,7 +93,7 @@ namespace SharpBoy.Core.Tests
             {
                 var address = addressValue[0];
                 var expected = addressValue[1];
-                var actual = cpu.Mmu.ReadValue(address);
+                var actual = cpu.Mmu.Read(address);
                 Assert.That(actual, Is.EqualTo(expected), $"Value at memory address {address:x4} is incorrect: {test.name}");
             }
 

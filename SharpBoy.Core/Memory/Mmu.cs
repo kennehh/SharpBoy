@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Processor;
+﻿using SharpBoy.Core.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Intrinsics.Arm;
@@ -9,76 +9,85 @@ namespace SharpBoy.Core.Memory
 {
     public class Mmu : IMmu
     {
-        private GameBoy gameboy;
-        private byte[] bootRom = new byte[0x100];
-        private byte[] wram = new byte[0x2000];
-        private byte[] hram = new byte[0x80];
-
+        private readonly IPpu ppu;
+        private readonly ITimer timer;
+        private readonly ICartridgeReader cartridgeReader;
+        private readonly IInterruptManager interruptManager;
+        private IReadableMemory bootRom = null;
+        private IReadWriteMemory wram = new Ram(0x2000);
+        private IReadWriteMemory hram = new Ram(0x80);
+        
+        // temporary
         private byte[] ioRegisters = new byte[0x10000];
 
-        private bool inBootRom = false;
+        private bool bootRomLoaded = false;
 
-        public Mmu(GameBoy gameboy)
+        public Mmu(IPpu ppu, ITimer timer, ICartridgeReader cartridgeReader, IInterruptManager interruptManager)
         {
-            this.gameboy = gameboy;
+            this.ppu = ppu;
+            this.timer = timer;
+            this.cartridgeReader = cartridgeReader;
+            this.interruptManager = interruptManager;
         }
 
         public void LoadBootRom(byte[] rom)
         {
-            Buffer.BlockCopy(rom, 0, bootRom, 0, rom.Length);
-            inBootRom = true;
+            bootRom = new Rom(rom);
+            bootRomLoaded = true;
         }
 
-        public byte ReadValue(ushort address)
+        public byte Read(int addr)
         {
+            var address = (ushort)addr;
             return address switch
             {
                 <= 0x7fff => ReadRom(address),
-                <= 0x9fff => gameboy.Ppu.ReadVram((ushort)(address & 0x1fff)),
-                <= 0xbfff => gameboy.Cartridge.ReadERam((ushort)(address & 0x1fff)),
-                <= 0xcfff => wram[(ushort)(address & 0x1fff)],
-                <= 0xdfff => wram[(ushort)(address & 0x1fff)], // In CGB mode, switchable bank 1~7 ;
-                <= 0xfdff => wram[(ushort)(address & 0x1fff)], // copy of wram (echo ram) - use of this area should be prohibited
-                <= 0xfe9f => gameboy.Ppu.ReadOam((byte)(address & 0xff)),
+                <= 0x9fff => ppu.ReadVram(address),
+                <= 0xbfff => cartridgeReader.ReadERam(address),
+                <= 0xcfff => wram.Read(address),
+                <= 0xdfff => wram.Read(address), // In CGB mode, switchable bank 1~7 ;
+                <= 0xfdff => wram.Read(address), // copy of wram (echo ram) - use of this area should be prohibited
+                <= 0xfe9f => ppu.ReadOam(address),
                 <= 0xfeff => 0, // use of this area should be prohibited
                 <= 0xff03 => ioRegisters[address], // handle I/O registers here
-                <= 0xff07 => gameboy.Timer.ReadRegister(address),
+                <= 0xff07 => timer.ReadRegister(address),
                 <= 0xff0e => ioRegisters[address], // handle I/O registers here
-                <= 0xff0f => (byte)gameboy.InterruptManager.IF,
+                <= 0xff0f => (byte)interruptManager.IF,
                 <= 0xff3f => ioRegisters[address], // handle I/O registers here
-                <= 0xff4b => gameboy.Ppu.ReadRegister(address),
+                <= 0xff4b => ppu.ReadRegister(address),
                 <= 0xff7f => ioRegisters[address], // handle I/O registers here
-                <= 0xfffe => hram[(byte)(address & 0x7f)],
-                <= 0xffff => (byte)gameboy.InterruptManager.IE
+                <= 0xfffe => hram.Read(address),
+                <= 0xffff => (byte)interruptManager.IE
             };
         }
 
-        public void WriteValue(ushort address, byte value)
+        public void Write(int addr, byte value)
         {
+            var address = (ushort)addr;
             switch (address)
             {
                 case <= 0x7fff:
                     break;
                 case <= 0x9fff:
                     // In CGB mode, switchable bank 0/1
-                    gameboy.Ppu.WriteVram((ushort)(address & 0x1fff), value);
+                    ppu.WriteVram(address, value);
                     break;
                 case <= 0xbfff:
-                    gameboy.Cartridge.WriteERam((ushort)(address & 0x1fff), value);
+                    cartridgeReader.WriteERam(address, value);
                     break;
                 case <= 0xcfff:
-                    wram[(ushort)(address & 0x1fff)] = value;
+                    wram.Write(address, value);
                     break;
                 case <= 0xdfff:
                     // In CGB mode, switchable bank 1~7
-                    wram[(ushort)(address & 0x1fff)] = value;
+                    wram.Write(address, value);
                     break;
                 case <= 0xfdff:
                     // copy of wram (echo ram) - use of this area should be prohibited
-                    wram[(ushort)(address & 0x1fff)] = value;
+                    wram.Write(address, value);
                     break;
                 case <= 0xfe9f:
-                    gameboy.Ppu.WriteOam((byte)(address & 0xff), value);
+                    ppu.WriteOam(address, value);
                     break;
                 case <= 0xfeff:
                     // use of this area should be prohibited
@@ -88,45 +97,45 @@ namespace SharpBoy.Core.Memory
                     ioRegisters[address] = value;
                     break;
                 case <= 0xff07:
-                    gameboy.Timer.WriteRegister(address, value);
+                    timer.WriteRegister(address, value);
                     break;
                 case <= 0xff0e:
                     // handle I/O registers here
                     ioRegisters[address] = value;
                     break;
                 case <= 0xff0f:
-                    gameboy.InterruptManager.IF = (InterruptFlag)value;
+                    interruptManager.IF = (InterruptFlag)value;
                     break;
                 case <= 0xff3f:
                     // handle I/O registers here
                     ioRegisters[address] = value;
                     break;
                 case <= 0xff4b:
-                    gameboy.Ppu.WriteRegister(address, value);
+                    ppu.WriteRegister(address, value);
                     break;
                 case 0xff50:
-                    inBootRom = false;
+                    bootRomLoaded = false;
                     break;
                 case <= 0xff7f:
                     // handle I/O registers here
                     ioRegisters[address] = value;
                     break;
                 case <= 0xfffe:
-                    hram[(byte)(address & 0x7f)] = value;
+                    hram.Write(address, value);
                     break;
                 case 0xffff:
-                    gameboy.InterruptManager.IE = (InterruptFlag)value;
+                    interruptManager.IE = (InterruptFlag)value;
                     break;
             }
         }
 
         private byte ReadRom(ushort address)
         {
-            if (inBootRom && address < 0x100)
+            if (bootRomLoaded && address < 0x100)
             {
-                return bootRom[address];
+                return bootRom.Read(address);
             }
-            return gameboy.Cartridge.ReadRom(address);
+            return cartridgeReader.ReadRom(address);
         }
     }
 }

@@ -9,6 +9,8 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using SharpBoy.Core.Rendering;
 
 namespace SharpBoy.Core.Tests
 {
@@ -33,8 +35,9 @@ namespace SharpBoy.Core.Tests
 
         private void TestBlarggRom(string path)
         {
-            var gb = new GameBoy();
+            var gb = CreateGameBoy();
             gb.LoadCartridge(path);
+            var cpu = (Cpu)gb.Cpu;
 
             var lastPC = -1;
             //gb.Cpu.Registers.PC = 0x101;
@@ -45,17 +48,17 @@ namespace SharpBoy.Core.Tests
             stopwatch.Start();
 
             var isHalted = false;
-            while (!(lastPC == gb.Cpu.Registers.PC && !isHalted))
+            while (!(lastPC == cpu.Registers.PC && !isHalted))
             {
-                isHalted = gb.Cpu.State == CpuState.Halted;
-                lastPC = gb.Cpu.Registers.PC;
+                isHalted = cpu.State == CpuState.Halted;
+                lastPC = cpu.Registers.PC;
 
                 gb.Step();
 
-                if (gb.Cpu.Mmu.ReadValue(0xff02) == 0x81)
+                if (gb.Mmu.Read(0xff02) == 0x81)
                 {
-                    characters.Add(gb.Cpu.Mmu.ReadValue(0xff01));
-                    gb.Cpu.Mmu.WriteValue(0xff02, 0x01);
+                    characters.Add(gb.Mmu.Read(0xff01));
+                    gb.Mmu.Write(0xff02, 0x01);
                 }
 
                 //Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(30), "Test took too long");
@@ -66,14 +69,14 @@ namespace SharpBoy.Core.Tests
             if (!characters.Any())
             {
                 // test message should be stored at 0xa004
-                Assert.That(gb.Mmu.ReadValue(0xa001), Is.EqualTo(0xde));
-                Assert.That(gb.Mmu.ReadValue(0xa002), Is.EqualTo(0xb0));
-                Assert.That(gb.Mmu.ReadValue(0xa003), Is.EqualTo(0x61));
+                Assert.That(gb.Mmu.Read(0xa001), Is.EqualTo(0xde));
+                Assert.That(gb.Mmu.Read(0xa002), Is.EqualTo(0xb0));
+                Assert.That(gb.Mmu.Read(0xa003), Is.EqualTo(0x61));
 
                 ushort address = 0xa004;
                 while (true)
                 {
-                    var character = gb.Mmu.ReadValue(address++);
+                    var character = gb.Mmu.Read(address++);
                     if (character != 0)
                     {
                         characters.Add(character);
@@ -88,6 +91,16 @@ namespace SharpBoy.Core.Tests
             var message = Encoding.Default.GetString(characters.ToArray());
             var passed = message.Contains("Passed") && !message.Contains("Failed");
             Assert.That(passed, "Message: " + message);
+        }
+
+        private static GameBoy CreateGameBoy()
+        {
+            var serviceProvider = new ServiceCollection()
+                .RegisterCoreServices()
+                .AddSingleton<IRenderer, RendererMock>()
+                .BuildServiceProvider();
+
+            return serviceProvider.GetService<GameBoy>();
         }
     }
 }

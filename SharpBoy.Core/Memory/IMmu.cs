@@ -4,10 +4,8 @@ using System.Text;
 
 namespace SharpBoy.Core.Memory
 {
-    public interface IMmu
+    public interface IMmu : IReadWriteMemory
     {
         void LoadBootRom(byte[] rom);
-        byte ReadValue(ushort address);
-        void WriteValue(ushort address, byte value);
     }
 }

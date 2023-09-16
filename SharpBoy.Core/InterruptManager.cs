@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.Processor
+namespace SharpBoy.Core
 {
-    internal class InterruptManager : IInterruptManager
+    public class InterruptManager : IInterruptManager
     {
         public InterruptFlag IE { get; set; }
         public InterruptFlag IF { get; set; }
@@ -19,7 +19,7 @@ namespace SharpBoy.Core.Processor
         private readonly static Interrupt[] interrupts = Enum
             .GetValues(typeof(InterruptFlag))
             .Cast<InterruptFlag>()
-            .Select((x, i) => new Interrupt(x, (ushort)(0x40 + (i * 0x08))))
+            .Select((x, i) => new Interrupt(x, (ushort)(0x40 + i * 0x08)))
             .ToArray();
 
         public bool AnyInterruptRequested => ((byte)IE & (byte)IF & 0x1f) != 0;
@@ -28,7 +28,7 @@ namespace SharpBoy.Core.Processor
         public void ClearInterrupt(InterruptFlag flag) => SetInterruptFlag(flag, false);
         public Interrupt GetRequestedInterrupt() => interrupts.FirstOrDefault(x => IsInterruptRequested(x.Flag));
 
-        private void SetInterruptFlag(InterruptFlag flag, bool val) => IF = (val ? IF | flag : IF & ~flag);
+        private void SetInterruptFlag(InterruptFlag flag, bool val) => IF = val ? IF | flag : IF & ~flag;
         private bool IsInterruptRequested(InterruptFlag flag) => IE.HasFlag(flag) && IF.HasFlag(flag);
     }
 }

@@ -1,8 +1,7 @@
 ﻿namespace SharpBoy.Core
 {
-    internal interface ITimer
+    public interface ITimer : ITicker
     {
-        void Sync(int cycles);
         byte ReadRegister(ushort address);
         void WriteRegister(ushort address, byte value);
     }

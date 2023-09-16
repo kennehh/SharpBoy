@@ -1,15 +1,9 @@
-﻿using SharpBoy.Core.Processor;
-
-namespace SharpBoy.Core
+﻿namespace SharpBoy.Core
 {
-    internal class Timer : ITimer
+    public class Timer : ITimer
     {
-        public byte DIV { get; private set; }
-        public byte TIMA { get; private set; }
-        public byte TMA { get; private set; }
-
         private byte tac = 0;
-        public byte TAC
+        private byte TAC
         {
             get => tac;
             set
@@ -19,6 +13,10 @@ namespace SharpBoy.Core
                 currentTacClock = GetTacClock(value);
             }
         }
+
+        private byte div;
+        private byte tima;
+        private byte tma;
 
         private bool isTimerEnabled = false;
         private int currentTacClock = GetTacClock(0);
@@ -33,19 +31,19 @@ namespace SharpBoy.Core
             this.interruptManager = interruptManager;
         }
 
-        public void Sync(int cycles)
+        public void Tick()
         {
-            UpdateDivider(cycles);
-            UpdateTimer(cycles);
+            UpdateDivider(4);
+            UpdateTimer(4);
         }
 
         public byte ReadRegister(ushort address)
         {
             return address switch
             {
-                0xff04 => DIV,
-                0xff05 => TIMA,
-                0xff06 => TMA,
+                0xff04 => div,
+                0xff05 => tima,
+                0xff06 => tma,
                 0xff07 => TAC,
                 _ => throw new NotImplementedException()
             };
@@ -55,9 +53,9 @@ namespace SharpBoy.Core
         {
             switch (address)
             {
-                case 0xff04: DIV = 0; break;
-                case 0xff05: TIMA = value; break;
-                case 0xff06: TMA = value; break;
+                case 0xff04: div = 0; break;
+                case 0xff05: tima = value; break;
+                case 0xff06: tma = value; break;
                 case 0xff07: TAC = value; break;
                 default: throw new NotImplementedException();
             }
@@ -68,13 +66,13 @@ namespace SharpBoy.Core
             divCycles += cycles;
             while (divCycles >= DivClock)
             {
-                if (DIV >= 0xff)
+                if (div >= 0xff)
                 {
-                    DIV = 0;
+                    div = 0;
                 }
                 else
                 {
-                    DIV++;
+                    div++;
                 }
                 divCycles -= DivClock;
             }
@@ -88,14 +86,14 @@ namespace SharpBoy.Core
 
                 while (timaCycles >= currentTacClock)
                 {
-                    if (TIMA >= 0xff)
+                    if (tima >= 0xff)
                     {
-                        TIMA = TMA;
+                        tima = tma;
                         interruptManager.RequestInterrupt(InterruptFlag.Timer);
                     }
                     else
                     {
-                        TIMA++;
+                        tima++;
                     }
                     timaCycles -= currentTacClock;
                 }

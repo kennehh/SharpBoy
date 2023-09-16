@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Processor;
+﻿using SharpBoy.Core.Memory;
 using SharpBoy.Core.Rendering;
 using System;
 using System.Collections;
@@ -10,9 +10,9 @@ using System.Text;
 namespace SharpBoy.Core.Graphics
 {
 
-    internal class Ppu : IPpu
+    public class Ppu : IPpu
     {
-        internal PpuRegisters Registers { get; }
+        internal PpuRegisters Registers { get; } = new PpuRegisters();
 
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
@@ -24,25 +24,24 @@ namespace SharpBoy.Core.Graphics
             new ColorRgb(27, 42, 9)
         };
 
-        private byte[] vram = new byte[0x2000];
-        private byte[] oam = new byte[0xa0];
+        private IReadWriteMemory vram = new Ram(0x2000);
+        private IReadWriteMemory oam = new Ram(0xa0);
         private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 3];
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
-        private readonly RenderQueue renderQueue;
+        private readonly IRenderQueue renderQueue;
 
-        public Ppu(IInterruptManager interruptManager, RenderQueue renderQueue)
+        public Ppu(IInterruptManager interruptManager, IRenderQueue renderQueue)
         {
-            Registers = new PpuRegisters();
             this.interruptManager = interruptManager;
             this.renderQueue = renderQueue;
         }
 
-        public void Sync(int cpuCyles)
+        public void Tick()
         {
             var previousStatus = Registers.CurrentStatus;
-            cycles += cpuCyles;
+            cycles += 4;
 
             if (Registers.LY <= 143)
             {
@@ -95,56 +94,13 @@ namespace SharpBoy.Core.Graphics
             HandleStatInterrupt();
         }
 
-        private void HandleStatInterrupt()
-        {
-            if (Registers.StatInterruptSource != StatInterruptSourceFlag.None)
-            {
-                StatInterruptSourceFlag? interrupt = null;
+        public byte ReadVram(ushort address) => vram.Read(address);
 
-                if (Registers.CurrentStatus == PpuStatus.HorizontalBlank && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.HorizontalBlank))
-                {
-                    interrupt = StatInterruptSourceFlag.HorizontalBlank;
-                }
-                else if (Registers.CurrentStatus == PpuStatus.VerticalBlank && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.VerticalBlank))
-                {
-                    interrupt = StatInterruptSourceFlag.VerticalBlank;
-                }
-                else if (Registers.CurrentStatus == PpuStatus.SearchingOam && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.SearchingOam))
-                {
-                    interrupt = StatInterruptSourceFlag.SearchingOam;
-                }
-                else if (Registers.LyCompareFlag && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.LyEqualsLyc))
-                {
-                    interrupt = StatInterruptSourceFlag.LyEqualsLyc;
-                }
+        public byte ReadOam(ushort address) => oam.Read(address);
 
-                if (interrupt.HasValue)
-                {
-                    Registers.StatInterruptSource &= ~interrupt.Value;
-                    interruptManager.RequestInterrupt(InterruptFlag.LcdStat);
-                }
-            }
-        }
+        public void WriteVram(ushort address, byte value) => vram.Write(address, value);
 
-        public byte ReadVram(ushort address)
-        {
-            return vram[address];
-        }
-
-        public byte ReadOam(ushort address)
-        {
-            return oam[address];
-        }
-
-        public void WriteVram(ushort address, byte value)
-        {
-            vram[address] = value;
-        }
-
-        public void WriteOam(ushort address, byte value)
-        {
-            oam[address] = value;
-        }
+        public void WriteOam(ushort address, byte value) => oam.Write(address, value);
 
         public byte ReadRegister(ushort address)
         {
@@ -211,18 +167,18 @@ namespace SharpBoy.Core.Graphics
 
                 if (tileDataAddress == 0x8000)
                 {
-                    tileNum = vram[tileAddress & 0x1fff];
+                    tileNum = vram.Read(tileAddress);
                 }
                 else
                 {
-                    tileNum = (sbyte)vram[tileAddress & 0x1fff]; // signed
+                    tileNum = (sbyte)vram.Read(tileAddress); // signed
                 }
 
                 int tileLocation = tileDataAddress + (tileNum * 16);
                 int lineOffset = (yPos % 8) * 2; // Each line in a tile takes up 2 bytes
 
-                byte data1 = vram[(tileLocation + lineOffset) & 0x1fff];
-                byte data2 = vram[(tileLocation + lineOffset + 1) & 0x1fff];
+                byte data1 = vram.Read(tileLocation + lineOffset);
+                byte data2 = vram.Read(tileLocation + lineOffset + 1);
 
                 // Find the correct pixel within the tile
                 int colorBitIndex = 7 - (xPos % 8);
@@ -233,10 +189,10 @@ namespace SharpBoy.Core.Graphics
 
                 // Set pixel color in the screen buffer
                 var color = GetColor(colorIndex);
-                var index = ((line * LcdWidth) + pixel) * 3;
-                frameBuffer[index] = color.Red;
-                frameBuffer[index + 1] = color.Green;
-                frameBuffer[index + 2] = color.Blue;
+                var pixelPosition = ((line * LcdWidth) + pixel) * 3;
+                frameBuffer[pixelPosition] = color.Red;
+                frameBuffer[pixelPosition + 1] = color.Green;
+                frameBuffer[pixelPosition + 2] = color.Blue;
             }
         }
 
@@ -245,19 +201,50 @@ namespace SharpBoy.Core.Graphics
             var colorValue = Registers.BGP >>> (pixelIndex * 2) & 3;
             return Colors[colorValue];
         }
-    }
 
-    public struct ColorRgb
-    {
-        public byte Red;
-        public byte Green;
-        public byte Blue;
-
-        public ColorRgb(byte red, byte green, byte blue)
+        private void HandleStatInterrupt()
         {
-            Red = red;
-            Green = green;
-            Blue = blue;
+            if (Registers.StatInterruptSource != StatInterruptSourceFlag.None)
+            {
+                StatInterruptSourceFlag? interrupt = null;
+
+                if (Registers.CurrentStatus == PpuStatus.HorizontalBlank && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.HorizontalBlank))
+                {
+                    interrupt = StatInterruptSourceFlag.HorizontalBlank;
+                }
+                else if (Registers.CurrentStatus == PpuStatus.VerticalBlank && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.VerticalBlank))
+                {
+                    interrupt = StatInterruptSourceFlag.VerticalBlank;
+                }
+                else if (Registers.CurrentStatus == PpuStatus.SearchingOam && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.SearchingOam))
+                {
+                    interrupt = StatInterruptSourceFlag.SearchingOam;
+                }
+                else if (Registers.LyCompareFlag && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.LyEqualsLyc))
+                {
+                    interrupt = StatInterruptSourceFlag.LyEqualsLyc;
+                }
+
+                if (interrupt.HasValue)
+                {
+                    Registers.StatInterruptSource &= ~interrupt.Value;
+                    interruptManager.RequestInterrupt(InterruptFlag.LcdStat);
+                }
+            }
+        }
+
+        private struct ColorRgb
+        {
+            public byte Red;
+            public byte Green;
+            public byte Blue;
+
+            public ColorRgb(byte red, byte green, byte blue)
+            {
+                Red = red;
+                Green = green;
+                Blue = blue;
+            }
         }
     }
 }

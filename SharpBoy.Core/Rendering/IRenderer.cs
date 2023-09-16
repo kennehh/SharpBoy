@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Rendering
 {
-    internal interface IRenderer
+    public interface IRenderer
     {
-        event Action OnClose;
+        event Action Closing;
         void Initialise();
         void Run();
     }

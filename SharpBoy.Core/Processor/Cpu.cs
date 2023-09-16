@@ -9,25 +9,23 @@ using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Processor
 {
-    internal class Cpu
+    public class Cpu : ICpu
     {
-        public CpuState State { get; set; }
+        internal CpuState State { get; set; }
 
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
-        internal ITimer Timer { get; }
-        internal IPpu Ppu { get; }
         internal CpuRegisters Registers { get; }
 
         private int cycles = 0;
         private bool haltBugTriggered = false;
+        private readonly IEnumerable<ITicker> tickers;
 
-        public Cpu(IMmu mmu, IInterruptManager interruptManager, ITimer timer, IPpu ppu)
+        public Cpu(IMmu mmu, IInterruptManager interruptManager, IPpu ppu, ITimer timer)
         {
             Mmu = mmu;
             InterruptManager = interruptManager;
-            Timer = timer;
-            Ppu = ppu;
+            tickers = new ITicker[] { ppu, timer };
             Registers = new CpuRegisters();
         }
 
@@ -75,8 +73,10 @@ namespace SharpBoy.Core.Processor
         private void CycleTick()
         {
             cycles += 4;
-            Timer.Sync(4);
-            Ppu.Sync(4);
+            foreach (var ticker in tickers)
+            {
+                ticker.Tick();
+            }
         }
 
         private void ExecuteInstruction(byte opcode)
@@ -284,7 +284,7 @@ namespace SharpBoy.Core.Processor
 
         private byte Read8BitValueFromMemory(ushort address)
         {
-            var val = Mmu.ReadValue(address);
+            var val = Mmu.Read(address);
             CycleTick();
             return val;
         }
@@ -298,7 +298,7 @@ namespace SharpBoy.Core.Processor
 
         private void Write8BitValueToMemory(ushort address, byte value)
         {
-            Mmu.WriteValue(address, value);
+            Mmu.Write(address, value);
             CycleTick();
         }
 
