@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="display.vert" />
+    <None Remove="Shaders\display.frag" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders\display.frag" />
+    <EmbeddedResource Include="Shaders\display.vert" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Silk.NET.OpenGL" Version="2.17.1" />
     <PackageReference Include="Silk.NET.Windowing" Version="2.17.1" />
   </ItemGroup>

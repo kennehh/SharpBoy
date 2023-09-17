@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SharpBoy.Core.Memory;
 using SharpBoy.Core.Graphics;
+using SharpBoy.Rendering.Silk;
 
 internal class Program
 {
