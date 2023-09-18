@@ -12,8 +12,6 @@ namespace SharpBoy.Core
 
     public class GameBoy
     {
-        public event Action Stopped;
-
         internal ICpu Cpu { get; }
         internal IMmu Mmu { get; }
 
@@ -23,14 +21,13 @@ namespace SharpBoy.Core
         private const double ExpectedMillisecondsPerUpdate = 1000 / RefreshRateHz;
         private const int ExpectedCpuCyclesPerUpdate = (int)(ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond);
 
-        private readonly IRenderer renderer;
         private readonly ICartridgeReader cartridgeReader;
+        private bool stopped = false;
 
-        public GameBoy(ICpu cpu, IMmu mmu, IRenderer renderer, ICartridgeReader cartridgeReader)
+        public GameBoy(ICpu cpu, IMmu mmu, ICartridgeReader cartridgeReader)
         {
             Cpu = cpu;
             Mmu = mmu;
-            this.renderer = renderer;
             this.cartridgeReader = cartridgeReader;
         }
 
@@ -48,13 +45,13 @@ namespace SharpBoy.Core
 
         public void Run()
         {
-            renderer.Initialise();
-
             var emulationThread = new Thread(RunEmulator);
-            var renderThread = new Thread(renderer.Run);
-
             emulationThread.Start();
-            renderThread.Start();
+        }
+
+        public void Stop()
+        {
+            stopped = true;
         }
 
         internal int Step()
@@ -70,9 +67,7 @@ namespace SharpBoy.Core
             var targetCyclesPerSecond = CpuSpeedHz;
             var windowClosing = false;
 
-            renderer.Closing += () => windowClosing = true;
-
-            while (!windowClosing)
+            while (!stopped)
             {
                 var elapsedTime = stopwatch.ElapsedMilliseconds;
                 var expectedCycles = targetCyclesPerSecond * elapsedTime / 1000;
@@ -91,8 +86,6 @@ namespace SharpBoy.Core
                     Thread.Sleep(1);
                 }
             }
-
-            Stopped?.Invoke();
         }
     }
 }

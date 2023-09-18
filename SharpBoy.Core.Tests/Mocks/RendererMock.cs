@@ -9,14 +9,19 @@ namespace SharpBoy.Core.Tests.Mocks
 {
     internal class RendererMock : IRenderer
     {
-        public event Action Closing;
-
-        public void Initialise()
+        public void Initialise(Func<string, nint> getProcAddress)
         {
+            throw new NotImplementedException();
         }
 
-        public void Run()
+        public void Render()
         {
+            throw new NotImplementedException();
+        }
+
+        public void Resize(int width, int height)
+        {
+            throw new NotImplementedException();
         }
     }
 }

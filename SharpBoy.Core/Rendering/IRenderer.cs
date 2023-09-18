@@ -8,8 +8,8 @@ namespace SharpBoy.Core.Rendering
 {
     public interface IRenderer
     {
-        event Action Closing;
-        void Initialise();
-        void Run();
+        void Initialise(Func<string, nint> getProcAddress);
+        void Render();
+        void Resize(int width, int height);
     }
 }
