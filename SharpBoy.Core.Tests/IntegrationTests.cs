@@ -97,7 +97,6 @@ namespace SharpBoy.Core.Tests
         {
             var serviceProvider = new ServiceCollection()
                 .RegisterCoreServices()
-                .AddSingleton<IRenderer, RendererMock>()
                 .BuildServiceProvider();
 
             return serviceProvider.GetService<GameBoy>();

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Rendering
 {
-    public interface IRenderer
+    public interface IRenderer : IDisposable
     {
         void Initialise(Func<string, nint> getProcAddress);
         void Render();

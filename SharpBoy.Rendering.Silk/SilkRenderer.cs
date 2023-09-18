@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace SharpBoy.Rendering.Silk
 {
-    public class SilkRenderer : IRenderer, IDisposable
+    public class SilkRenderer : IRenderer
     {
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
@@ -42,7 +42,7 @@ namespace SharpBoy.Rendering.Silk
         {
             if (!disposed)
             {
-                gl?.Dispose();
+                display.Dispose();
                 disposed = true;
             }
         }

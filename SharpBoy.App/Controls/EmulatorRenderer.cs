@@ -55,6 +55,7 @@ namespace SharpBoy.App.Controls
         {
             base.OnOpenGlDeinit(gl);
             gameBoy.Stop();
+            renderer.Dispose();
         }
     }
 }
