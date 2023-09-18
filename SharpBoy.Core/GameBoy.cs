@@ -45,27 +45,9 @@ namespace SharpBoy.Core
 
         public void Run()
         {
-            var emulationThread = new Thread(RunEmulator);
-            emulationThread.Start();
-        }
-
-        public void Stop()
-        {
-            stopped = true;
-        }
-
-        internal int Step()
-        {
-            var cycles = Cpu.Step();
-            return cycles;
-        }
-
-        private void RunEmulator()
-        {
             var stopwatch = Stopwatch.StartNew();
             var cyclesEmulated = 0L;
             var targetCyclesPerSecond = CpuSpeedHz;
-            var windowClosing = false;
 
             while (!stopped)
             {
@@ -86,6 +68,17 @@ namespace SharpBoy.Core
                     Thread.Sleep(1);
                 }
             }
+        }
+
+        public void Stop()
+        {
+            stopped = true;
+        }
+
+        internal int Step()
+        {
+            var cycles = Cpu.Step();
+            return cycles;
         }
     }
 }

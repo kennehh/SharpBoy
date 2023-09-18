@@ -7,11 +7,14 @@ using SharpBoy.App.Views;
 using SharpBoy.Core;
 using SharpBoy.Core.Rendering;
 using SharpBoy.Rendering.Silk;
+using System;
 
 namespace SharpBoy.App;
 
 public partial class App : Application
 {
+    public static IServiceProvider ServiceProvider { get; private set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -19,6 +22,11 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        ServiceProvider = new ServiceCollection()
+            .RegisterCoreServices()
+            .AddSingleton<IRenderer, SilkRenderer>()
+            .BuildServiceProvider();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow
