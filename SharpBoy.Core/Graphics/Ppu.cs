@@ -25,6 +25,7 @@ namespace SharpBoy.Core.Graphics
             new ColorRgb(14, 69, 11),
             new ColorRgb(27, 42, 9)
         };
+        private static readonly ColorRgb[] ColorMap = (ColorRgb[])Colors.Clone();
 
         private IReadWriteMemory vram = new Ram(0x2000);
         private IReadWriteMemory oam = new Ram(0xa0);
@@ -135,7 +136,7 @@ namespace SharpBoy.Core.Graphics
                 case 0xff44: break;
                 case 0xff45: Registers.LYC = value; break;
                 case 0xff46: Registers.DMA = value; break;
-                case 0xff47: Registers.BGP = value; break;
+                case 0xff47: Registers.BGP = value; UpdateColorMap(); break;
                 case 0xff48: Registers.OBP0 = value; break;
                 case 0xff49: Registers.OBP1 = value; break;
                 case 0xff4a: Registers.WY = value; break;
@@ -190,7 +191,7 @@ namespace SharpBoy.Core.Graphics
                 colorIndex |= (data1 >> colorBitIndex) & 1;
 
                 // Set pixel color in the screen buffer
-                var color = GetColor(colorIndex);
+                var color = ColorMap[colorIndex];
                 var pixelPosition = ((line * LcdWidth) + pixel) * 3;
                 frameBuffer[pixelPosition] = color.Red;
                 frameBuffer[pixelPosition + 1] = color.Green;
@@ -198,10 +199,13 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        private ColorRgb GetColor(int pixelIndex)
+        private void UpdateColorMap()
         {
-            var colorValue = Registers.BGP >>> (pixelIndex * 2) & 3;
-            return Colors[colorValue];
+            for (int i = 0; i < 4; i++)
+            {
+                var colorValue = Registers.BGP >>> (i * 2) & 3;
+                ColorMap[i] = Colors[colorValue];
+            }
         }
 
         private void HandleStatInterrupt()
@@ -237,9 +241,9 @@ namespace SharpBoy.Core.Graphics
 
         private struct ColorRgb
         {
-            public byte Red;
-            public byte Green;
-            public byte Blue;
+            public byte Red { get; }
+            public byte Green { get; }
+            public byte Blue { get; }
 
             public ColorRgb(byte red, byte green, byte blue)
             {
