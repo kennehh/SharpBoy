@@ -8,6 +8,7 @@ namespace SharpBoy.Core.Processor
 {
     public interface ICpu
     {
-        public int Step();
+        CpuRegisters Registers { get; }
+        int Step();
     }
 }

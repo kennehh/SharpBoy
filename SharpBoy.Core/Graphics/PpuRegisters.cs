@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Graphics
 {
-    internal class PpuRegisters
+    public class PpuRegisters
     {
         public byte STAT
         {
@@ -23,7 +23,7 @@ namespace SharpBoy.Core.Graphics
         public bool LyCompareFlag => LY == LYC;
         public PpuStatus CurrentStatus = PpuStatus.HorizontalBlank;
 
-        public LcdcFlags LCDC = 0;
+        public LcdcFlags LCDC = LcdcFlags.None;
 
         public byte LY = 0;
         public byte LYC = 0;
@@ -43,8 +43,9 @@ namespace SharpBoy.Core.Graphics
     }
 
     [Flags]
-    internal enum LcdcFlags
+    public enum LcdcFlags
     {
+        None = 0,
         LcdEnable = 1 << 7,
         WindowTileMapArea = 1 << 6,
         WindowEnable = 1 << 5,
@@ -55,7 +56,7 @@ namespace SharpBoy.Core.Graphics
         BgWindowPriority = 1 << 0,
     }
 
-    internal enum PpuStatus : byte
+    public enum PpuStatus : byte
     {
         HorizontalBlank = 0,
         VerticalBlank = 1,
@@ -64,7 +65,7 @@ namespace SharpBoy.Core.Graphics
     }
 
     [Flags]
-    internal enum StatInterruptSourceFlag : byte
+    public enum StatInterruptSourceFlag : byte
     {
         None = 0,
         HorizontalBlank = 1 << 3,

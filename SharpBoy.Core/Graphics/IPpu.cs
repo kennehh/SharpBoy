@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpBoy.Core.Processor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace SharpBoy.Core.Graphics
 {
     public interface IPpu : ITicker
     {
+        PpuRegisters Registers { get; }
         byte ReadVram(ushort address);
         byte ReadOam(ushort address);
         byte ReadRegister(ushort address);

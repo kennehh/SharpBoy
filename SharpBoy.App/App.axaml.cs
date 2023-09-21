@@ -25,6 +25,7 @@ public partial class App : Application
         ServiceProvider = new ServiceCollection()
             .RegisterCoreServices()
             .AddSingleton<IRenderer, SilkRenderer>()
+            .AddSingleton<DebugViewModel>()
             .BuildServiceProvider();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

@@ -15,7 +15,7 @@ namespace SharpBoy.Core.Processor
 
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
-        internal CpuRegisters Registers { get; }
+        public CpuRegisters Registers { get; }
 
         private int cycles = 0;
         private bool haltBugTriggered = false;

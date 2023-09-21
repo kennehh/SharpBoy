@@ -13,6 +13,7 @@ namespace SharpBoy.Core
         {
             return services
                 .AddSingleton<GameBoy>()
+                .AddSingleton<GameBoyState>()
                 .AddSingleton<ICpu, Cpu>()
                 .AddSingleton<IMmu, Mmu>()
                 .AddSingleton<IPpu, Ppu>()

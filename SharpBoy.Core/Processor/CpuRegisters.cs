@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace SharpBoy.Core.Processor
 {
     [StructLayout(LayoutKind.Explicit)]
-    internal class CpuRegisters
+    public class CpuRegisters
     {
         [FieldOffset(1)]
         public byte A;
@@ -44,7 +44,7 @@ namespace SharpBoy.Core.Processor
     }
 
     [Flags]
-    internal enum Flag : byte
+    public enum Flag : byte
     {
         Zero = 1 << 7,
         Subtract = 1 << 6,

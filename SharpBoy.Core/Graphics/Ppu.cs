@@ -12,7 +12,7 @@ namespace SharpBoy.Core.Graphics
 
     public class Ppu : IPpu
     {
-        internal PpuRegisters Registers { get; } = new PpuRegisters();
+        public PpuRegisters Registers { get; } = new PpuRegisters();
 
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
