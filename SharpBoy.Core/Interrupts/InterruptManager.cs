@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core
+namespace SharpBoy.Core.Interrupts
 {
     public class InterruptManager : IInterruptManager
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Graphics
 {
-    public interface IPpu : ITicker
+    public interface IPpu
     {
         PpuRegisters Registers { get; }
         byte ReadVram(ushort address);
@@ -16,5 +16,6 @@ namespace SharpBoy.Core.Graphics
         void WriteVram(ushort address, byte value);
         void WriteOam(ushort address, byte value);
         void WriteRegister(ushort address, byte value);
+        void Tick();
     }
 }

@@ -1,5 +1,7 @@
-﻿using SharpBoy.Core.Memory;
+﻿using SharpBoy.Core.Interrupts;
+using SharpBoy.Core.Memory;
 using SharpBoy.Core.Rendering;
+using SharpBoy.Core.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;

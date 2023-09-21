@@ -1,6 +1,6 @@
 ﻿using SharpBoy.Core.Memory;
 
-namespace SharpBoy.Core
+namespace SharpBoy.Core.Cartridge
 {
     public class CartridgeReader : ICartridgeReader
     {

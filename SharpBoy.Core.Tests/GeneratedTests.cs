@@ -6,6 +6,7 @@ using SharpBoy.Core.Graphics;
 using Microsoft.Extensions.DependencyInjection;
 using SharpBoy.Core.Rendering;
 using SharpBoy.Core.Memory;
+using SharpBoy.Core.Utilities;
 
 namespace SharpBoy.Core.Tests
 {

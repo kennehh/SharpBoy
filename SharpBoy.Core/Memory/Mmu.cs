@@ -1,4 +1,7 @@
-﻿using SharpBoy.Core.Graphics;
+﻿using SharpBoy.Core.Cartridge;
+using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Interrupts;
+using SharpBoy.Core.Timing;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Intrinsics.Arm;

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using SharpBoy.Core.Rendering;
+using SharpBoy.Core.Utilities;
 
 namespace SharpBoy.Core.Tests
 {

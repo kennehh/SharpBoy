@@ -1,4 +1,7 @@
-﻿namespace SharpBoy.Core
+﻿using SharpBoy.Core.Interrupts;
+using SharpBoy.Core.Utilities;
+
+namespace SharpBoy.Core.Timing
 {
     public class Timer : ITimer
     {

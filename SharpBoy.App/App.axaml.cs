@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using SharpBoy.App.ViewModels;
 using SharpBoy.App.Views;
-using SharpBoy.Core;
 using SharpBoy.Core.Rendering;
 using SharpBoy.Core.Rendering.Silk;
+using SharpBoy.Core.Utilities;
 using System;
 
 namespace SharpBoy.App;

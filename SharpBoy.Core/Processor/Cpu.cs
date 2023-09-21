@@ -5,7 +5,10 @@ using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Text;
 using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
+using SharpBoy.Core.Timing;
+using SharpBoy.Core.Utilities;
 
 namespace SharpBoy.Core.Processor
 {
@@ -19,13 +22,15 @@ namespace SharpBoy.Core.Processor
 
         private int cycles = 0;
         private bool haltBugTriggered = false;
-        private readonly IEnumerable<ITicker> tickers;
+        private readonly IPpu ppu;
+        private readonly ITimer timer;
 
         public Cpu(IMmu mmu, IInterruptManager interruptManager, IPpu ppu, ITimer timer)
         {
             Mmu = mmu;
             InterruptManager = interruptManager;
-            tickers = new ITicker[] { ppu, timer };
+            this.ppu = ppu;
+            this.timer = timer;
             Registers = new CpuRegisters();
         }
 
@@ -73,10 +78,8 @@ namespace SharpBoy.Core.Processor
         private void CycleTick()
         {
             cycles += 4;
-            foreach (var ticker in tickers)
-            {
-                ticker.Tick();
-            }
+            ppu.Tick();
+            timer.Tick();
         }
 
         private void ExecuteInstruction(byte opcode)

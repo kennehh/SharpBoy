@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text;
 using SharpBoy.Core.Graphics;
 using SharpBoy.Core.Rendering;
+using SharpBoy.Core.Cartridge;
 
 namespace SharpBoy.Core
 {
@@ -53,6 +54,7 @@ namespace SharpBoy.Core
             var stopwatch = Stopwatch.StartNew();
             var cyclesEmulated = 0L;
             var targetCyclesPerSecond = CpuSpeedHz;
+            var syncEvent = new AutoResetEvent(false);
 
             while (!stopped)
             {
@@ -67,6 +69,7 @@ namespace SharpBoy.Core
                     cyclesToEmulate -= cycles;
                     cyclesEmulated += cycles;
                 }
+
                 if (cyclesToEmulate <= 0)
                 {
                     if (StateUpdated != null)
