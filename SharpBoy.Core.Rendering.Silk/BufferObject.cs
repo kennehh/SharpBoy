@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Rendering.Silk
+namespace SharpBoy.Core.Rendering.Silk
 {
-    public class BufferObject<TDataType> : IDisposable
+    internal class BufferObject<TDataType> : IDisposable
         where TDataType : unmanaged
     {
         //Our handle, buffertype and the GL instance this class will use, these are private because they have no reason to be public.

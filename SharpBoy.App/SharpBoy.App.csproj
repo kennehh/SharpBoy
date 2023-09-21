@@ -23,6 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpBoy.Core\SharpBoy.Core.csproj" />
-    <ProjectReference Include="..\SharpBoy.Rendering.Silk\SharpBoy.Rendering.Silk.csproj" />
+    <ProjectReference Include="..\SharpBoy.Core.Rendering.Silk\SharpBoy.Core.Rendering.Silk.csproj" />
   </ItemGroup>
 </Project>

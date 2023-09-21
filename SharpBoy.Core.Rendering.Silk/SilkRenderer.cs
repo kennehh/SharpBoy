@@ -1,17 +1,8 @@
-﻿using SharpBoy.Core.Rendering;
-using SharpBoy.Rendering.Silk;
-using Silk.NET.Core;
-using Silk.NET.Core.Native;
-using Silk.NET.Maths;
+﻿using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using Silk.NET.Windowing;
-using System.ComponentModel;
 using System.Drawing;
-using System.Net.NetworkInformation;
-using System.Numerics;
-using System.Runtime.InteropServices;
 
-namespace SharpBoy.Rendering.Silk
+namespace SharpBoy.Core.Rendering.Silk
 {
     public class SilkRenderer : IRenderer
     {

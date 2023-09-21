@@ -6,7 +6,7 @@ using SharpBoy.App.ViewModels;
 using SharpBoy.App.Views;
 using SharpBoy.Core;
 using SharpBoy.Core.Rendering;
-using SharpBoy.Rendering.Silk;
+using SharpBoy.Core.Rendering.Silk;
 using System;
 
 namespace SharpBoy.App;

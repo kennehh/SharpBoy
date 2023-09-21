@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Rendering.Silk
+namespace SharpBoy.Core.Rendering.Silk
 {
     internal static class EmbeddedResource
     {

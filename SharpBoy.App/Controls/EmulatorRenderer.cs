@@ -1,12 +1,7 @@
-﻿using Avalonia.Controls;
-using Avalonia.OpenGL;
+﻿using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
-using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
-using SharpBoy.Core;
 using SharpBoy.Core.Rendering;
-using SharpBoy.Rendering.Silk;
 using System;
 
 namespace SharpBoy.App.Controls

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Rendering.Silk
+namespace SharpBoy.Core.Rendering.Silk
 {
-    public class VertexArrayObject<TVertexType, TIndexType> : IDisposable
+    internal class VertexArrayObject<TVertexType, TIndexType> : IDisposable
         where TVertexType : unmanaged
         where TIndexType : unmanaged
     {

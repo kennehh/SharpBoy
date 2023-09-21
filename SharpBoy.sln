@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBoy.Core", "SharpBoy.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBoy.Core.Tests", "SharpBoy.Core.Tests\SharpBoy.Core.Tests.csproj", "{EA221235-2AB8-4542-A58D-D90A82B4862A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBoy.Rendering.Silk", "SharpBoy.Rendering.Silk\SharpBoy.Rendering.Silk.csproj", "{F158990F-1DF7-470B-8118-9D47C1983A12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBoy.Core.Rendering.Silk", "SharpBoy.Core.Rendering.Silk\SharpBoy.Core.Rendering.Silk.csproj", "{F158990F-1DF7-470B-8118-9D47C1983A12}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBoy.App", "SharpBoy.App\SharpBoy.App.csproj", "{C1B14380-69C1-4E72-9133-BF60C535E748}"
 EndProject
