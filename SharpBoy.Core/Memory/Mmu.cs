@@ -24,6 +24,7 @@ namespace SharpBoy.Core.Memory
         private byte[] ioRegisters = new byte[0x10000];
 
         private bool bootRomLoaded = false;
+        public bool BootRomLoaded => bootRomLoaded;
 
         public Mmu(IPpu ppu, ITimer timer, ICartridgeReader cartridgeReader, IInterruptManager interruptManager)
         {

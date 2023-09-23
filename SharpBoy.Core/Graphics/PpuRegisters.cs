@@ -15,8 +15,8 @@ namespace SharpBoy.Core.Graphics
             set
             {
                 StatInterruptSource = (StatInterruptSourceFlag)(value & 0b01111000);
-                // LYEqualsLYC = BitUtils.IsBitSet(value, 2);
-                CurrentStatus = (PpuStatus)(value & 0b00000011);
+                // LyCompareFlag is read only
+                // CurrentStatus is read only
             }
         }
 

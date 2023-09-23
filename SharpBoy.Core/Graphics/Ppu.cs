@@ -138,7 +138,7 @@ namespace SharpBoy.Core.Graphics
             switch (address)
             {
                 case 0xff40: Registers.LCDC = (LcdcFlags)value; break;
-                case 0xff41: Registers.STAT = BitUtils.SetBits(Registers.STAT, value, 0b01111000); break;
+                case 0xff41: Registers.STAT = value; break;
                 case 0xff42: Registers.SCY = value; break;
                 case 0xff43: Registers.SCX = value; break;
                 case 0xff44: break;
@@ -166,12 +166,13 @@ namespace SharpBoy.Core.Graphics
             int bgMapAddress = Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea) ? 0x9C00 : 0x9800;
 
             int yPos = line + Registers.SCY; // y position of the current scanline
-            int tileRow = (yPos / 8) * 32; // Each tile is 8x8 pixels, and each row has 32 tiles
+            int tileRow = (yPos >> 3) * 32; // Each tile is 8x8 pixels, and each row has 32 tiles
+            int pixelPositionBase = line * LcdWidth * 3; // Base position in framebuffer for this scanline
 
             for (int pixel = 0; pixel < LcdWidth; pixel++)
             {
                 int xPos = pixel + Registers.SCX;
-                int tileCol = xPos / 8;
+                int tileCol = xPos >>> 3;
 
                 int tileNum;
                 int tileAddress = bgMapAddress + tileRow + tileCol;
@@ -185,22 +186,23 @@ namespace SharpBoy.Core.Graphics
                     tileNum = (sbyte)vram.Read(tileAddress); // signed
                 }
 
-                int tileLocation = tileDataAddress + (tileNum * 16);
-                int lineOffset = (yPos % 8) * 2; // Each line in a tile takes up 2 bytes
+                int tileLocation = tileDataAddress + (tileNum << 4);
+                int lineOffset = (yPos & 7) * 2; // Each line in a tile takes up 2 bytes
 
                 byte data1 = vram.Read(tileLocation + lineOffset);
                 byte data2 = vram.Read(tileLocation + lineOffset + 1);
 
                 // Find the correct pixel within the tile
-                int colorBitIndex = 7 - (xPos % 8);
+                int colorBitIndex = 7 - (xPos & 7);
 
                 // Combine data from two bytes to get the color index
-                int colorIndex = ((data2 >> colorBitIndex) & 1) << 1;
-                colorIndex |= (data1 >> colorBitIndex) & 1;
+                int colorIndex = ((data2 >>> colorBitIndex) & 1) << 1;
+                colorIndex |= (data1 >>> colorBitIndex) & 1;
 
                 // Set pixel color in the screen buffer
                 var color = BgpColorMap[colorIndex];
-                var pixelPosition = ((line * LcdWidth) + pixel) * 3;
+                var pixelPosition = pixelPositionBase + pixel * 3;
+
                 frameBuffer[pixelPosition] = color.Red;
                 frameBuffer[pixelPosition + 1] = color.Green;
                 frameBuffer[pixelPosition + 2] = color.Blue;

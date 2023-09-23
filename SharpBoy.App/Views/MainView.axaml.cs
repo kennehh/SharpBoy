@@ -23,7 +23,7 @@ public partial class MainView : UserControl
 
         const string romPath = "C:\\Projects\\Tetris (World) (Rev A).gb";
         const string bootPath = "Z:\\games\\bios\\gb\\gb_bios.bin";
-        gameboy.LoadBootRom(bootPath);
+        //gameboy.LoadBootRom(bootPath);
         gameboy.LoadCartridge(romPath);
 
         Task.Run(gameboy.Run);

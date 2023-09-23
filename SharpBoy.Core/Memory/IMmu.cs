@@ -6,6 +6,7 @@ namespace SharpBoy.Core.Memory
 {
     public interface IMmu : IReadWriteMemory
     {
+        bool BootRomLoaded { get; }
         void LoadBootRom(byte[] rom);
     }
 }

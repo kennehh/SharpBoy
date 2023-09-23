@@ -9,9 +9,10 @@ namespace SharpBoy.Core.Rendering
 
         public void Enqueue(ReadOnlyMemory<byte> frame)
         {
-            if (queue.Count <= 0xff)
+            queue.Enqueue(frame);
+            if (queue.Count > 0xff)
             {
-                queue.Enqueue(frame);
+                queue.TryDequeue(out _);
             }
             frameReady.Set();
         }

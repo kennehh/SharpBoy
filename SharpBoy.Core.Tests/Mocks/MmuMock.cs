@@ -16,6 +16,8 @@ namespace SharpBoy.Core.Tests.Mocks
             this.memory = memory ?? new byte[0x10000];
         }
 
+        public bool BootRomLoaded => false;
+
         public void LoadBootRom(byte[] rom) { }
 
         public byte Read(int address) => memory[address];
