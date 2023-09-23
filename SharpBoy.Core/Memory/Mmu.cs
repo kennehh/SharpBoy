@@ -32,6 +32,8 @@ namespace SharpBoy.Core.Memory
             this.timer = timer;
             this.cartridgeReader = cartridgeReader;
             this.interruptManager = interruptManager;
+
+            Array.Fill<byte>(ioRegisters, 0xff);
         }
 
         public void LoadBootRom(byte[] rom)
@@ -97,8 +99,7 @@ namespace SharpBoy.Core.Memory
                     // use of this area should be prohibited
                     break;
                 case <= 0xff03:
-                    // handle I/O registers here
-                    ioRegisters[address] = value;
+                    // ioRegisters[address] = value;
                     break;
                 case <= 0xff07:
                     timer.WriteRegister(address, value);

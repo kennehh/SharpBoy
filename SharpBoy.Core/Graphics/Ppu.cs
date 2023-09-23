@@ -155,23 +155,27 @@ namespace SharpBoy.Core.Graphics
 
         private void RenderBgScanline()
         {
-            if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
-            {
-                return;
-            }
-
             var line = Registers.LY;
 
             int tileDataAddress = Registers.LCDC.HasFlag(LcdcFlags.TileDataArea) ? 0x8000 : 0x8800;
             int bgMapAddress = Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea) ? 0x9C00 : 0x9800;
 
-            int yPos = line + Registers.SCY; // y position of the current scanline
-            int tileRow = (yPos >> 3) * 32; // Each tile is 8x8 pixels, and each row has 32 tiles
+            int yPos = (line + Registers.SCY) & 0xFF; // y position of the current scanline
+            int tileRow = (yPos >>> 3) * 32; // Each tile is 8x8 pixels, and each row has 32 tiles
             int pixelPositionBase = line * LcdWidth * 3; // Base position in framebuffer for this scanline
 
             for (int pixel = 0; pixel < LcdWidth; pixel++)
             {
-                int xPos = pixel + Registers.SCX;
+                var pixelPosition = pixelPositionBase + pixel * 3;
+
+                if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
+                {
+                    frameBuffer[pixelPosition] = TransparentColor.Red;
+                    frameBuffer[pixelPosition + 1] = TransparentColor.Green;
+                    frameBuffer[pixelPosition + 2] = TransparentColor.Blue;
+                }
+
+                int xPos = (pixel + Registers.SCX) & 0xFF;
                 int tileCol = xPos >>> 3;
 
                 int tileNum;
@@ -201,8 +205,6 @@ namespace SharpBoy.Core.Graphics
 
                 // Set pixel color in the screen buffer
                 var color = BgpColorMap[colorIndex];
-                var pixelPosition = pixelPositionBase + pixel * 3;
-
                 frameBuffer[pixelPosition] = color.Red;
                 frameBuffer[pixelPosition + 1] = color.Green;
                 frameBuffer[pixelPosition + 2] = color.Blue;
