@@ -1,22 +1,38 @@
-﻿using Avalonia.OpenGL;
+﻿using Avalonia;
+using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
-using ReactiveUI;
 using SharpBoy.Core.Rendering;
 using System;
+using System.Drawing;
 
-namespace SharpBoy.App.Controls
+namespace SharpBoy.App.Avalonia.Controls
 {
     public partial class EmulatorRenderer : OpenGlControlBase
     {
         public IRenderer Renderer { get; set; }
         private bool initialised = false;
 
+        public EmulatorRenderer()
+        {
+            // Listen for property changes
+            PropertyChanged += HandlePropertyChanged;
+        }
+
+        private void HandlePropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            if (initialised && e.Property == BoundsProperty)
+            {
+                var size = ((Rect)e.NewValue).Size;
+                Renderer.Resize((int)size.Width, (int)size.Height);
+            }
+        }
+
         protected override void OnOpenGlInit(GlInterface gl)
         {
             if (!initialised)
             {
-                Renderer.Initialise(gl.GetProcAddress);                
-                this.WhenAnyValue(x => x.Bounds.Size).Subscribe(size => Renderer.Resize((int)size.Width, (int)size.Height));
+                Renderer.Initialise(gl.GetProcAddress);
+                Renderer.Resize((int)Bounds.Size.Width, (int)Bounds.Size.Height);
                 initialised = true;
             }
         }

@@ -3,8 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="500"
-        x:Class="SharpBoy.App.Views.DebugWindow"
-		xmlns:vm="clr-namespace:SharpBoy.App.ViewModels"
+        x:Class="SharpBoy.App.Avalonia.Views.DebugWindow"
+		xmlns:vm="clr-namespace:SharpBoy.App.Avalonia.ViewModels"
 		Width="300" Height="500"
         Title="DebugWindow"
 		x:DataType="vm:DebugViewModel">
@@ -15,8 +15,8 @@
 	</Design.DataContext>
     <DataGrid Name="RegisterDataGrid" AutoGenerateColumns="False" ItemsSource="{CompiledBinding Registers}">
         <DataGrid.Columns>
-            <DataGridTextColumn Header="Register" Binding="{ReflectionBinding Key}" />
-            <DataGridTextColumn Header="Value" Binding="{ReflectionBinding Value}" />
+            <DataGridTextColumn Header="Register" Binding="{CompiledBinding Name}" />
+            <DataGridTextColumn Header="Value" Binding="{CompiledBinding Value}" />
         </DataGrid.Columns>
     </DataGrid>
 </Window>

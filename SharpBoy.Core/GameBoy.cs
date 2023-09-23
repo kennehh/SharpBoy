@@ -88,22 +88,22 @@ namespace SharpBoy.Core
                 {
                     if (StateUpdated != null)
                     {
-                        state.Registers["A"] = Cpu.Registers.A.ToString("X");
-                        state.Registers["F"] = Cpu.Registers.F.ToString("X");
-                        state.Registers["AF"] = Cpu.Registers.AF.ToString("X");
-                        state.Registers["B"] = Cpu.Registers.B.ToString("X");
-                        state.Registers["C"] = Cpu.Registers.C.ToString("X");
-                        state.Registers["BC"] = Cpu.Registers.BC.ToString("X");
-                        state.Registers["D"] = Cpu.Registers.D.ToString("X");
-                        state.Registers["E"] = Cpu.Registers.E.ToString("X");
-                        state.Registers["DE"] = Cpu.Registers.DE.ToString("X");
-                        state.Registers["H"] = Cpu.Registers.H.ToString("X");
-                        state.Registers["L"] = Cpu.Registers.L.ToString("X");
-                        state.Registers["HL"] = Cpu.Registers.HL.ToString("X");
-                        state.Registers["PC"] = Cpu.Registers.PC.ToString("X");
-
-                        state.Registers["STAT"] = Ppu.Registers.STAT.ToString("X");
-                        state.Registers["LCDC"] = Ppu.Registers.LCDC.ToString();
+                        state.Registers.Clear();
+                        state.Registers.Add(new RegisterState("A", Cpu.Registers.A.ToString("X")));
+                        state.Registers.Add(new RegisterState("F", Cpu.Registers.F.ToString("X")));
+                        state.Registers.Add(new RegisterState("AF", Cpu.Registers.AF.ToString("X")));
+                        state.Registers.Add(new RegisterState("B", Cpu.Registers.B.ToString("X")));
+                        state.Registers.Add(new RegisterState("C", Cpu.Registers.C.ToString("X")));
+                        state.Registers.Add(new RegisterState("BC", Cpu.Registers.BC.ToString("X")));
+                        state.Registers.Add(new RegisterState("D", Cpu.Registers.D.ToString("X")));
+                        state.Registers.Add(new RegisterState("E", Cpu.Registers.E.ToString("X")));
+                        state.Registers.Add(new RegisterState("DE", Cpu.Registers.DE.ToString("X")));
+                        state.Registers.Add(new RegisterState("H", Cpu.Registers.H.ToString("X")));
+                        state.Registers.Add(new RegisterState("L", Cpu.Registers.L.ToString("X")));
+                        state.Registers.Add(new RegisterState("HL", Cpu.Registers.HL.ToString("X")));
+                        state.Registers.Add(new RegisterState("PC", Cpu.Registers.PC.ToString("X")));
+                        state.Registers.Add(new RegisterState("STAT", Ppu.Registers.STAT.ToString("X")));
+                        state.Registers.Add(new RegisterState("LCDC", Ppu.Registers.LCDC.ToString("X")));
 
                         StateUpdated(state);
                     }

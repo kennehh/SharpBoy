@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using Avalonia;
-using Avalonia.OpenGL;
-using Avalonia.ReactiveUI;
-using Silk.NET.OpenGL;
 
-namespace SharpBoy.App.Desktop;
+using Avalonia;
+
+namespace SharpBoy.App.Avalonia.Desktop;
 
 class Program
 {
@@ -20,6 +17,7 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .WithInterFont()
             .With(new Win32PlatformOptions
             {
                 RenderingMode = new[]
@@ -27,7 +25,6 @@ class Program
                     Win32RenderingMode.Wgl
                 }
             })
-            .WithInterFont()
-            .LogToTrace()
-            .UseReactiveUI();
+            .LogToTrace();
+
 }

@@ -1,12 +1,12 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Microsoft.Extensions.DependencyInjection;
-using SharpBoy.App.Controls;
+using SharpBoy.App.Avalonia.Controls;
 using SharpBoy.Core;
 using SharpBoy.Core.Rendering;
 using System.Threading.Tasks;
 
-namespace SharpBoy.App.Views;
+namespace SharpBoy.App.Avalonia.Views;
 
 public partial class MainView : UserControl
 {

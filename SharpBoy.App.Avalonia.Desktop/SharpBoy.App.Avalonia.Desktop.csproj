@@ -14,6 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpBoy.App\SharpBoy.App.csproj" />
+    <ProjectReference Include="..\SharpBoy.App.Avalonia\SharpBoy.App.Avalonia.csproj" />
   </ItemGroup>
 </Project>

@@ -1,15 +1,16 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
-using SharpBoy.App.ViewModels;
-using SharpBoy.App.Views;
+using SharpBoy.App.Avalonia.ViewModels;
+using SharpBoy.App.Avalonia.Views;
 using SharpBoy.Core.Rendering;
 using SharpBoy.Core.Rendering.Silk;
 using SharpBoy.Core.Utilities;
 using System;
 
-namespace SharpBoy.App;
+namespace SharpBoy.App.Avalonia;
 
 public partial class App : Application
 {
@@ -22,6 +23,10 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // Line below is needed to remove Avalonia data validation.
+        // Without this line you will get duplicate validations from both Avalonia and CT
+        BindingPlugins.DataValidators.RemoveAt(0);
+
         ServiceProvider = new ServiceCollection()
             .RegisterCoreServices()
             .AddSingleton<IRenderer, SilkRenderer>()
