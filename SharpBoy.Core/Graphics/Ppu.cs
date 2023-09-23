@@ -6,6 +6,8 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Numerics;
 using System.Reflection;
 using System.Text;
 
@@ -18,6 +20,7 @@ namespace SharpBoy.Core.Graphics
 
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
+
         private static readonly ColorRgb[] Colors =
         {
             new ColorRgb(154, 158, 63),
@@ -25,7 +28,11 @@ namespace SharpBoy.Core.Graphics
             new ColorRgb(14, 69, 11),
             new ColorRgb(27, 42, 9)
         };
-        private static readonly ColorRgb[] ColorMap = (ColorRgb[])Colors.Clone();
+
+        private static readonly ColorRgb TransparentColor = Colors[0];
+        private static readonly ColorRgb[] BgpColorMap = (ColorRgb[])Colors.Clone();
+        private static readonly ColorRgb[] Obp0ColorMap = (ColorRgb[])Colors.Clone();
+        private static readonly ColorRgb[] Obp1ColorMap = (ColorRgb[])Colors.Clone();
 
         private IReadWriteMemory vram = new Ram(0x2000);
         private IReadWriteMemory oam = new Ram(0xa0);
@@ -58,7 +65,8 @@ namespace SharpBoy.Core.Graphics
                         Registers.CurrentStatus = PpuStatus.Drawing;
                         if (Registers.CurrentStatus != previousStatus)
                         {
-                            RenderScanline();
+                            RenderBgScanline();
+                            RenderSprites();
                         }
                         break;
                     case < 456:
@@ -136,16 +144,16 @@ namespace SharpBoy.Core.Graphics
                 case 0xff44: break;
                 case 0xff45: Registers.LYC = value; break;
                 case 0xff46: Registers.DMA = value; break;
-                case 0xff47: Registers.BGP = value; UpdateColorMap(); break;
-                case 0xff48: Registers.OBP0 = value; break;
-                case 0xff49: Registers.OBP1 = value; break;
+                case 0xff47: Registers.BGP = value; UpdateBgpColorMap(); break;
+                case 0xff48: Registers.OBP0 = value; UpdateObp0ColorMap(); break;
+                case 0xff49: Registers.OBP1 = value; UpdateObp1ColorMap(); break;
                 case 0xff4a: Registers.WY = value; break;
                 case 0xff4b: Registers.WX = value; break;
                 default: throw new NotImplementedException();
             }
         }
 
-        private void RenderScanline()
+        private void RenderBgScanline()
         {
             if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
             {
@@ -191,7 +199,7 @@ namespace SharpBoy.Core.Graphics
                 colorIndex |= (data1 >> colorBitIndex) & 1;
 
                 // Set pixel color in the screen buffer
-                var color = ColorMap[colorIndex];
+                var color = BgpColorMap[colorIndex];
                 var pixelPosition = ((line * LcdWidth) + pixel) * 3;
                 frameBuffer[pixelPosition] = color.Red;
                 frameBuffer[pixelPosition + 1] = color.Green;
@@ -199,12 +207,96 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        private void UpdateColorMap()
+        private void RenderSprites()
+        {
+            if (!Registers.LCDC.HasFlag(LcdcFlags.ObjEnable))
+            {
+                return;
+            }
+
+            int spriteHeight = Registers.LCDC.HasFlag(LcdcFlags.ObjSize) ? 16 : 8;
+
+            for (int i = 0; i < 40; i++) // Game Boy has 40 sprites in OAM
+            {
+                int index = i * 4; // Each sprite has 4 bytes of data in OAM
+                byte yPos = oam.Read(index);
+                byte xPos = oam.Read(index + 1);
+                byte tileNumber = oam.Read(index + 2);
+                byte attributes = oam.Read(index + 3);
+
+                bool yFlip = (attributes & 0x40) != 0;
+                bool xFlip = (attributes & 0x20) != 0;
+                // ... other flags can be read from attributes as needed
+
+                int yPositionCorrected = yPos - 16;
+                int xPositionCorrected = xPos - 8;
+
+                // Check if this sprite intersects with the current scanline
+                if (Registers.LY >= yPositionCorrected && Registers.LY < (yPositionCorrected + spriteHeight))
+                {
+                    int line = yFlip ? (yPositionCorrected + spriteHeight - 1 - Registers.LY) : (Registers.LY - yPositionCorrected);
+                    RenderSpriteLine(xPositionCorrected, line, tileNumber, xFlip, attributes);
+                }
+            }
+        }
+
+        private void RenderSpriteLine(int x, int line, byte tileNumber, bool xFlip, byte attributes)
+        {
+            // Get the tile pattern data for this line of the sprite
+            int tileDataAddress = 0x8000 + (tileNumber * 16) + (line * 2);
+            byte data1 = vram.Read(tileDataAddress);
+            byte data2 = vram.Read(tileDataAddress + 1);
+
+            for (int tilePixel = 0; tilePixel < 8; tilePixel++)
+            {
+                int colorBit = xFlip ? tilePixel : 7 - tilePixel;
+                int colorIndex = ((data2 >> colorBit) & 1) << 1;
+                colorIndex |= (data1 >> colorBit) & 1;
+
+                // Convert color index to actual color and merge with background
+                var color = GetSpriteColor(colorIndex, attributes);
+
+                if (color != TransparentColor)
+                {
+                    int bufferPosition = ((Registers.LY * LcdWidth) + x + tilePixel) * 3;
+
+                    frameBuffer[bufferPosition] = color.Red;
+                    frameBuffer[bufferPosition + 1] = color.Green;
+                    frameBuffer[bufferPosition + 2] = color.Blue;
+                }
+            }
+        }
+
+        private ColorRgb GetSpriteColor(int colorIndex, byte attributes)
+        {
+            bool useObp1 = (attributes & 0x10) != 0;  // Check if OBP1 palette is used.
+            return useObp1 ? Obp1ColorMap[colorIndex] : Obp0ColorMap[colorIndex];
+        }
+
+        private void UpdateBgpColorMap()
         {
             for (int i = 0; i < 4; i++)
             {
                 var colorValue = Registers.BGP >>> (i * 2) & 3;
-                ColorMap[i] = Colors[colorValue];
+                BgpColorMap[i] = Colors[colorValue];
+            }
+        }
+
+        private void UpdateObp0ColorMap()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                var colorValue = Registers.OBP0 >>> (i * 2) & 3;
+                Obp0ColorMap[i] = Colors[colorValue];
+            }
+        }
+
+        private void UpdateObp1ColorMap()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                var colorValue = Registers.OBP1 >>> (i * 2) & 3;
+                Obp1ColorMap[i] = Colors[colorValue];
             }
         }
 
@@ -251,6 +343,31 @@ namespace SharpBoy.Core.Graphics
                 Green = green;
                 Blue = blue;
             }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ColorRgb other && this == other;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Red, Green, Blue);
+            }
+
+            public static bool operator ==(ColorRgb x, ColorRgb y)
+            {
+                return x.Red == y.Red && x.Blue == y.Blue && x.Green == y.Green;
+            }
+
+            public static bool operator !=(ColorRgb x, ColorRgb y)
+            {
+                return !(x == y);
+            }
+        }
+
+        private enum SpriteAttribute
+        {
+
         }
     }
 }

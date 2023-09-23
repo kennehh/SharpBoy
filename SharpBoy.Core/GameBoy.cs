@@ -54,7 +54,6 @@ namespace SharpBoy.Core
             var stopwatch = Stopwatch.StartNew();
             var cyclesEmulated = 0L;
             var targetCyclesPerSecond = CpuSpeedHz;
-            var syncEvent = new AutoResetEvent(false);
 
             while (!stopped)
             {
