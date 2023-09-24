@@ -8,11 +8,14 @@ namespace SharpBoy.Core.Rendering.Silk
     {
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
-        private readonly IRenderQueue renderQueue;
-        private bool disposed = false;
 
+        private bool disposed = false;
         private GL gl = null;
         private Display display = null;
+        private Vector2D<int> position = new Vector2D<int>(0, 0);
+        private Vector2D<uint> size = new Vector2D<uint>(LcdWidth, LcdHeight);
+
+        private readonly IRenderQueue renderQueue;
 
         public SilkRenderer(IRenderQueue renderQueue)
         {
@@ -48,10 +51,6 @@ namespace SharpBoy.Core.Rendering.Silk
                 display.Render(fb);
             }
         }
-
-        private Vector2D<int> position = new Vector2D<int>(0, 0);
-        private Vector2D<uint> size = new Vector2D<uint>(LcdWidth, LcdHeight);
-
 
         public void Resize(int width, int height)
         {

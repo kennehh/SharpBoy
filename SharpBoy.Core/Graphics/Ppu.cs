@@ -41,11 +41,13 @@ namespace SharpBoy.Core.Graphics
         private int cycles;
         private readonly IInterruptManager interruptManager;
         private readonly IRenderQueue renderQueue;
+        private readonly TileMaps tileMaps;
 
         public Ppu(IInterruptManager interruptManager, IRenderQueue renderQueue)
         {
             this.interruptManager = interruptManager;
             this.renderQueue = renderQueue;
+            tileMaps = new TileMaps(vram);
         }
 
         public void Tick()
@@ -55,51 +57,11 @@ namespace SharpBoy.Core.Graphics
 
             if (Registers.LY <= 143)
             {
-                switch (cycles)
-                {
-                    case < 80:
-                        Registers.CurrentStatus = PpuStatus.SearchingOam;
-                        break;
-                    case < 252:
-                        // could take from 172 to 289 cycles, defaulting to 172 for now
-                        Registers.CurrentStatus = PpuStatus.Drawing;
-                        if (Registers.CurrentStatus != previousStatus)
-                        {
-                            RenderBgScanline();
-                            RenderSprites();
-                        }
-                        break;
-                    case < 456:
-                        // could take from 87 to 204 cycles, defaulting to 204 for now
-                        Registers.CurrentStatus = PpuStatus.HorizontalBlank;
-                        break;
-                    default:
-                        Registers.LY++;
-                        cycles -= 456;
-                        break;
-                }
+                HandleModeSwitching(previousStatus);
             }
             else
             {
-                Registers.CurrentStatus = PpuStatus.VerticalBlank;
-                if (Registers.CurrentStatus != previousStatus)
-                {
-                    interruptManager.RequestInterrupt(InterruptFlag.VBlank);
-                    renderQueue.Enqueue(frameBuffer);
-                }
-
-                if (cycles >= 456)
-                {
-                    if (Registers.LY >= 153)
-                    {
-                        Registers.LY = 0;
-                    }
-                    else
-                    {
-                        Registers.LY++;
-                    }
-                    cycles -= 456;
-                }
+                HandleVBlank(previousStatus);
             }
 
             HandleStatInterrupt();
@@ -137,74 +99,128 @@ namespace SharpBoy.Core.Graphics
         {
             switch (address)
             {
-                case 0xff40: Registers.LCDC = (LcdcFlags)value; break;
+                case 0xff40: UpdateLcdc(value); break;
                 case 0xff41: Registers.STAT = value; break;
                 case 0xff42: Registers.SCY = value; break;
                 case 0xff43: Registers.SCX = value; break;
                 case 0xff44: break;
                 case 0xff45: Registers.LYC = value; break;
                 case 0xff46: Registers.DMA = value; break;
-                case 0xff47: Registers.BGP = value; UpdateBgpColorMap(); break;
-                case 0xff48: Registers.OBP0 = value; UpdateObp0ColorMap(); break;
-                case 0xff49: Registers.OBP1 = value; UpdateObp1ColorMap(); break;
+                case 0xff47:
+                    Registers.BGP = value;
+                    UpdateColorMap(BgpColorMap, value); 
+                    break;
+                case 0xff48:
+                    Registers.OBP0 = value;
+                    UpdateColorMap(Obp0ColorMap, value); 
+                    break;
+                case 0xff49:
+                    Registers.OBP1 = value;
+                    UpdateColorMap(Obp1ColorMap, value); 
+                    break;
                 case 0xff4a: Registers.WY = value; break;
                 case 0xff4b: Registers.WX = value; break;
                 default: throw new NotImplementedException();
             }
         }
 
+        private void UpdateLcdc(byte newValue)
+        {
+            Registers.LCDC = (LcdcFlags)newValue;
+            tileMaps.SetActiveTileMap(Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea));
+            tileMaps.ActiveTileMap.SetActiveTileData(Registers.LCDC.HasFlag(LcdcFlags.TileDataArea));
+        }
+
+        private void HandleModeSwitching(PpuStatus previousStatus)
+        {
+            switch (cycles)
+            {
+                case < 80:
+                    Registers.CurrentStatus = PpuStatus.SearchingOam;
+                    break;
+                case < 252:
+                    // could take from 172 to 289 cycles, defaulting to 172 for now
+                    Registers.CurrentStatus = PpuStatus.Drawing;
+                    if (Registers.CurrentStatus != previousStatus)
+                    {
+                        RenderBgScanline();
+                        RenderSprites();
+                    }
+                    break;
+                case < 456:
+                    // could take from 87 to 204 cycles, defaulting to 204 for now
+                    Registers.CurrentStatus = PpuStatus.HorizontalBlank;
+                    break;
+                default:
+                    Registers.LY++;
+                    cycles -= 456;
+                    break;
+            }
+        }
+
+        private void HandleVBlank(PpuStatus previousStatus)
+        {
+            Registers.CurrentStatus = PpuStatus.VerticalBlank;
+            if (Registers.CurrentStatus != previousStatus)
+            {
+                interruptManager.RequestInterrupt(InterruptFlag.VBlank);
+                renderQueue.Enqueue(frameBuffer);
+            }
+
+            if (cycles >= 456)
+            {
+                if (Registers.LY >= 153)
+                {
+                    Registers.LY = 0;
+                }
+                else
+                {
+                    Registers.LY++;
+                }
+                cycles -= 456;
+            }
+        }
+
         private void RenderBgScanline()
         {
+            // Get the current line being rendered
             var line = Registers.LY;
 
-            int tileDataAddress = Registers.LCDC.HasFlag(LcdcFlags.TileDataArea) ? 0x8000 : 0x8800;
-            int bgMapAddress = Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea) ? 0x9C00 : 0x9800;
+            // Calculate the base position in the framebuffer for this scanline
+            int pixelPositionBase = line * LcdWidth * 3;
 
-            int yPos = (line + Registers.SCY) & 0xFF; // y position of the current scanline
-            int tileRow = (yPos >>> 3) * 32; // Each tile is 8x8 pixels, and each row has 32 tiles
-            int pixelPositionBase = line * LcdWidth * 3; // Base position in framebuffer for this scanline
-
-            for (int pixel = 0; pixel < LcdWidth; pixel++)
+            // If the LCD is disabled, fill the framebuffer with the transparent color for this scanline
+            if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
             {
-                var pixelPosition = pixelPositionBase + pixel * 3;
-
-                if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
+                for (int pixel = 0; pixel < LcdWidth; pixel++)
                 {
+                    var pixelPosition = pixelPositionBase + pixel * 3;
+
                     frameBuffer[pixelPosition] = TransparentColor.Red;
                     frameBuffer[pixelPosition + 1] = TransparentColor.Green;
                     frameBuffer[pixelPosition + 2] = TransparentColor.Blue;
                 }
+                return; // Exit early since LCD is disabled
+            }
 
+            // Calculate the adjusted Y position accounting for vertical scroll
+            int yPos = (line + Registers.SCY) & 0xFF;
+
+            // Iterate through each pixel in the current scanline
+            for (int pixel = 0; pixel < LcdWidth; pixel++)
+            {
+                var pixelPosition = pixelPositionBase + pixel * 3;
+
+                // Calculate the adjusted X position accounting for horizontal scroll
                 int xPos = (pixel + Registers.SCX) & 0xFF;
-                int tileCol = xPos >>> 3;
 
-                int tileNum;
-                int tileAddress = bgMapAddress + tileRow + tileCol;
+                // Fetch the color index for the given pixel from the active tilemap
+                var colorIndex = tileMaps.ActiveTileMap.GetColorIndex(xPos, yPos);
 
-                if (tileDataAddress == 0x8000)
-                {
-                    tileNum = vram.Read(tileAddress);
-                }
-                else
-                {
-                    tileNum = (sbyte)vram.Read(tileAddress); // signed
-                }
-
-                int tileLocation = tileDataAddress + (tileNum << 4);
-                int lineOffset = (yPos & 7) * 2; // Each line in a tile takes up 2 bytes
-
-                byte data1 = vram.Read(tileLocation + lineOffset);
-                byte data2 = vram.Read(tileLocation + lineOffset + 1);
-
-                // Find the correct pixel within the tile
-                int colorBitIndex = 7 - (xPos & 7);
-
-                // Combine data from two bytes to get the color index
-                int colorIndex = ((data2 >>> colorBitIndex) & 1) << 1;
-                colorIndex |= (data1 >>> colorBitIndex) & 1;
-
-                // Set pixel color in the screen buffer
+                // Get the actual RGB color using the fetched color index
                 var color = BgpColorMap[colorIndex];
+
+                // Fill the framebuffer with the RGB values
                 frameBuffer[pixelPosition] = color.Red;
                 frameBuffer[pixelPosition + 1] = color.Green;
                 frameBuffer[pixelPosition + 2] = color.Blue;
@@ -277,30 +293,12 @@ namespace SharpBoy.Core.Graphics
             return useObp1 ? Obp1ColorMap[colorIndex] : Obp0ColorMap[colorIndex];
         }
 
-        private void UpdateBgpColorMap()
+        private void UpdateColorMap(ColorRgb[] colorMap, byte registerValue)
         {
             for (int i = 0; i < 4; i++)
             {
-                var colorValue = Registers.BGP >>> (i * 2) & 3;
-                BgpColorMap[i] = Colors[colorValue];
-            }
-        }
-
-        private void UpdateObp0ColorMap()
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                var colorValue = Registers.OBP0 >>> (i * 2) & 3;
-                Obp0ColorMap[i] = Colors[colorValue];
-            }
-        }
-
-        private void UpdateObp1ColorMap()
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                var colorValue = Registers.OBP1 >>> (i * 2) & 3;
-                Obp1ColorMap[i] = Colors[colorValue];
+                var colorValue = registerValue >>> (i * 2) & 3;
+                colorMap[i] = Colors[colorValue];
             }
         }
 
@@ -367,11 +365,6 @@ namespace SharpBoy.Core.Graphics
             {
                 return !(x == y);
             }
-        }
-
-        private enum SpriteAttribute
-        {
-
         }
     }
 }

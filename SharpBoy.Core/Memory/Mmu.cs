@@ -98,8 +98,11 @@ namespace SharpBoy.Core.Memory
                 case <= 0xfeff:
                     // use of this area should be prohibited
                     break;
-                case <= 0xff03:
+                case <= 0xff00:
                     // ioRegisters[address] = value;
+                    break;
+                case <= 0xff03:
+                    ioRegisters[address] = value;
                     break;
                 case <= 0xff07:
                     timer.WriteRegister(address, value);

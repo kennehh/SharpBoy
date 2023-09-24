@@ -42,7 +42,7 @@ namespace SharpBoy.Core.Tests
 
             var lastPC = -1;
             //gb.Cpu.Registers.PC = 0x101;
-            gb.LoadBootRom("Z:\\games\\bios\\gb\\dmg0_rom.bin");
+            //gb.LoadBootRom("Z:\\games\\bios\\gb\\dmg0_rom.bin");
             var characters = new List<byte>();
 
             var stopwatch = new Stopwatch();

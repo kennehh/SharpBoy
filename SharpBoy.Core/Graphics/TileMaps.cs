@@ -1,0 +1,149 @@
+﻿using SharpBoy.Core.Memory;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace SharpBoy.Core.Graphics
+{
+    /// <summary>
+    /// Manages the two tile maps for the background and window.
+    /// </summary>
+    public class TileMaps
+    {
+        public TileMap ActiveTileMap { get; private set; }
+
+        private readonly TileMap tileMap9800;
+        private readonly TileMap tileMap9C00;
+
+        public TileMaps(IReadWriteMemory vram)
+        {
+            tileMap9800 = new TileMap(vram, 0x9800);
+            tileMap9C00 = new TileMap(vram, 0x9C00);
+            ActiveTileMap = tileMap9800;
+        }
+
+        public void SetActiveTileMap(bool useTileMap9C00)
+        {
+            ActiveTileMap = useTileMap9C00 ? tileMap9C00 : tileMap9800;
+        }
+    }
+
+    /// <summary>
+    /// Represents a tile map, which consists of tile indices.
+    /// </summary>
+    public class TileMap
+    {
+        private readonly IReadWriteMemory vram;
+        private readonly int baseAddress;
+
+        private readonly TileData tileData8800;
+        private readonly TileData tileData8000;
+
+        private TileData activeTileData;
+
+        public TileMap(IReadWriteMemory vram, int baseAddress)
+        {
+            this.vram = vram;
+            this.baseAddress = baseAddress;
+
+            tileData8000 = new TileData(vram, 0x8000);
+            tileData8800 = new TileData(vram, 0x8800);
+            activeTileData = tileData8000;
+        }
+
+        public void SetActiveTileData(bool useTileData8000)
+        {
+            activeTileData = useTileData8000 ? tileData8000 : tileData8800;
+        }
+
+        public int GetColorIndex(int x, int y)
+        {
+            return GetTile(x, y).GetColorIndex(x, y);
+        }
+
+        private Tile GetTile(int x, int y)
+        {
+            int tileNumber = GetTileNumber(x >>> 3, y >>> 3);
+            return activeTileData.GetTile(tileNumber);
+        }
+
+        // Get the tile index number from the tile map based on coordinates.
+        private int GetTileNumber(int xIndex, int yIndex)
+        {
+            // Calculate the address in memory for the desired tile index.
+            int address = baseAddress + (yIndex * 32) + xIndex;
+
+            // Read the tile number, with consideration for the two possible tile data address regions.
+            return activeTileData.Address == 0x8800
+                ? (sbyte)vram.Read(address)
+                : vram.Read(address);
+        }
+    }
+
+    /// <summary>
+    /// Represents a set of tiles available at a specific memory address.
+    /// </summary>
+    public class TileData
+    {
+        public int Address { get; }
+
+        private const int TotalTiles = 256;
+        private readonly Tile[] tiles = new Tile[TotalTiles];
+
+        public TileData(IReadWriteMemory vram, int baseAddress)
+        {
+            Address = baseAddress;
+
+            for (int tileNumber = 0; tileNumber < TotalTiles; tileNumber++)
+            {
+                int tileAddress = Address + (tileNumber << 4);
+                tiles[tileNumber] = new Tile(vram, tileAddress);
+            }
+        }
+
+        public Tile GetTile(int tileNumber)
+        {
+            // Normalize the tile number to be within [0, 255]
+            int normalizedTileNumber = tileNumber & 0xFF;
+            return tiles[normalizedTileNumber];
+        }
+    }
+
+    /// <summary>
+    /// Represents an individual 8x8 pixel tile.
+    /// </summary>
+    public class Tile
+    {
+        private readonly IReadWriteMemory vram;
+        private readonly int baseAddress;
+
+        public Tile(IReadWriteMemory vram, int baseAddress)
+        {
+            this.vram = vram;
+            this.baseAddress = baseAddress;
+        }
+
+        // Fetch the color index for a specific pixel within the tile.
+        public int GetColorIndex(int x, int y)
+        {
+            int xPixelInTile = x & 7;  // Extract the x position within the tile.
+            int yPixelInTile = y & 7;  // Extract the y position within the tile.
+
+            int yOffset = yPixelInTile * 2; // 2 bytes per row
+            byte data1 = vram.Read(baseAddress + yOffset);
+            byte data2 = vram.Read(baseAddress + yOffset + 1);
+
+            // Find the correct pixel within the tile.
+            int colorBitIndex = 7 - xPixelInTile;
+
+            // Combine bits from data1 and data2 to create the color index for the pixel.
+            int colorIndex = ((data2 >>> colorBitIndex) & 1) << 1;
+            colorIndex |= (data1 >>> colorBitIndex) & 1;
+
+            return colorIndex;
+        }
+    }
+}
