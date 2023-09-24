@@ -63,8 +63,6 @@ namespace SharpBoy.Core.Graphics
             {
                 HandleVBlank(previousStatus);
             }
-
-            HandleStatInterrupt();
         }
 
         public byte ReadVram(ushort address) => vram.Read(address);
@@ -104,7 +102,7 @@ namespace SharpBoy.Core.Graphics
                 case 0xff42: Registers.SCY = value; break;
                 case 0xff43: Registers.SCX = value; break;
                 case 0xff44: break;
-                case 0xff45: Registers.LYC = value; break;
+                case 0xff45: UpdateLyc(value); break;
                 case 0xff46: Registers.DMA = value; break;
                 case 0xff47:
                     Registers.BGP = value;
@@ -131,12 +129,40 @@ namespace SharpBoy.Core.Graphics
             tileMaps.ActiveTileMap.SetActiveTileData(Registers.LCDC.HasFlag(LcdcFlags.TileDataArea));
         }
 
+        private void UpdateLyc(byte newValue)
+        {
+            Registers.LYC = newValue;
+            CheckLyEqualsLycInterrupt();
+        }
+
+        private void IncrementLy()
+        {
+            if (Registers.LY >= 153)
+            {
+                Registers.LY = 0;
+            }
+            else
+            {
+                Registers.LY++;
+            }
+            CheckLyEqualsLycInterrupt();
+        }
+
+        private void CheckLyEqualsLycInterrupt()
+        {
+            if (Registers.LyCompareFlag)
+            {
+                HandleStatInterrupt(StatInterruptSourceFlag.LyEqualsLyc);
+            }
+        }
+
         private void HandleModeSwitching(PpuStatus previousStatus)
         {
             switch (cycles)
             {
                 case < 80:
                     Registers.CurrentStatus = PpuStatus.SearchingOam;
+                    HandleStatInterrupt(StatInterruptSourceFlag.SearchingOam);
                     break;
                 case < 252:
                     // could take from 172 to 289 cycles, defaulting to 172 for now
@@ -150,9 +176,10 @@ namespace SharpBoy.Core.Graphics
                 case < 456:
                     // could take from 87 to 204 cycles, defaulting to 204 for now
                     Registers.CurrentStatus = PpuStatus.HorizontalBlank;
+                    HandleStatInterrupt(StatInterruptSourceFlag.HorizontalBlank);
                     break;
                 default:
-                    Registers.LY++;
+                    IncrementLy();
                     cycles -= 456;
                     break;
             }
@@ -161,6 +188,8 @@ namespace SharpBoy.Core.Graphics
         private void HandleVBlank(PpuStatus previousStatus)
         {
             Registers.CurrentStatus = PpuStatus.VerticalBlank;
+            HandleStatInterrupt(StatInterruptSourceFlag.VerticalBlank);
+
             if (Registers.CurrentStatus != previousStatus)
             {
                 interruptManager.RequestInterrupt(InterruptFlag.VBlank);
@@ -169,14 +198,7 @@ namespace SharpBoy.Core.Graphics
 
             if (cycles >= 456)
             {
-                if (Registers.LY >= 153)
-                {
-                    Registers.LY = 0;
-                }
-                else
-                {
-                    Registers.LY++;
-                }
+                IncrementLy();
                 cycles -= 456;
             }
         }
@@ -302,34 +324,11 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        private void HandleStatInterrupt()
+        private void HandleStatInterrupt(StatInterruptSourceFlag flagToCheck)
         {
-            if (Registers.StatInterruptSource != StatInterruptSourceFlag.None)
+            if (Registers.StatInterruptSource != StatInterruptSourceFlag.None && Registers.StatInterruptSource.HasFlag(flagToCheck))
             {
-                StatInterruptSourceFlag? interrupt = null;
-
-                if (Registers.CurrentStatus == PpuStatus.HorizontalBlank && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.HorizontalBlank))
-                {
-                    interrupt = StatInterruptSourceFlag.HorizontalBlank;
-                }
-                else if (Registers.CurrentStatus == PpuStatus.VerticalBlank && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.VerticalBlank))
-                {
-                    interrupt = StatInterruptSourceFlag.VerticalBlank;
-                }
-                else if (Registers.CurrentStatus == PpuStatus.SearchingOam && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.SearchingOam))
-                {
-                    interrupt = StatInterruptSourceFlag.SearchingOam;
-                }
-                else if (Registers.LyCompareFlag && Registers.StatInterruptSource.HasFlag(StatInterruptSourceFlag.LyEqualsLyc))
-                {
-                    interrupt = StatInterruptSourceFlag.LyEqualsLyc;
-                }
-
-                if (interrupt.HasValue)
-                {
-                    Registers.StatInterruptSource &= ~interrupt.Value;
-                    interruptManager.RequestInterrupt(InterruptFlag.LcdStat);
-                }
+                interruptManager.RequestInterrupt(InterruptFlag.LcdStat);
             }
         }
 
