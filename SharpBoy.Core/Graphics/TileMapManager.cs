@@ -23,6 +23,7 @@ namespace SharpBoy.Core.Graphics
             tileMap9800 = new TileMap(vram, 0x9800);
             tileMap9C00 = new TileMap(vram, 0x9C00);
             activeBgTileMap = tileMap9800;
+            activeWindowTileMap = tileMap9800;
         }
 
         public void SetActiveBgTileMap(bool useTileMap9C00)

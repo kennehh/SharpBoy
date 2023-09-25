@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
@@ -24,12 +25,12 @@ namespace SharpBoy.Core.Memory
     internal abstract class Memory
     {
         private byte[] memory;
-        private ushort addressMask;
+        private bool useBitwiseAnd;
 
         protected Memory(int size)
         {
             memory = new byte[size];
-            addressMask = (ushort)(size - 1);
+            useBitwiseAnd = IsPowerOfTwo(size);
         }
 
         protected Memory(byte[] data) : this(data.Length)
@@ -39,17 +40,34 @@ namespace SharpBoy.Core.Memory
 
         protected void WriteToMemory(int address, byte value)
         {
-            memory[address & addressMask] = value;
+            memory[MapAddress(address)] = value;
         }
 
         protected byte ReadFromMemory(int address)
         {
-            return memory[address & addressMask];
+            return memory[MapAddress(address)];
         }
 
         protected void CopyToMemory(byte[] source)
         {
             Buffer.BlockCopy(source, 0, memory, 0, source.Length);
+        }
+
+        private bool IsPowerOfTwo(int x)
+        {
+            return (x & (x - 1)) == 0;
+        }
+
+        private int MapAddress(int address)
+        {
+            if (useBitwiseAnd)
+            {
+                return address & (memory.Length - 1);
+            }
+            else
+            {
+                return address % memory.Length;
+            }
         }
     }
 

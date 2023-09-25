@@ -26,12 +26,19 @@ namespace SharpBoy.Core.Graphics
         public IReadOnlyCollection<Sprite> GetVisibleSprites(int currentScanline, int spriteHeight)
         {
             visibleSprites.Clear();
+            int spriteCount = 0;
 
             foreach (var sprite in sprites)
             {
                 if (IsSpriteVisibleOnScanline(sprite, currentScanline, spriteHeight))
                 {
                     visibleSprites.Add(sprite);
+                    spriteCount++;
+
+                    if (spriteCount >= 10)
+                    {
+                        break;
+                    }
                 }
             }
 
