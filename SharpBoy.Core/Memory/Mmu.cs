@@ -12,6 +12,8 @@ namespace SharpBoy.Core.Memory
 {
     public class Mmu : IMmu
     {
+        public bool BootRomLoaded { get; private set; }
+
         private readonly IPpu ppu;
         private readonly ITimer timer;
         private readonly ICartridgeReader cartridgeReader;
@@ -20,11 +22,8 @@ namespace SharpBoy.Core.Memory
         private IReadWriteMemory wram = new Ram(0x2000);
         private IReadWriteMemory hram = new Ram(0x80);
         
-        // temporary
+        // TODO: Implement I/O, this array is just temporary
         private byte[] ioRegisters = new byte[0x10000];
-
-        private bool bootRomLoaded = false;
-        public bool BootRomLoaded => bootRomLoaded;
 
         public Mmu(IPpu ppu, ITimer timer, ICartridgeReader cartridgeReader, IInterruptManager interruptManager)
         {
@@ -39,7 +38,7 @@ namespace SharpBoy.Core.Memory
         public void LoadBootRom(byte[] rom)
         {
             bootRom = new Rom(rom);
-            bootRomLoaded = true;
+            BootRomLoaded = true;
         }
 
         public byte Read(int addr)
@@ -120,9 +119,13 @@ namespace SharpBoy.Core.Memory
                     break;
                 case <= 0xff4b:
                     ppu.WriteRegister(address, value);
+                    if (address == 0xff46)
+                    {
+                        DoOamDmaTransfer(value);
+                    }
                     break;
                 case 0xff50:
-                    bootRomLoaded = false;
+                    BootRomLoaded = false;
                     break;
                 case <= 0xff7f:
                     // handle I/O registers here
@@ -139,11 +142,24 @@ namespace SharpBoy.Core.Memory
 
         private byte ReadRom(ushort address)
         {
-            if (bootRomLoaded && address < 0x100)
+            if (BootRomLoaded && address < 0x100)
             {
                 return bootRom.Read(address);
             }
             return cartridgeReader.ReadRom(address);
+        }
+
+        private void DoOamDmaTransfer(byte value)
+        {
+            var sourceData = new byte[160];
+            var sourceAddress = value << 8;
+
+            for (int i = 0; i < 160; i++)
+            {
+                sourceData[i] = Read(sourceAddress + i);
+            }
+
+            ppu.DoOamDmaTransfer(sourceData); 
         }
     }
 }

@@ -56,6 +56,7 @@ namespace SharpBoy.Core.Timing
         {
             switch (address)
             {
+                // div is reset to zero whenever it is written to
                 case 0xff04: div = 0; break;
                 case 0xff05: tima = value; break;
                 case 0xff06: tma = value; break;

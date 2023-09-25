@@ -16,6 +16,7 @@ namespace SharpBoy.Core.Graphics
         void WriteVram(ushort address, byte value);
         void WriteOam(ushort address, byte value);
         void WriteRegister(ushort address, byte value);
+        void DoOamDmaTransfer(byte[] sourceData);
         void Tick();
     }
 }

@@ -41,13 +41,15 @@ namespace SharpBoy.Core.Graphics
         private int cycles;
         private readonly IInterruptManager interruptManager;
         private readonly IRenderQueue renderQueue;
-        private readonly TileMaps tileMaps;
+        private readonly TileMapManager tileMapManager;
+        private readonly SpriteManager spriteManager;
 
         public Ppu(IInterruptManager interruptManager, IRenderQueue renderQueue)
         {
             this.interruptManager = interruptManager;
             this.renderQueue = renderQueue;
-            tileMaps = new TileMaps(vram);
+            tileMapManager = new TileMapManager(vram);
+            spriteManager = new SpriteManager(oam, vram);
         }
 
         public void Tick()
@@ -122,11 +124,17 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
+        public void DoOamDmaTransfer(byte[] sourceData)
+        {
+            oam.Copy(sourceData);
+        }
+
         private void UpdateLcdc(byte newValue)
         {
             Registers.LCDC = (LcdcFlags)newValue;
-            tileMaps.SetActiveTileMap(Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea));
-            tileMaps.ActiveTileMap.SetActiveTileData(Registers.LCDC.HasFlag(LcdcFlags.TileDataArea));
+            tileMapManager.SetActiveBgTileMap(Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea));
+            tileMapManager.SetActiveWindowTileMap(Registers.LCDC.HasFlag(LcdcFlags.WindowTileMapArea));
+            tileMapManager.SetActiveTileData(Registers.LCDC.HasFlag(LcdcFlags.TileDataArea));
         }
 
         private void UpdateLyc(byte newValue)
@@ -169,8 +177,7 @@ namespace SharpBoy.Core.Graphics
                     Registers.CurrentStatus = PpuStatus.Drawing;
                     if (Registers.CurrentStatus != previousStatus)
                     {
-                        RenderBgScanline();
-                        RenderSprites();
+                        RenderScanline();
                     }
                     break;
                 case < 456:
@@ -203,27 +210,26 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        private void RenderBgScanline()
+        private void RenderScanline()
         {
-            // Get the current line being rendered
-            var line = Registers.LY;
-
-            // Calculate the base position in the framebuffer for this scanline
-            int pixelPositionBase = line * LcdWidth * 3;
-
             // If the LCD is disabled, fill the framebuffer with the transparent color for this scanline
             if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
             {
-                for (int pixel = 0; pixel < LcdWidth; pixel++)
+                for (int x = 0; x < LcdWidth; x++)
                 {
-                    var pixelPosition = pixelPositionBase + pixel * 3;
-
-                    frameBuffer[pixelPosition] = TransparentColor.Red;
-                    frameBuffer[pixelPosition + 1] = TransparentColor.Green;
-                    frameBuffer[pixelPosition + 2] = TransparentColor.Blue;
+                    DrawPixel(x, Registers.LY, TransparentColor);
                 }
                 return; // Exit early since LCD is disabled
             }
+
+            RenderBgScanline();
+            RenderWindowScanline();
+            RenderSpritesScanline();
+        }
+
+        private void RenderBgScanline()
+        {
+            var line = Registers.LY;
 
             // Calculate the adjusted Y position accounting for vertical scroll
             int yPos = (line + Registers.SCY) & 0xFF;
@@ -231,87 +237,126 @@ namespace SharpBoy.Core.Graphics
             // Iterate through each pixel in the current scanline
             for (int pixel = 0; pixel < LcdWidth; pixel++)
             {
-                var pixelPosition = pixelPositionBase + pixel * 3;
-
                 // Calculate the adjusted X position accounting for horizontal scroll
                 int xPos = (pixel + Registers.SCX) & 0xFF;
 
                 // Fetch the color index for the given pixel from the active tilemap
-                var colorIndex = tileMaps.ActiveTileMap.GetColorIndex(xPos, yPos);
+                var colorIndex = tileMapManager.GetBgColorIndex(xPos, yPos);
 
                 // Get the actual RGB color using the fetched color index
                 var color = BgpColorMap[colorIndex];
 
                 // Fill the framebuffer with the RGB values
-                frameBuffer[pixelPosition] = color.Red;
-                frameBuffer[pixelPosition + 1] = color.Green;
-                frameBuffer[pixelPosition + 2] = color.Blue;
+                DrawPixel(pixel, line, color);
             }
         }
 
-        private void RenderSprites()
+        private void RenderSpritesScanline()
         {
             if (!Registers.LCDC.HasFlag(LcdcFlags.ObjEnable))
             {
                 return;
             }
 
-            int spriteHeight = Registers.LCDC.HasFlag(LcdcFlags.ObjSize) ? 16 : 8;
+            var spriteHeight = Registers.LCDC.HasFlag(LcdcFlags.ObjSize) ? 16 : 8;
+            var currentScanline = Registers.LY;
 
-            for (int i = 0; i < 40; i++) // Game Boy has 40 sprites in OAM
+            var visibleSprites = spriteManager.GetVisibleSprites(Registers.LY, spriteHeight);
+
+            foreach (var sprite in visibleSprites)
             {
-                int index = i * 4; // Each sprite has 4 bytes of data in OAM
-                byte yPos = oam.Read(index);
-                byte xPos = oam.Read(index + 1);
-                byte tileNumber = oam.Read(index + 2);
-                byte attributes = oam.Read(index + 3);
+                int line = currentScanline - (sprite.YPos - 16);
 
-                bool yFlip = (attributes & 0x40) != 0;
-                bool xFlip = (attributes & 0x20) != 0;
-                // ... other flags can be read from attributes as needed
-
-                int yPositionCorrected = yPos - 16;
-                int xPositionCorrected = xPos - 8;
-
-                // Check if this sprite intersects with the current scanline
-                if (Registers.LY >= yPositionCorrected && Registers.LY < (yPositionCorrected + spriteHeight))
+                if (sprite.YFlip)
                 {
-                    int line = yFlip ? (yPositionCorrected + spriteHeight - 1 - Registers.LY) : (Registers.LY - yPositionCorrected);
-                    RenderSpriteLine(xPositionCorrected, line, tileNumber, xFlip, attributes);
+                    line = spriteHeight - line - 1;
+                }
+
+                byte[] lineData = sprite.GetLineToRender(line);
+
+                for (int i = 0; i < lineData.Length; i++)
+                {
+                    int screenX = sprite.XPos + i;
+                    int screenY = sprite.YPos + line - 16;
+
+                    var color = GetSpriteColor(lineData[i], sprite.UseObp1Palette);
+
+                    if (color == TransparentColor)
+                    {
+                        continue;
+                    }
+
+                    if (sprite.BgAndWindowHasPriority)
+                    {
+                        var bgColor = GetPixelColor(screenX, screenY);
+                        if (bgColor != TransparentColor)
+                        {
+                            continue;
+                        }
+                    }
+
+                    DrawPixel(screenX, screenY, color);
                 }
             }
         }
 
-        private void RenderSpriteLine(int x, int line, byte tileNumber, bool xFlip, byte attributes)
+        private void RenderWindowScanline()
         {
-            // Get the tile pattern data for this line of the sprite
-            int tileDataAddress = 0x8000 + (tileNumber * 16) + (line * 2);
-            byte data1 = vram.Read(tileDataAddress);
-            byte data2 = vram.Read(tileDataAddress + 1);
-
-            for (int tilePixel = 0; tilePixel < 8; tilePixel++)
+            if (!Registers.LCDC.HasFlag(LcdcFlags.WindowEnable))
             {
-                int colorBit = xFlip ? tilePixel : 7 - tilePixel;
-                int colorIndex = ((data2 >> colorBit) & 1) << 1;
-                colorIndex |= (data1 >> colorBit) & 1;
+                return;
+            }
 
-                // Convert color index to actual color and merge with background
-                var color = GetSpriteColor(colorIndex, attributes);
+            var line = Registers.LY;
 
-                if (color != TransparentColor)
+            int windowX = Registers.WX - 7;
+            int windowY = Registers.WY;
+
+            if (line < windowY)
+            {
+                return;
+            }
+
+            int yPos = line - windowY;
+
+            for (int pixel = 0; pixel < LcdWidth; pixel++)
+            {
+                int xPos = pixel;
+
+                if (xPos < windowX)
                 {
-                    int bufferPosition = ((Registers.LY * LcdWidth) + x + tilePixel) * 3;
-
-                    frameBuffer[bufferPosition] = color.Red;
-                    frameBuffer[bufferPosition + 1] = color.Green;
-                    frameBuffer[bufferPosition + 2] = color.Blue;
+                    continue;
                 }
+
+                var colorIndex = tileMapManager.GetWindowColorIndex(xPos - windowX, yPos);
+                var color = BgpColorMap[colorIndex];
+
+                DrawPixel(pixel, line, color);
             }
         }
 
-        private ColorRgb GetSpriteColor(int colorIndex, byte attributes)
+        private void DrawPixel(int x, int y, ColorRgb color)
         {
-            bool useObp1 = (attributes & 0x10) != 0;  // Check if OBP1 palette is used.
+            int bufferPosition = ((y * LcdWidth) + x) * 3;
+
+            frameBuffer[bufferPosition] = color.Red;
+            frameBuffer[bufferPosition + 1] = color.Green;
+            frameBuffer[bufferPosition + 2] = color.Blue;
+        }
+
+        private ColorRgb GetPixelColor(int x, int y)
+        {
+            int bufferPosition = ((y * LcdWidth) + x) * 3;
+
+            var red = frameBuffer[bufferPosition];
+            var green = frameBuffer[bufferPosition + 1];
+            var blue = frameBuffer[bufferPosition + 2];
+
+            return new ColorRgb(red, green, blue);
+        }
+
+        private ColorRgb GetSpriteColor(int colorIndex, bool useObp1)
+        {
             return useObp1 ? Obp1ColorMap[colorIndex] : Obp0ColorMap[colorIndex];
         }
 

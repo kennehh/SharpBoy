@@ -78,10 +78,17 @@ namespace SharpBoy.Core
 
                 while (cyclesToEmulate > 0)
                 {
-                    var cycles = Step();
+                    try
+                    {
+                        var cycles = Step();
 
-                    cyclesToEmulate -= cycles;
-                    cyclesEmulated += cycles;
+                        cyclesToEmulate -= cycles;
+                        cyclesEmulated += cycles;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
 
                 if (cyclesToEmulate <= 0)

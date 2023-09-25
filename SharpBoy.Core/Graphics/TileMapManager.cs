@@ -11,23 +11,44 @@ namespace SharpBoy.Core.Graphics
     /// <summary>
     /// Manages the two tile maps for the background and window.
     /// </summary>
-    public class TileMaps
+    public class TileMapManager
     {
-        public TileMap ActiveTileMap { get; private set; }
-
         private readonly TileMap tileMap9800;
         private readonly TileMap tileMap9C00;
+        private TileMap activeBgTileMap;
+        private TileMap activeWindowTileMap;
 
-        public TileMaps(IReadWriteMemory vram)
+        public TileMapManager(IReadableMemory vram)
         {
             tileMap9800 = new TileMap(vram, 0x9800);
             tileMap9C00 = new TileMap(vram, 0x9C00);
-            ActiveTileMap = tileMap9800;
+            activeBgTileMap = tileMap9800;
         }
 
-        public void SetActiveTileMap(bool useTileMap9C00)
+        public void SetActiveBgTileMap(bool useTileMap9C00)
         {
-            ActiveTileMap = useTileMap9C00 ? tileMap9C00 : tileMap9800;
+            activeBgTileMap = useTileMap9C00 ? tileMap9C00 : tileMap9800;
+        }
+
+        public void SetActiveWindowTileMap(bool useTileMap9C00)
+        {
+            activeWindowTileMap = useTileMap9C00 ? tileMap9C00 : tileMap9800;
+        }
+
+        public void SetActiveTileData(bool useTileData8000)
+        {
+            activeBgTileMap.SetActiveTileData(useTileData8000);
+            activeWindowTileMap.SetActiveTileData(useTileData8000);
+        }
+
+        public int GetBgColorIndex(int x, int y)
+        {
+            return activeBgTileMap.GetColorIndex(x, y);
+        }
+
+        public int GetWindowColorIndex(int x, int y)
+        {
+            return activeWindowTileMap.GetColorIndex(x, y);
         }
     }
 
@@ -36,7 +57,7 @@ namespace SharpBoy.Core.Graphics
     /// </summary>
     public class TileMap
     {
-        private readonly IReadWriteMemory vram;
+        private readonly IReadableMemory vram;
         private readonly int baseAddress;
 
         private readonly TileData tileData8800;
@@ -44,7 +65,7 @@ namespace SharpBoy.Core.Graphics
 
         private TileData activeTileData;
 
-        public TileMap(IReadWriteMemory vram, int baseAddress)
+        public TileMap(IReadableMemory vram, int baseAddress)
         {
             this.vram = vram;
             this.baseAddress = baseAddress;
@@ -93,7 +114,7 @@ namespace SharpBoy.Core.Graphics
         private const int TotalTiles = 256;
         private readonly Tile[] tiles = new Tile[TotalTiles];
 
-        public TileData(IReadWriteMemory vram, int baseAddress)
+        public TileData(IReadableMemory vram, int baseAddress)
         {
             Address = baseAddress;
 
@@ -117,10 +138,10 @@ namespace SharpBoy.Core.Graphics
     /// </summary>
     public class Tile
     {
-        private readonly IReadWriteMemory vram;
+        private readonly IReadableMemory vram;
         private readonly int baseAddress;
 
-        public Tile(IReadWriteMemory vram, int baseAddress)
+        public Tile(IReadableMemory vram, int baseAddress)
         {
             this.vram = vram;
             this.baseAddress = baseAddress;

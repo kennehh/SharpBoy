@@ -44,7 +44,7 @@ namespace SharpBoy.Core.Graphics
     }
 
     [Flags]
-    public enum LcdcFlags
+    public enum LcdcFlags : byte
     {
         None = 0,
         LcdEnable = 1 << 7,

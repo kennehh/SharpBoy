@@ -11,6 +11,7 @@ namespace SharpBoy.Core.Memory
     public interface IWritableMemory
     {
         void Write(int address, byte value);
+        void Copy(byte[] source);
     }
 
     public interface IReadableMemory
@@ -33,7 +34,7 @@ namespace SharpBoy.Core.Memory
 
         protected Memory(byte[] data) : this(data.Length)
         {
-            Buffer.BlockCopy(data, 0, memory, 0, data.Length);
+            CopyToMemory(data);
         }
 
         protected void WriteToMemory(int address, byte value)
@@ -45,6 +46,11 @@ namespace SharpBoy.Core.Memory
         {
             return memory[address & addressMask];
         }
+
+        protected void CopyToMemory(byte[] source)
+        {
+            Buffer.BlockCopy(source, 0, memory, 0, source.Length);
+        }
     }
 
     internal class Ram : Memory, IReadWriteMemory
@@ -53,6 +59,7 @@ namespace SharpBoy.Core.Memory
         public Ram(byte[] rom) : base(rom) { }
         public byte Read(int address) => ReadFromMemory(address);
         public void Write(int address, byte value) => WriteToMemory(address, value);
+        public void Copy(byte[] source) => CopyToMemory(source);
     }
 
     internal class Rom : Memory, IReadableMemory
