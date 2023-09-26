@@ -277,9 +277,6 @@ namespace SharpBoy.Core.Graphics
 
                 for (int i = 0; i < lineData.Length; i++)
                 {
-                    int screenX = sprite.XPos + i - 8;
-                    int screenY = sprite.YPos + line - 16;
-
                     var index = lineData[i];
                     if (index == SpriteTransparentColorIndex)
                     {
@@ -287,6 +284,8 @@ namespace SharpBoy.Core.Graphics
                     }
 
                     var color = GetSpriteColor(index, sprite.UseObp1Palette);
+                    int screenX = sprite.XPos + i - 8;
+                    int screenY = sprite.YPos + line - 16;
 
                     if (sprite.BgAndWindowHasPriority)
                     {

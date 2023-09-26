@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Text;
 using SharpBoy.Core.Graphics;
 using SharpBoy.Core.Rendering;
-using SharpBoy.Core.Cartridge;
+using SharpBoy.Core.CartridgeHandling;
 
 namespace SharpBoy.Core
 {
@@ -24,11 +24,11 @@ namespace SharpBoy.Core
         private const double CpuCyclesPerMillisecond = CpuSpeedHz / 1000;
         private const double ExpectedMillisecondsPerUpdate = 1000 / RefreshRateHz;
         private const int ExpectedCpuCyclesPerUpdate = (int)(ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond);
-        private readonly ICartridgeReader cartridgeReader;
+        private readonly ICartridge cartridgeReader;
         private readonly GameBoyState state;
         private bool stopped = false;
 
-        public GameBoy(ICpu cpu, IMmu mmu, IPpu ppu, ICartridgeReader cartridgeReader, GameBoyState state)
+        public GameBoy(ICpu cpu, IMmu mmu, IPpu ppu, ICartridge cartridgeReader, GameBoyState state)
         {
             Cpu = cpu;
             Mmu = mmu;

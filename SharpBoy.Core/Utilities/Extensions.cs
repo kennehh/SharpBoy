@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SharpBoy.Core.Cartridge;
+using SharpBoy.Core.CartridgeHandling;
 using SharpBoy.Core.Graphics;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
@@ -21,7 +21,7 @@ namespace SharpBoy.Core.Utilities
                 .AddSingleton<ICpu, Cpu>()
                 .AddSingleton<IMmu, Mmu>()
                 .AddSingleton<IPpu, Ppu>()
-                .AddSingleton<ICartridgeReader, CartridgeReader>()
+                .AddSingleton<ICartridge, Cartridge>()
                 .AddSingleton<IRenderQueue, RenderQueue>()
                 .AddSingleton<IInterruptManager, InterruptManager>()
                 .AddSingleton<ITimer, Timer>();

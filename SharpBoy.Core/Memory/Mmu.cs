@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Cartridge;
+﻿using SharpBoy.Core.CartridgeHandling;
 using SharpBoy.Core.Graphics;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Timing;
@@ -16,7 +16,7 @@ namespace SharpBoy.Core.Memory
 
         private readonly IPpu ppu;
         private readonly ITimer timer;
-        private readonly ICartridgeReader cartridgeReader;
+        private readonly ICartridge cartridgeReader;
         private readonly IInterruptManager interruptManager;
         private IReadableMemory bootRom = null;
         private IReadWriteMemory wram = new Ram(0x2000);
@@ -25,7 +25,7 @@ namespace SharpBoy.Core.Memory
         // TODO: Implement I/O, this array is just temporary
         private byte[] ioRegisters = new byte[0x10000];
 
-        public Mmu(IPpu ppu, ITimer timer, ICartridgeReader cartridgeReader, IInterruptManager interruptManager)
+        public Mmu(IPpu ppu, ITimer timer, ICartridge cartridgeReader, IInterruptManager interruptManager)
         {
             this.ppu = ppu;
             this.timer = timer;

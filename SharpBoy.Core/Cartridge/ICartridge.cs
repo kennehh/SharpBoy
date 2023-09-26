@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.Cartridge
+namespace SharpBoy.Core.CartridgeHandling
 {
-    public interface ICartridgeReader
+    public interface ICartridge
     {
         void LoadCartridge(byte[] rom);
         byte ReadRom(ushort address);

@@ -1,20 +1,22 @@
 ﻿using SharpBoy.Core.Memory;
 
-namespace SharpBoy.Core.Cartridge
+namespace SharpBoy.Core.CartridgeHandling
 {
-    public class CartridgeReader : ICartridgeReader
+    public class Cartridge : ICartridge
     {
+        public CartridgeHeader Header { get; } = new CartridgeHeader();
+
         private IReadableMemory rom;
         private IReadWriteMemory eram = new Ram(0x2000);
 
-        public CartridgeReader()
+        public Cartridge()
         {
             var data = new byte[0x8000];
             Array.Fill<byte>(data, 0xff);
-            LoadCartridge(data);
+            rom = new Rom(data);
         }
 
-        public CartridgeReader(byte[] rom)
+        public Cartridge(byte[] rom)
         {
             this.rom = new Rom(rom);
         }
@@ -26,6 +28,7 @@ namespace SharpBoy.Core.Cartridge
         public void LoadCartridge(byte[] data)
         {
             rom = new Rom(data);
+            Header.ReadRom(rom);
         }
     }
 }
