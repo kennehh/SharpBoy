@@ -30,6 +30,7 @@ namespace SharpBoy.Core.Graphics
         };
 
         private static readonly ColorRgb TransparentColor = Colors[0];
+        private const int SpriteTransparentColorIndex = 0;
         private static readonly ColorRgb[] BgpColorMap = (ColorRgb[])Colors.Clone();
         private static readonly ColorRgb[] Obp0ColorMap = (ColorRgb[])Colors.Clone();
         private static readonly ColorRgb[] Obp1ColorMap = (ColorRgb[])Colors.Clone();
@@ -279,12 +280,13 @@ namespace SharpBoy.Core.Graphics
                     int screenX = sprite.XPos + i - 8;
                     int screenY = sprite.YPos + line - 16;
 
-                    var color = GetSpriteColor(lineData[i], sprite.UseObp1Palette);
-
-                    if (color == TransparentColor)
+                    var index = lineData[i];
+                    if (index == SpriteTransparentColorIndex)
                     {
                         continue;
                     }
+
+                    var color = GetSpriteColor(index, sprite.UseObp1Palette);
 
                     if (sprite.BgAndWindowHasPriority)
                     {
