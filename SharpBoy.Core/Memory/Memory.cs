@@ -24,8 +24,8 @@ namespace SharpBoy.Core.Memory
 
     internal abstract class Memory
     {
-        private byte[] memory;
-        private bool useBitwiseAnd;
+        private readonly byte[] memory;
+        private readonly bool useBitwiseAnd;
 
         protected Memory(int size)
         {
@@ -53,7 +53,7 @@ namespace SharpBoy.Core.Memory
             Buffer.BlockCopy(source, 0, memory, 0, source.Length);
         }
 
-        private bool IsPowerOfTwo(int x)
+        private static bool IsPowerOfTwo(int x)
         {
             return (x & (x - 1)) == 0;
         }
@@ -71,7 +71,7 @@ namespace SharpBoy.Core.Memory
         }
     }
 
-    internal class Ram : Memory, IReadWriteMemory
+    internal sealed class Ram : Memory, IReadWriteMemory
     {
         public Ram(int size) : base(size) { }
         public Ram(byte[] rom) : base(rom) { }
@@ -80,7 +80,7 @@ namespace SharpBoy.Core.Memory
         public void Copy(byte[] source) => CopyToMemory(source);
     }
 
-    internal class Rom : Memory, IReadableMemory
+    internal sealed class Rom : Memory, IReadableMemory
     {
         public Rom(byte[] rom) : base(rom) { }
         public byte Read(int address) => ReadFromMemory(address);

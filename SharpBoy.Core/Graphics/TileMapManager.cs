@@ -97,11 +97,12 @@ namespace SharpBoy.Core.Graphics
         {
             // Calculate the address in memory for the desired tile index.
             int address = baseAddress + (yIndex * 32) + xIndex;
-
-            // Read the tile number, with consideration for the two possible tile data address regions.
-            return activeTileData.Address == 0x8800
-                ? (sbyte)vram.Read(address)
-                : vram.Read(address);
+            int value = vram.Read(address);
+            if (activeTileData.Address == 0x8800)
+            {
+                value -= 128;
+            }
+            return value;
         }
     }
 
