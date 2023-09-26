@@ -22,8 +22,9 @@ public partial class MainView : UserControl
         gameboy = App.ServiceProvider.GetRequiredService<GameBoy>();
 
         //const string romPath = "C:\\Projects\\SharpBoy\\SharpBoy.Core.Tests\\TestRoms\\blargg\\cpu_instrs\\cpu_instrs.gb";
-        const string romPath = "C:\\Projects\\Dr. Mario (World) (Rev A).gb";
-        const string bootPath = "Z:\\games\\bios\\gb\\gb_bios.bin";
+        const string romPath = "Z:\\Games\\Roms\\gb\\Dr. Mario (World) (Rev A).zip";
+        //const string romPath = "C:\\Projects\\Dr. Mario (World) (Rev A).gb";
+        //const string bootPath = "Z:\\games\\bios\\gb\\gb_bios.bin";
         //gameboy.LoadBootRom(bootPath);
         gameboy.LoadCartridge(romPath);
 

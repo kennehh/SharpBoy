@@ -7,6 +7,8 @@ using System.Text;
 using SharpBoy.Core.Graphics;
 using SharpBoy.Core.Rendering;
 using SharpBoy.Core.CartridgeHandling;
+using System.IO.Compression;
+using System.Runtime.Intrinsics.Arm;
 
 namespace SharpBoy.Core
 {
@@ -45,7 +47,17 @@ namespace SharpBoy.Core
 
         public void LoadCartridge(string path)
         {
-            var rom = File.ReadAllBytes(path);
+            byte[] rom;
+
+            if (Path.GetExtension(path) == ".zip")
+            {
+                rom = ReadFromZipFile(path);
+            }
+            else
+            {
+                rom = File.ReadAllBytes(path);
+            }
+            
             cartridgeReader.LoadCartridge(rom);
         }
 
@@ -129,6 +141,33 @@ namespace SharpBoy.Core
         {
             var cycles = Cpu.Step();
             return cycles;
+        }
+
+        private byte[] ReadFromZipFile(string path)
+        {
+            byte[] rom;
+
+            using (var zip = ZipFile.OpenRead(path))
+            {
+                var gbEntry = zip.Entries.FirstOrDefault(x => Path.GetExtension(x.Name) == ".gb");
+                if (gbEntry == null)
+                {
+                    return null;
+                }
+
+                using (var stream = gbEntry.Open())
+                {
+                    var bytesRead = 0;
+                    rom = new byte[gbEntry.Length];
+
+                    while (bytesRead < gbEntry.Length)
+                    {
+                        bytesRead += stream.Read(rom, bytesRead, rom.Length - bytesRead);
+                    }
+
+                    return rom;
+                }
+            }
         }
     }
 }
