@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.Rendering
+namespace SharpBoy.Core.Graphics
 {
     public interface IRenderQueue
     {

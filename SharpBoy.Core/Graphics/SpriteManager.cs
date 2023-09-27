@@ -23,7 +23,7 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        public IReadOnlyCollection<Sprite> GetVisibleSprites(int currentScanline, int spriteHeight)
+        public IEnumerable<Sprite> GetVisibleSprites(int currentScanline, int spriteHeight)
         {
             visibleSprites.Clear();
             int spriteCount = 0;
@@ -79,16 +79,16 @@ namespace SharpBoy.Core.Graphics
         public byte YPos => oam.Read(OamIndex);
         public byte XPos => oam.Read(OamIndex + 1);
         public byte TileNumber => oam.Read(OamIndex + 2);
-        public SpriteAttributes Attributes => (SpriteAttributes)oam.Read(OamIndex + 3);
+        public SpriteAttributeFlags Attributes => (SpriteAttributeFlags)oam.Read(OamIndex + 3);
 
-        public bool YFlip => Attributes.HasFlag(SpriteAttributes.YFlip);
-        public bool XFlip => Attributes.HasFlag(SpriteAttributes.XFlip);
-        public bool BgAndWindowHasPriority => Attributes.HasFlag(SpriteAttributes.BgAndWindowHasPriority);
-        public bool UseObp1Palette => Attributes.HasFlag(SpriteAttributes.UseObp1Palette);
+        public bool YFlip => Attributes.HasFlag(SpriteAttributeFlags.YFlip);
+        public bool XFlip => Attributes.HasFlag(SpriteAttributeFlags.XFlip);
+        public bool BgAndWindowHasPriority => Attributes.HasFlag(SpriteAttributeFlags.BgAndWindowHasPriority);
+        public bool UseObp1Palette => Attributes.HasFlag(SpriteAttributeFlags.UseObp1Palette);
 
         // Game Boy Color specific attributes
-        public byte CgbPalette => (byte)(Attributes & SpriteAttributes.CgbPalette); // Mask to get bits 0-2
-        public bool UseVramBank1 => Attributes.HasFlag(SpriteAttributes.UseVramBank1);
+        public byte CgbPalette => (byte)(Attributes & SpriteAttributeFlags.CgbPalette); // Mask to get bits 0-2
+        public bool UseVramBank1 => Attributes.HasFlag(SpriteAttributeFlags.UseVramBank1);
 
         public int GetColorIndex(int x, int y)
         {
@@ -110,7 +110,7 @@ namespace SharpBoy.Core.Graphics
     }
 
     [Flags]
-    public enum SpriteAttributes : byte
+    public enum SpriteAttributeFlags : byte
     {
         UseObp1Palette = 1 << 4,
         XFlip = 1 << 5,

@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Text;
 using SharpBoy.Core.Graphics;
+using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
 using SharpBoy.Core.Timing;
@@ -24,13 +25,15 @@ namespace SharpBoy.Core.Processor
         private bool haltBugTriggered = false;
         private readonly IPpu ppu;
         private readonly ITimer timer;
+        private readonly IInputController inputController;
 
-        public Cpu(IMmu mmu, IInterruptManager interruptManager, IPpu ppu, ITimer timer)
+        public Cpu(IMmu mmu, IInterruptManager interruptManager, IPpu ppu, ITimer timer, IInputController inputController)
         {
             Mmu = mmu;
             InterruptManager = interruptManager;
             this.ppu = ppu;
             this.timer = timer;
+            this.inputController = inputController;
             Registers = new CpuRegisters();
         }
 
@@ -49,6 +52,7 @@ namespace SharpBoy.Core.Processor
             }
 
             HandleInterrupts();
+            inputController.CheckForInputs();
 
             return cycles;
         }
@@ -121,7 +125,7 @@ namespace SharpBoy.Core.Processor
                 case 0x1e: ld_8_8(Operand8Bit.E, Operand8Bit.Immediate); break;
                 case 0x1f: rra(); break;
 
-                case 0x20: jr_i8(Flag.Zero, false); break;
+                case 0x20: jr_i8(Flags.Zero, false); break;
                 case 0x21: ld_16_16(Operand16Bit.HL, Operand16Bit.Immediate); break;
                 case 0x22: ld_hl_a(1); break;
                 case 0x23: inc_16(Operand16Bit.HL); break;
@@ -129,7 +133,7 @@ namespace SharpBoy.Core.Processor
                 case 0x25: dec_8(Operand8Bit.H); break;
                 case 0x26: ld_8_8(Operand8Bit.H, Operand8Bit.Immediate); break;
                 case 0x27: daa(); break;
-                case 0x28: jr_i8(Flag.Zero, true); break;
+                case 0x28: jr_i8(Flags.Zero, true); break;
                 case 0x29: add_hl_r16(Operand16Bit.HL); break;
                 case 0x2a: ld_a_hl(1); break;
                 case 0x2b: dec_16(Operand16Bit.HL); break;
@@ -138,7 +142,7 @@ namespace SharpBoy.Core.Processor
                 case 0x2e: ld_8_8(Operand8Bit.L, Operand8Bit.Immediate); break;
                 case 0x2f: cpl(); break;
 
-                case 0x30: jr_i8(Flag.Carry, false); break;
+                case 0x30: jr_i8(Flags.Carry, false); break;
                 case 0x31: ld_16_16(Operand16Bit.SP, Operand16Bit.Immediate); break;
                 case 0x32: ld_hl_a(-1); break;
                 case 0x33: inc_16(Operand16Bit.SP); break;
@@ -146,7 +150,7 @@ namespace SharpBoy.Core.Processor
                 case 0x35: dec_8(Operand8Bit.IndirectHL); break;
                 case 0x36: ld_8_8(Operand8Bit.IndirectHL, Operand8Bit.Immediate); break;
                 case 0x37: scf(); break;
-                case 0x38: jr_i8(Flag.Carry, true); break;
+                case 0x38: jr_i8(Flags.Carry, true); break;
                 case 0x39: add_hl_r16(Operand16Bit.SP); break;
                 case 0x3a: ld_a_hl(-1); break;
                 case 0x3b: dec_16(Operand16Bit.SP); break;
@@ -167,36 +171,36 @@ namespace SharpBoy.Core.Processor
                 case <= 0xb7: or_a((Operand8Bit)(opcode & 0x07)); break;
                 case <= 0xbf: cp_a((Operand8Bit)(opcode & 0x07)); break;
 
-                case 0xc0: ret(Flag.Zero, false); break;
+                case 0xc0: ret(Flags.Zero, false); break;
                 case 0xc1: pop(Operand16Bit.BC); break;
-                case 0xc2: jp_i16(Flag.Zero, false); break;
+                case 0xc2: jp_i16(Flags.Zero, false); break;
                 case 0xc3: jp_i16(); break;
-                case 0xc4: call_i16(Flag.Zero, false); break;
+                case 0xc4: call_i16(Flags.Zero, false); break;
                 case 0xc5: push(Operand16Bit.BC); break;
                 case 0xc6: add_a(Operand8Bit.Immediate); break;
                 case 0xc7: rst(0x00); break;
-                case 0xc8: ret(Flag.Zero, true); break;
+                case 0xc8: ret(Flags.Zero, true); break;
                 case 0xc9: ret(); break;
-                case 0xca: jp_i16(Flag.Zero, true); break;
+                case 0xca: jp_i16(Flags.Zero, true); break;
                 case 0xcb: ExecuteCBInstruction(ReadImmediate8Bit()); break;
-                case 0xcc: call_i16(Flag.Zero, true); break;
+                case 0xcc: call_i16(Flags.Zero, true); break;
                 case 0xcd: call_i16(); break;
                 case 0xce: adc_a(Operand8Bit.Immediate); break;
                 case 0xcf: rst(0x08); break;
 
-                case 0xd0: ret(Flag.Carry, false); break;
+                case 0xd0: ret(Flags.Carry, false); break;
                 case 0xd1: pop(Operand16Bit.DE); break;
-                case 0xd2: jp_i16(Flag.Carry, false); break;
+                case 0xd2: jp_i16(Flags.Carry, false); break;
                 // no 0xd3
-                case 0xd4: call_i16(Flag.Carry, false); break;
+                case 0xd4: call_i16(Flags.Carry, false); break;
                 case 0xd5: push(Operand16Bit.DE); break;
                 case 0xd6: sub_a(Operand8Bit.Immediate); break;
                 case 0xd7: rst(0x10); break;
-                case 0xd8: ret(Flag.Carry, true); break;
+                case 0xd8: ret(Flags.Carry, true); break;
                 case 0xd9: reti(); break;
-                case 0xda: jp_i16(Flag.Carry, true); break;
+                case 0xda: jp_i16(Flags.Carry, true); break;
                 // no 0xdb
-                case 0xdc: call_i16(Flag.Carry, true); break;
+                case 0xdc: call_i16(Flags.Carry, true); break;
                 // no 0xdd
                 case 0xde: sbc_a(Operand8Bit.Immediate); break;
                 case 0xdf: rst(0x18); break;
@@ -481,9 +485,9 @@ namespace SharpBoy.Core.Processor
             var result = Registers.HL + value;
             var halfCarryResult = (Registers.HL & 0xfff) + (value & 0xfff);
 
-            Registers.SetFlag(Flag.Subtract, false);
-            Registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xfff);
-            Registers.SetFlag(Flag.Carry, result > 0xffff);
+            Registers.SetFlag(Flags.Subtract, false);
+            Registers.SetFlag(Flags.HalfCarry, halfCarryResult > 0xfff);
+            Registers.SetFlag(Flags.Carry, result > 0xffff);
 
             Registers.HL = (ushort)result;
             CycleTick();
@@ -504,10 +508,10 @@ namespace SharpBoy.Core.Processor
             var carryResult = (Registers.SP & 0xff) + (value & 0xff);
             var halfCarryResult = (Registers.SP & 0xf) + (value & 0xf);
 
-            Registers.SetFlag(Flag.Zero, false);
-            Registers.SetFlag(Flag.Subtract, false);
-            Registers.SetFlag(Flag.HalfCarry, halfCarryResult > 0xf);
-            Registers.SetFlag(Flag.Carry, carryResult > 0xff);
+            Registers.SetFlag(Flags.Zero, false);
+            Registers.SetFlag(Flags.Subtract, false);
+            Registers.SetFlag(Flags.HalfCarry, halfCarryResult > 0xf);
+            Registers.SetFlag(Flags.Carry, carryResult > 0xff);
 
             CycleTick();
 
@@ -535,7 +539,7 @@ namespace SharpBoy.Core.Processor
             CycleTick();
         }
 
-        private void jr_i8(Flag flag, bool isSet)
+        private void jr_i8(Flags flag, bool isSet)
         {
             var val = (sbyte)ReadImmediate8Bit();
             if (Registers.F.HasFlag(flag) == isSet)
@@ -553,7 +557,7 @@ namespace SharpBoy.Core.Processor
 
         private void jp_hl() => Registers.PC = Registers.HL;
 
-        private void jp_i16(Flag flag, bool isSet)
+        private void jp_i16(Flags flag, bool isSet)
         {
             ushort pc = ReadImmediate16Bit();
             if (Registers.F.HasFlag(flag) == isSet)
@@ -570,7 +574,7 @@ namespace SharpBoy.Core.Processor
             Registers.PC = pc;
         }
 
-        private void call_i16(Flag flag, bool isSet)
+        private void call_i16(Flags flag, bool isSet)
         {
             ushort pc = ReadImmediate16Bit();
 
@@ -587,7 +591,7 @@ namespace SharpBoy.Core.Processor
             CycleTick();
         }
 
-        private void ret(Flag flag, bool isSet)
+        private void ret(Flags flag, bool isSet)
         {
             CycleTick();
             if (Registers.F.HasFlag(flag) == isSet)

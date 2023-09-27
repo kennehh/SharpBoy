@@ -93,7 +93,7 @@ namespace SharpBoy.Core.Timing
                     if (tima >= 0xff)
                     {
                         tima = tma;
-                        interruptManager.RequestInterrupt(InterruptFlag.Timer);
+                        interruptManager.RequestInterrupt(InterruptFlags.Timer);
                     }
                     else
                     {

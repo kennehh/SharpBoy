@@ -1,6 +1,5 @@
 ﻿using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
-using SharpBoy.Core.Rendering;
 using SharpBoy.Core.Utilities;
 using System;
 using System.Collections;
@@ -37,7 +36,7 @@ namespace SharpBoy.Core.Graphics
 
         private IReadWriteMemory vram = new Ram(0x2000);
         private IReadWriteMemory oam = new Ram(0xa0);
-        private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 3];
+        private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 4];
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
@@ -161,7 +160,7 @@ namespace SharpBoy.Core.Graphics
         {
             if (Registers.LyCompareFlag)
             {
-                HandleStatInterrupt(StatInterruptSourceFlag.LyEqualsLyc);
+                HandleStatInterrupt(StatInterruptSourceFlags.LyEqualsLyc);
             }
         }
 
@@ -171,7 +170,7 @@ namespace SharpBoy.Core.Graphics
             {
                 case < 80:
                     Registers.CurrentStatus = PpuStatus.SearchingOam;
-                    HandleStatInterrupt(StatInterruptSourceFlag.SearchingOam);
+                    HandleStatInterrupt(StatInterruptSourceFlags.SearchingOam);
                     break;
                 case < 252:
                     // could take from 172 to 289 cycles, defaulting to 172 for now
@@ -184,7 +183,7 @@ namespace SharpBoy.Core.Graphics
                 case < 456:
                     // could take from 87 to 204 cycles, defaulting to 204 for now
                     Registers.CurrentStatus = PpuStatus.HorizontalBlank;
-                    HandleStatInterrupt(StatInterruptSourceFlag.HorizontalBlank);
+                    HandleStatInterrupt(StatInterruptSourceFlags.HorizontalBlank);
                     break;
                 default:
                     IncrementLy();
@@ -196,11 +195,11 @@ namespace SharpBoy.Core.Graphics
         private void HandleVBlank(PpuStatus previousStatus)
         {
             Registers.CurrentStatus = PpuStatus.VerticalBlank;
-            HandleStatInterrupt(StatInterruptSourceFlag.VerticalBlank);
+            HandleStatInterrupt(StatInterruptSourceFlags.VerticalBlank);
 
             if (Registers.CurrentStatus != previousStatus)
             {
-                interruptManager.RequestInterrupt(InterruptFlag.VBlank);
+                interruptManager.RequestInterrupt(InterruptFlags.VBlank);
                 renderQueue.Enqueue(frameBuffer);
             }
 
@@ -287,6 +286,11 @@ namespace SharpBoy.Core.Graphics
                     int screenX = sprite.XPos + i - 8;
                     int screenY = sprite.YPos + line - 16;
 
+                    if (screenX < 0 || screenY < 0 || screenX >= LcdWidth || screenY >= LcdHeight)
+                    {
+                        continue;
+                    }
+
                     if (sprite.BgAndWindowHasPriority)
                     {
                         var bgColor = GetPixelColor(screenX, screenY);
@@ -338,16 +342,17 @@ namespace SharpBoy.Core.Graphics
 
         private void DrawPixel(int x, int y, ColorRgb color)
         {
-            int bufferPosition = ((y * LcdWidth) + x) * 3;
+            int bufferPosition = ((y * LcdWidth) + x) * 4;
 
             frameBuffer[bufferPosition] = color.Red;
             frameBuffer[bufferPosition + 1] = color.Green;
             frameBuffer[bufferPosition + 2] = color.Blue;
+            frameBuffer[bufferPosition + 3] = 255;
         }
 
         private ColorRgb GetPixelColor(int x, int y)
         {
-            int bufferPosition = ((y * LcdWidth) + x) * 3;
+            int bufferPosition = ((y * LcdWidth) + x) * 4;
 
             var red = frameBuffer[bufferPosition];
             var green = frameBuffer[bufferPosition + 1];
@@ -370,11 +375,11 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        private void HandleStatInterrupt(StatInterruptSourceFlag flagToCheck)
+        private void HandleStatInterrupt(StatInterruptSourceFlags flagToCheck)
         {
-            if (Registers.StatInterruptSource != StatInterruptSourceFlag.None && Registers.StatInterruptSource.HasFlag(flagToCheck))
+            if (Registers.StatInterruptSource != StatInterruptSourceFlags.None && Registers.StatInterruptSource.HasFlag(flagToCheck))
             {
-                interruptManager.RequestInterrupt(InterruptFlag.LcdStat);
+                interruptManager.RequestInterrupt(InterruptFlags.LcdStat);
             }
         }
 

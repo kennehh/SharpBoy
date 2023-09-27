@@ -57,7 +57,7 @@ namespace SharpBoy.Core.Tests
             cpu.Registers.C = data.c;
             cpu.Registers.D = data.d;
             cpu.Registers.E = data.e;
-            cpu.Registers.F = (Flag)data.f;
+            cpu.Registers.F = (Flags)data.f;
             cpu.Registers.H = data.h;
             cpu.Registers.L = data.l;
             cpu.Registers.PC = data.pc;

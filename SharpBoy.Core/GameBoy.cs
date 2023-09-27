@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using SharpBoy.Core.Graphics;
-using SharpBoy.Core.Rendering;
 using SharpBoy.Core.CartridgeHandling;
 using System.IO.Compression;
 using System.Runtime.Intrinsics.Arm;

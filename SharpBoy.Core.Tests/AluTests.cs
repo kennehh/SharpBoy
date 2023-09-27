@@ -54,7 +54,7 @@ namespace SharpBoy.Core.Tests
                     {
                         int result = 0;
                         var test = serializer.Deserialize<AluTest>(reader);
-                        registers.F = (Flag)Convert.ToByte(test.flags, 16);
+                        registers.F = (Flags)Convert.ToByte(test.flags, 16);
 
                         result = method(registers, Convert.ToByte(test.x, 16), Convert.ToByte(test.y, 16));
 

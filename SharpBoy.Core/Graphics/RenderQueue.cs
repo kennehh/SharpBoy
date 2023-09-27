@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace SharpBoy.Core.Rendering
+namespace SharpBoy.Core.Graphics
 {
     public class RenderQueue : IRenderQueue
     {

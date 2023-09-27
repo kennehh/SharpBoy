@@ -9,7 +9,7 @@ namespace SharpBoy.Core.Processor
         [FieldOffset(1)]
         public byte A;
         [FieldOffset(0)]
-        public Flag F;
+        public Flags F;
         [FieldOffset(0)]
         public ushort AF;
 
@@ -40,11 +40,11 @@ namespace SharpBoy.Core.Processor
         [FieldOffset(10)]
         public ushort PC;
 
-        public void SetFlag(Flag flag, bool val) => F = (val ? F | flag : F & ~flag);
+        public void SetFlag(Flags flag, bool val) => F = (val ? F | flag : F & ~flag);
     }
 
     [Flags]
-    public enum Flag : byte
+    public enum Flags : byte
     {
         Zero = 1 << 7,
         Subtract = 1 << 6,

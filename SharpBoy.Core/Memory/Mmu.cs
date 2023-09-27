@@ -1,5 +1,6 @@
 ﻿using SharpBoy.Core.CartridgeHandling;
 using SharpBoy.Core.Graphics;
+using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Timing;
 using System;
@@ -18,6 +19,7 @@ namespace SharpBoy.Core.Memory
         private readonly ITimer timer;
         private readonly ICartridge cartridgeReader;
         private readonly IInterruptManager interruptManager;
+        private readonly IInputController inputController;
         private IReadableMemory bootRom = null;
         private IReadWriteMemory wram = new Ram(0x2000);
         private IReadWriteMemory hram = new Ram(0x80);
@@ -25,13 +27,13 @@ namespace SharpBoy.Core.Memory
         // TODO: Implement I/O, this array is just temporary
         private byte[] ioRegisters = new byte[0x10000];
 
-        public Mmu(IPpu ppu, ITimer timer, ICartridge cartridgeReader, IInterruptManager interruptManager)
+        public Mmu(IPpu ppu, ITimer timer, ICartridge cartridgeReader, IInterruptManager interruptManager, IInputController inputController)
         {
             this.ppu = ppu;
             this.timer = timer;
             this.cartridgeReader = cartridgeReader;
             this.interruptManager = interruptManager;
-
+            this.inputController = inputController;
             Array.Fill<byte>(ioRegisters, 0xff);
         }
 
@@ -54,6 +56,7 @@ namespace SharpBoy.Core.Memory
                 <= 0xfdff => wram.Read(address), // copy of wram (echo ram) - use of this area should be prohibited
                 <= 0xfe9f => ppu.ReadOam(address),
                 <= 0xfeff => 0, // use of this area should be prohibited
+                <= 0xff00 => inputController.ReadRegister(),
                 <= 0xff03 => ioRegisters[address], // handle I/O registers here
                 <= 0xff07 => timer.ReadRegister(address),
                 <= 0xff0e => ioRegisters[address], // handle I/O registers here
@@ -97,11 +100,11 @@ namespace SharpBoy.Core.Memory
                 case <= 0xfeff:
                     // use of this area should be prohibited
                     break;
+                case 0xff00:
+                    inputController.WriteRegister(value);
+                    break;
                 case <= 0xff03:
-                    if (address != 0xff00)
-                    {
-                        ioRegisters[address] = value;
-                    }
+                    ioRegisters[address] = value;
                     break;
                 case <= 0xff07:
                     timer.WriteRegister(address, value);
@@ -111,7 +114,7 @@ namespace SharpBoy.Core.Memory
                     ioRegisters[address] = value;
                     break;
                 case <= 0xff0f:
-                    interruptManager.IF = (InterruptFlag)value;
+                    interruptManager.IF = (InterruptFlags)value;
                     break;
                 case <= 0xff3f:
                     // handle I/O registers here
@@ -135,7 +138,7 @@ namespace SharpBoy.Core.Memory
                     hram.Write(address, value);
                     break;
                 case 0xffff:
-                    interruptManager.IE = (InterruptFlag)value;
+                    interruptManager.IE = (InterruptFlags)value;
                     break;
             }
         }

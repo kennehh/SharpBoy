@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Hosting;
 using SharpBoy.Core.CartridgeHandling;
 using SharpBoy.Core.Graphics;
+using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
 using SharpBoy.Core.Processor;
-using SharpBoy.Core.Rendering;
 using SharpBoy.Core.Timing;
 using Timer = SharpBoy.Core.Timing.Timer;
 
@@ -24,6 +24,7 @@ namespace SharpBoy.Core.Utilities
                 .AddSingleton<ICartridge, Cartridge>()
                 .AddSingleton<IRenderQueue, RenderQueue>()
                 .AddSingleton<IInterruptManager, InterruptManager>()
+                .AddSingleton<IInputController, InputController>()
                 .AddSingleton<ITimer, Timer>();
         }
     }

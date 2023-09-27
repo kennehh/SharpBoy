@@ -14,13 +14,13 @@ namespace SharpBoy.Core.Graphics
             get => (byte)((byte)StatInterruptSource | (LyCompareFlag.ToBit() << 2) | (byte)CurrentStatus);
             set
             {
-                StatInterruptSource = (StatInterruptSourceFlag)(value & 0b01111000);
+                StatInterruptSource = (StatInterruptSourceFlags)(value & 0b01111000);
                 // LyCompareFlag is read only
                 // CurrentStatus is read only
             }
         }
 
-        public StatInterruptSourceFlag StatInterruptSource = StatInterruptSourceFlag.None;
+        public StatInterruptSourceFlags StatInterruptSource = StatInterruptSourceFlags.None;
         public bool LyCompareFlag => LY == LYC;
         public PpuStatus CurrentStatus = PpuStatus.HorizontalBlank;
 
@@ -66,7 +66,7 @@ namespace SharpBoy.Core.Graphics
     }
 
     [Flags]
-    public enum StatInterruptSourceFlag : byte
+    public enum StatInterruptSourceFlags : byte
     {
         None = 0,
         HorizontalBlank = 1 << 3,
