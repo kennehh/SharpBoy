@@ -293,8 +293,8 @@ namespace SharpBoy.Core.Graphics
 
                     if (sprite.BgAndWindowHasPriority)
                     {
-                        var bgColor = GetPixelColor(screenX, screenY);
-                        if (bgColor != TransparentColor)
+                        var bgIndex = GetBgPixelColorIndex(screenX, screenY);
+                        if (bgIndex != 0)
                         {
                             continue;
                         }
@@ -359,6 +359,11 @@ namespace SharpBoy.Core.Graphics
             var blue = frameBuffer[bufferPosition + 2];
 
             return new ColorRgb(red, green, blue);
+        }
+
+        private int GetBgPixelColorIndex(int x, int y)
+        {
+            return Array.IndexOf(BgpColorMap, GetPixelColor(x, y));
         }
 
         private ColorRgb GetSpriteColor(int colorIndex, bool useObp1)
