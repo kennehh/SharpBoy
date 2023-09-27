@@ -9,8 +9,12 @@ namespace SharpBoy.Core.InputHandling
 {
     public class InputController : IInputController
     {
+        private byte CombinedState => (byte)~buttonState;
+        private byte DirectionState => (byte)(CombinedState >>> 4 & 0x0f);
+        private byte ActionState => (byte)(CombinedState & 0x0f);
+
         private GameBoyButton buttonState = 0;
-        private JoypadFlags register = 0;
+        private JoypadFlags joypadRegister = 0;
         private readonly IInputHandler inputHandler;
         private static readonly IEnumerable<GameBoyButton> buttons = Enum.GetValues<GameBoyButton>();
 
@@ -24,7 +28,7 @@ namespace SharpBoy.Core.InputHandling
             buttonState = 0;
             byte state = 0x0f;
 
-            if (register.HasFlag(JoypadFlags.SelectAction) || register.HasFlag(JoypadFlags.SelectDirection))
+            if (joypadRegister.HasFlag(JoypadFlags.SelectAction) || joypadRegister.HasFlag(JoypadFlags.SelectDirection))
             {                
                 foreach (var btn in buttons)
                 {
@@ -34,24 +38,20 @@ namespace SharpBoy.Core.InputHandling
                     }
                 }
 
-                state = (byte)buttonState;
-                if (register.HasFlag(JoypadFlags.SelectDirection))
-                {
-                    state >>>= 4;
-                }
-                state = (byte)(~state & 0x0f);
+                state = joypadRegister.HasFlag(JoypadFlags.SelectDirection) ? DirectionState : ActionState;
             }
-            register |= (JoypadFlags)state;
+
+            joypadRegister |= (JoypadFlags)state;
         }
 
         public byte ReadRegister()
         {
-            return (byte)register;
+            return (byte)joypadRegister;
         }
 
         public void WriteRegister(byte value)
         {
-            register = (JoypadFlags)(value & 0b0011_0000);
+            joypadRegister = (JoypadFlags)(value & 0b0011_0000);
         }
 
         [Flags]
@@ -59,10 +59,10 @@ namespace SharpBoy.Core.InputHandling
         {
             SelectAction = 1 << 5,
             SelectDirection = 1 << 4,
-            DownOrStartNotPressed = 1 << 3,
-            UpOrSelectNotPressed = 1 << 2,
-            LeftOrBNotPressed = 1 << 1,
-            RightOrANotPressed = 1 << 0,
+            DownOrStartReleased = 1 << 3,
+            UpOrSelectReleased = 1 << 2,
+            LeftOrBReleased = 1 << 1,
+            RightOrAReleased = 1 << 0,
         }
     }
 }
