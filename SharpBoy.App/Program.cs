@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SDL2;
+using SharpBoy.App.Sdl;
 using SharpBoy.Core;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Utilities;
@@ -11,12 +12,13 @@ namespace SharpBoy.App
         static void Main(string[] args)
         {
             var serviceCollection = new ServiceCollection()
-            .RegisterCoreServices()
-            .AddSingleton<MainWindow>()
-            .AddSingleton<GameBoyFramebuffer>()
-            .AddSingleton<IInputHandler, InputHandler>()
-            //.AddSingleton<DebugViewModel>()
-            .BuildServiceProvider();
+                .RegisterCoreServices()
+                .AddSingleton<SdlManager>()
+                .AddSingleton<MainWindow>()
+                .AddSingleton<GameBoyFramebuffer>()
+                .AddSingleton<IInputHandler, SdlInputHandler>()
+                //.AddSingleton<DebugViewModel>()
+                .BuildServiceProvider();
 
 
             var gameboy = serviceCollection.GetRequiredService<GameBoy>();

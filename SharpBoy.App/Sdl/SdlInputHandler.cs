@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.App
+namespace SharpBoy.App.Sdl
 {
-    public class InputHandler : IInputHandler
+    public class SdlInputHandler : IInputHandler
     {
 
         private static readonly Dictionary<GameBoyButton, SDL.SDL_Scancode> mapping = new()

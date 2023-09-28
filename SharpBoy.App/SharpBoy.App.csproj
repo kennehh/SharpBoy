@@ -17,4 +17,8 @@
     <ProjectReference Include="..\SharpBoy.Core\SharpBoy.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ImGui\Shaders\" />
+  </ItemGroup>
+
 </Project>

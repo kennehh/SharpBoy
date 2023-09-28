@@ -1,4 +1,5 @@
 ﻿using SDL2;
+using SharpBoy.App.ImGui;
 using SharpBoy.App.Sdl;
 using System;
 using System.Collections.Generic;
@@ -8,66 +9,68 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.App
 {
-    public class MainWindow
+    public class MainWindow : IDisposable
     {
-        private readonly GameBoyFramebuffer _gbFramebuffer;
-        private Window _window;
-        private Renderer _renderer;
+        private readonly SdlManager sdlManager;
+        private readonly GameBoyFramebuffer gbFramebuffer;
+        private readonly ImGuiManager imGuiManager;
+        private SdlWindow window;
+        private SdlRenderer renderer;
 
-        private int _width;
-        private int _height;
+        private int width;
+        private int height;
         private bool running = false;
 
-        public MainWindow(GameBoyFramebuffer gbFramebuffer)
+        public MainWindow(SdlManager sdlManager, GameBoyFramebuffer gbFramebuffer)
         {
-            _width = 160 * 4;
-            _height = 144 * 4;
-            _gbFramebuffer = gbFramebuffer;
+            width = 160 * 4;
+            height = 144 * 4;
+            this.sdlManager = sdlManager;
+            this.gbFramebuffer = gbFramebuffer;
+            imGuiManager = new ImGuiManager("hello");
+
+            this.sdlManager.OnRender += Render;
+            this.sdlManager.OnPollEvent += PollEvent;
         }
 
         public void Initialise()
         {
-            SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
+            window = new SdlWindow("SharpBoy", width, height, SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
+            renderer = new SdlRenderer(window);
 
-            _window = new Window("SharpBoy", _width, _height, SDL.SDL_WindowFlags.SDL_WINDOW_VULKAN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
-            _renderer = new Renderer(_window);
-
-            _gbFramebuffer.Initialise(_renderer);
-            _gbFramebuffer.Resize(_width, _height);
+            sdlManager.SetCurrentRenderer(renderer);
+            
+            gbFramebuffer.Initialise(renderer);
+            gbFramebuffer.Resize(width, height);
         }
 
         public void Run()
         {
-            SDL.SDL_Event e;
             running = true;
 
             while (running)
             {
-                PollEvents();
+                sdlManager.PollEvents();
                 Update();
-                Render();
+                sdlManager.Render();
             }
         }
         
-        public void PollEvents()
+        public void PollEvent(SDL.SDL_Event e)
         {
-            while (SDL.SDL_PollEvent(out var e) != 0)
+            switch (e.type)
             {
-                switch (e.type)
-                {
-                    case SDL.SDL_EventType.SDL_QUIT:
-                        running = false;
-                        break;
+                case SDL.SDL_EventType.SDL_QUIT:
+                    running = false;
+                    break;
 
-                    case SDL.SDL_EventType.SDL_WINDOWEVENT:
-                        if (e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED ||
-                            e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED)
-                        {
-                            // The window was resized. Call the Resize function.
-                            _gbFramebuffer.Resize(e.window.data1, e.window.data2);
-                        }
-                        break;
-                }
+                case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                    if (e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED ||
+                        e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED)
+                    {
+                        gbFramebuffer.Resize(e.window.data1, e.window.data2);
+                    }
+                    break;
             }
         }
 
@@ -78,17 +81,19 @@ namespace SharpBoy.App
 
         public void Render()
         {
-            SDL.SDL_RenderClear(_renderer.Handle);
-            _gbFramebuffer.Render();
-            SDL.SDL_RenderPresent(_renderer.Handle);
+            gbFramebuffer.Render();
+            //_imGuiManager.Render();
         }
 
         public void Dispose()
         {
-            _gbFramebuffer?.Dispose();
-            _renderer?.Dispose();
-            _window?.Dispose();
-            SDL.SDL_Quit();
+            sdlManager.OnRender -= Render;
+            sdlManager.OnPollEvent -= PollEvent;
+            sdlManager.Dispose();
+
+            gbFramebuffer?.Dispose();
+            renderer?.Dispose();
+            window?.Dispose();
         }
     }
 }

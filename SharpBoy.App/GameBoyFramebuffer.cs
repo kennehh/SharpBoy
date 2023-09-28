@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.App
 {
-    public class GameBoyFramebuffer
+    public class GameBoyFramebuffer : IDisposable
     {
         private const int TextureWidth = 160;
         private const int TextureHeight = 144;
 
         private IRenderQueue _renderQueue;
-        private Renderer _renderer;
-        private Texture _texture;
+        private SdlRenderer _renderer;
+        private SdlTexture _texture;
         private int _width = TextureWidth;
         private int _height = TextureHeight;
         private int _xPosition = 0;
@@ -28,10 +28,10 @@ namespace SharpBoy.App
             _renderQueue = renderQueue;
         }
 
-        public void Initialise(Renderer renderer)
+        public void Initialise(SdlRenderer renderer)
         {
             _renderer = renderer;
-            _texture = new Texture(_renderer, TextureWidth, TextureHeight);
+            _texture = new SdlTexture(_renderer, TextureWidth, TextureHeight);
         }
 
         public void Render()
