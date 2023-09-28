@@ -62,4 +62,4 @@
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
 
-ShareBoy.Core.Tests/TestRoms/**/* linguist-vendored
+SharpBoy.Core.Tests/TestRoms/**/* linguist-vendored
