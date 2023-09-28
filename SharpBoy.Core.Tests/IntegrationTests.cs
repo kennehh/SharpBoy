@@ -10,8 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using SharpBoy.Core.Rendering;
 using SharpBoy.Core.Utilities;
+using SharpBoy.Core.InputHandling;
 
 namespace SharpBoy.Core.Tests
 {
@@ -97,6 +97,7 @@ namespace SharpBoy.Core.Tests
         {
             var serviceProvider = new ServiceCollection()
                 .RegisterCoreServices()
+                .AddSingleton<IInputHandler, InputHandlerMock>()
                 .BuildServiceProvider();
 
             return serviceProvider.GetService<GameBoy>();

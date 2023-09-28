@@ -4,9 +4,9 @@ using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
 using SharpBoy.Core.Graphics;
 using Microsoft.Extensions.DependencyInjection;
-using SharpBoy.Core.Rendering;
 using SharpBoy.Core.Memory;
 using SharpBoy.Core.Utilities;
+using SharpBoy.Core.InputHandling;
 
 namespace SharpBoy.Core.Tests
 {
@@ -45,6 +45,7 @@ namespace SharpBoy.Core.Tests
             var serviceProvider = new ServiceCollection()
                 .RegisterCoreServices()
                 .AddSingleton<IMmu, MmuMock>()
+                .AddSingleton<IInputHandler, InputHandlerMock>()
                 .BuildServiceProvider();
 
             return (Cpu)serviceProvider.GetService<ICpu>();
