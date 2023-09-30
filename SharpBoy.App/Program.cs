@@ -5,39 +5,43 @@ using SharpBoy.App.SdlCore;
 using SharpBoy.Core;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Utilities;
+using System.Windows.Forms;
 
 namespace SharpBoy.App
 {
     internal class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
-            var serviceCollection = new ServiceCollection()
-                .RegisterCoreServices()
-                .AddSingleton<SdlManager>()
-                //.AddSingleton<ImGuiManager>()
-                //.AddSingleton<ImGuiRenderer>()
-                .AddSingleton<MainWindow>()
-                .AddSingleton<GameBoyFramebuffer>()
-                .AddSingleton<IInputHandler, SdlInputHandler>()
-                //.AddSingleton<DebugViewModel>()
-                .BuildServiceProvider();
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "Game Boy Rom (*.gb)|*.gb;*.zip";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var serviceCollection = new ServiceCollection()
+                        .RegisterCoreServices()
+                        .AddSingleton<SdlManager>()
+                        //.AddSingleton<ImGuiManager>()
+                        //.AddSingleton<ImGuiRenderer>()
+                        .AddSingleton<MainWindow>()
+                        .AddSingleton<GameBoyFramebuffer>()
+                        .AddSingleton<IInputHandler, SdlInputHandler>()
+                        //.AddSingleton<DebugViewModel>()
+                        .BuildServiceProvider();
 
 
-            var gameboy = serviceCollection.GetRequiredService<GameBoy>();
+                    var gameboy = serviceCollection.GetRequiredService<GameBoy>();
+                    gameboy.LoadCartridge(openFileDialog.FileName);
 
-            const string romPath = "Z:\\Games\\Roms\\gb\\Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev B).zip";
-            //const string romPath = "C:\\Projects\\Dr. Mario (World) (Rev A).gb";
-            //const string romPath = "D:\\Emulators\\bgb\\bgbtest.gb";
-            //const string bootPath = "Z:\\games\\bios\\gb\\gb_bios.bin";
-            //gameboy.LoadBootRom(bootPath);
-            gameboy.LoadCartridge(romPath);
+                    Task.Run(gameboy.Run);
 
-            Task.Run(gameboy.Run);
-
-            var window = serviceCollection.GetRequiredService<MainWindow>();
-            window.Initialise();
-            window.Run();            
+                    var window = serviceCollection.GetRequiredService<MainWindow>();
+                    window.Initialise();
+                    window.Run();
+                }
+            }
         }
     }
 }
