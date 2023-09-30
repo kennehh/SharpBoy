@@ -1,5 +1,5 @@
 ﻿using SDL2;
-using SharpBoy.App.Sdl;
+using SharpBoy.App.SdlCore;
 using SharpBoy.Core.Graphics;
 using System;
 using System.Collections.Generic;
@@ -15,40 +15,42 @@ namespace SharpBoy.App
         private const int TextureWidth = 160;
         private const int TextureHeight = 144;
 
-        private IRenderQueue _renderQueue;
-        private SdlRenderer _renderer;
-        private SdlTexture _texture;
-        private int _width = TextureWidth;
-        private int _height = TextureHeight;
-        private int _xPosition = 0;
-        private int _yPosition = 0;
+        private IRenderQueue renderQueue;
+        private SdlRenderer renderer;
+        private SdlTexture texture;
+        private int width = TextureWidth;
+        private int height = TextureHeight;
+        private int xPosition = 0;
+        private int yPosition = 0;
 
         public GameBoyFramebuffer(IRenderQueue renderQueue)
         {
-            _renderQueue = renderQueue;
+            this.renderQueue = renderQueue;
         }
 
         public void Initialise(SdlRenderer renderer)
         {
-            _renderer = renderer;
-            _texture = new SdlTexture(_renderer, TextureWidth, TextureHeight);
+            this.renderer = renderer;
+            texture = new SdlTexture(this.renderer, TextureWidth, TextureHeight, SDL.SDL_PIXELFORMAT_ABGR8888, 4);
         }
 
         public void Render()
         {
             //_renderQueue.WaitForNextFrame();
-            if (_renderQueue.TryDequeue(out ReadOnlySpan<byte> frameBuffer))
+            if (renderQueue.TryDequeue(out ReadOnlySpan<byte> frameBuffer))
             {
-                _texture.Update(frameBuffer);
+                texture.Update(frameBuffer);
             }
 
-            SDL.SDL_Rect destRect;
-            destRect.x = _xPosition;
-            destRect.y = _yPosition;
-            destRect.w = _width;  // Window width
-            destRect.h = _height; // Window height
+            SDL.SDL_Rect destRect = new SDL.SDL_Rect
+            {
+                x = xPosition,
+                y = yPosition,
+                w = width,
+                h = height
+            };
 
-            SDL.SDL_RenderCopy(_renderer.Handle, _texture.Handle, IntPtr.Zero, ref destRect);
+            SDL.SDL_RenderCopy(renderer.Handle, texture.Handle, IntPtr.Zero, ref destRect);
         }
 
         public void Resize(int width, int height)
@@ -58,16 +60,16 @@ namespace SharpBoy.App
             var ratio = ratioX < ratioY ? ratioX : ratioY;
 
             // Calculate the width and height that the will be rendered to
-            _width = Convert.ToInt32(TextureWidth * ratio);
-            _height = Convert.ToInt32(TextureHeight * ratio);
+            this.width = Convert.ToInt32(TextureWidth * ratio);
+            this.height = Convert.ToInt32(TextureHeight * ratio);
             // Calculate the position, which will apply proper "pillar" or "letterbox" 
-            _xPosition = Convert.ToInt32((width - TextureWidth * ratio) / 2);
-            _yPosition = Convert.ToInt32((height - TextureHeight * ratio) / 2);
+            xPosition = Convert.ToInt32((width - TextureWidth * ratio) / 2);
+            yPosition = Convert.ToInt32((height - TextureHeight * ratio) / 2);
         }
 
         public void Dispose()
         {
-            _texture?.Dispose();
+            texture?.Dispose();
         }
     }
 

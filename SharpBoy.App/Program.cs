@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SDL2;
-using SharpBoy.App.Sdl;
+using SharpBoy.App.ImGuiCore;
+using SharpBoy.App.SdlCore;
 using SharpBoy.Core;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Utilities;
@@ -14,6 +15,8 @@ namespace SharpBoy.App
             var serviceCollection = new ServiceCollection()
                 .RegisterCoreServices()
                 .AddSingleton<SdlManager>()
+                //.AddSingleton<ImGuiManager>()
+                //.AddSingleton<ImGuiRenderer>()
                 .AddSingleton<MainWindow>()
                 .AddSingleton<GameBoyFramebuffer>()
                 .AddSingleton<IInputHandler, SdlInputHandler>()

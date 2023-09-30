@@ -1,6 +1,6 @@
 ﻿using SDL2;
-using SharpBoy.App.ImGui;
-using SharpBoy.App.Sdl;
+using SharpBoy.App.ImGuiCore;
+using SharpBoy.App.SdlCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,6 @@ namespace SharpBoy.App
         private readonly GameBoyFramebuffer gbFramebuffer;
         private readonly ImGuiManager imGuiManager;
         private SdlWindow window;
-        private SdlRenderer renderer;
 
         private int width;
         private int height;
@@ -27,20 +26,13 @@ namespace SharpBoy.App
             height = 144 * 4;
             this.sdlManager = sdlManager;
             this.gbFramebuffer = gbFramebuffer;
-            imGuiManager = new ImGuiManager("hello");
-
-            this.sdlManager.OnRender += Render;
-            this.sdlManager.OnPollEvent += PollEvent;
         }
 
         public void Initialise()
         {
             window = new SdlWindow("SharpBoy", width, height, SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
-            renderer = new SdlRenderer(window);
 
-            sdlManager.SetCurrentRenderer(renderer);
-            
-            gbFramebuffer.Initialise(renderer);
+            gbFramebuffer.Initialise(window.Renderer);
             gbFramebuffer.Resize(width, height);
         }
 
@@ -49,50 +41,43 @@ namespace SharpBoy.App
             running = true;
 
             while (running)
-            {
-                sdlManager.PollEvents();
-                Update();
-                sdlManager.Render();
+            {                
+                PollEvent();
+                window.Render(Render);
             }
         }
         
-        public void PollEvent(SDL.SDL_Event e)
+        public void PollEvent()
         {
-            switch (e.type)
+            while (SDL.SDL_PollEvent(out var e) != 0)
             {
-                case SDL.SDL_EventType.SDL_QUIT:
-                    running = false;
-                    break;
+                switch (e.type)
+                {
+                    case SDL.SDL_EventType.SDL_QUIT:
+                        running = false;
+                        break;
 
-                case SDL.SDL_EventType.SDL_WINDOWEVENT:
-                    if (e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED ||
-                        e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED)
-                    {
-                        gbFramebuffer.Resize(e.window.data1, e.window.data2);
-                    }
-                    break;
+                    case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                        if (e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED ||
+                            e.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED)
+                        {
+                            gbFramebuffer.Resize(e.window.data1, e.window.data2);
+                        }
+                        break;
+                }
             }
-        }
-
-        public void Update()
-        {
-
         }
 
         public void Render()
         {
             gbFramebuffer.Render();
-            //_imGuiManager.Render();
         }
 
         public void Dispose()
         {
-            sdlManager.OnRender -= Render;
-            sdlManager.OnPollEvent -= PollEvent;
             sdlManager.Dispose();
 
             gbFramebuffer?.Dispose();
-            renderer?.Dispose();
             window?.Dispose();
         }
     }

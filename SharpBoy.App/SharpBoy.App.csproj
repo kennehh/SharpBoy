@@ -9,18 +9,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="ImGui\Shaders\frag.glsl" />
-    <None Remove="ImGui\Shaders\vert.glsl" />
+    <None Remove="ImGuiCore\Shaders\frag.glsl" />
+    <None Remove="ImGuiCore\Shaders\vert.glsl" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="ImGui\Shaders\frag.glsl" />
-    <EmbeddedResource Include="ImGui\Shaders\vert.glsl" />
+    <EmbeddedResource Include="ImGuiCore\Shaders\frag.glsl" />
+    <EmbeddedResource Include="ImGuiCore\Shaders\vert.glsl" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.89.9.2" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.17.1" />
   </ItemGroup>
 
   <ItemGroup>

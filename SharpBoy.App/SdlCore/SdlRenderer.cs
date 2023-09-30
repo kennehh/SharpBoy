@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.App.Sdl
+namespace SharpBoy.App.SdlCore
 {
     public class SdlRenderer : IDisposable
     {

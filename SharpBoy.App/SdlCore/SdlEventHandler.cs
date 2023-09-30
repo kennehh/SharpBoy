@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.App.ImGui
+namespace SharpBoy.App.SdlCore
 {
-    public interface IImGuiWidget
+    internal class SdlEventHandler
     {
-        public void Render();
     }
 }

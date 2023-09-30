@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.App.Sdl
+namespace SharpBoy.App.SdlCore
 {
     public class SdlWindow : IDisposable
     {
         private IntPtr window;
+        public SdlRenderer Renderer { get; }
 
         public SdlWindow(string title, int width, int height, SDL.SDL_WindowFlags flags)
         {
@@ -18,6 +19,20 @@ namespace SharpBoy.App.Sdl
             {
                 throw new SdlException("Window creation failed");
             }
+
+            Renderer = new SdlRenderer(this);
+        }
+
+        public void Render(Action render)
+        {
+            if (Renderer == null)
+            {
+                return;
+            }
+
+            SDL.SDL_RenderClear(Renderer.Handle);
+            render();
+            SDL.SDL_RenderPresent(Renderer.Handle);
         }
 
         public IntPtr Handle => window;
@@ -29,6 +44,7 @@ namespace SharpBoy.App.Sdl
                 SDL.SDL_DestroyWindow(window);
                 window = IntPtr.Zero;
             }
+            Renderer?.Dispose();
         }
     }
 }
