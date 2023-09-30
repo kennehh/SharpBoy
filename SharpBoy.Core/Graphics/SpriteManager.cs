@@ -84,14 +84,19 @@ namespace SharpBoy.Core.Graphics
         public byte CgbPalette => (byte)(Attributes & SpriteAttributeFlags.CgbPalette); // Mask to get bits 0-2
         public bool UseVramBank1 => Attributes.HasFlag(SpriteAttributeFlags.UseVramBank1);
 
-        public byte[] GetLineToRender(int y, int tileHeight)
+        public byte[] GetLineToRender(int y, int spriteHeight)
         {
             byte[] lineData = new byte[8];
             var tile = tileData.GetTile(TileNumber);
 
+            if (YFlip)
+            {
+                y = spriteHeight - y - 1;
+            }
+
             for (int x = 0; x < 8; x++)
             {
-                lineData[XFlip ? 7 - x : x] = (byte)tile.GetColorIndex(x, y, tileHeight);
+                lineData[XFlip ? 7 - x : x] = (byte)tile.GetColorIndex(x, y, spriteHeight);
             }
 
             return lineData;

@@ -265,13 +265,7 @@ namespace SharpBoy.Core.Graphics
             foreach (var sprite in visibleSprites)
             {
                 int lineToRender = currentScanline - (sprite.YPos - 16);
-
-                if (sprite.YFlip)
-                {
-                    lineToRender = spriteHeight - lineToRender - 1;
-                }
-
-                byte[] lineData = sprite.GetLineToRender(lineToRender, spriteHeight);
+                var lineData = sprite.GetLineToRender(lineToRender, spriteHeight);
 
                 for (int i = 0; i < lineData.Length; i++)
                 {
@@ -346,7 +340,7 @@ namespace SharpBoy.Core.Graphics
             frameBuffer[bufferPosition] = color.Red;
             frameBuffer[bufferPosition + 1] = color.Green;
             frameBuffer[bufferPosition + 2] = color.Blue;
-            frameBuffer[bufferPosition + 3] = 255;
+            frameBuffer[bufferPosition + 3] = 0xff;
         }
 
         private ColorRgb GetPixelColor(int x, int y)
