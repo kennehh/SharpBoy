@@ -45,6 +45,8 @@ namespace SharpBoy.Core.Graphics
         private readonly SpriteManager spriteManager;
         private bool LastLcdEnabledStatus = false;
 
+        private int windowLineCounter = 0;
+
         public Ppu(IInterruptManager interruptManager, IRenderQueue renderQueue)
         {
             this.interruptManager = interruptManager;
@@ -183,6 +185,7 @@ namespace SharpBoy.Core.Graphics
             if (Registers.LY >= 153)
             {
                 Registers.LY = 0;
+                windowLineCounter = 0;
             }
             else
             {
@@ -247,8 +250,11 @@ namespace SharpBoy.Core.Graphics
 
         private void RenderScanline()
         {
-            RenderBgScanline();
-            RenderWindowScanline();
+            if (Registers.LCDC.HasFlag(LcdcFlags.BgWindowPriority))
+            {
+                RenderBgScanline();
+                RenderWindowScanline();
+            }
             RenderSpritesScanline();
         }
 
@@ -341,7 +347,7 @@ namespace SharpBoy.Core.Graphics
                 return;
             }
 
-            int yPos = line - windowY;
+            var incrementLineCounter = false;
 
             for (int pixel = 0; pixel < LcdWidth; pixel++)
             {
@@ -352,10 +358,17 @@ namespace SharpBoy.Core.Graphics
                     continue;
                 }
 
-                var colorIndex = tileMapManager.GetWindowColorIndex(xPos - windowX, yPos);
+                var colorIndex = tileMapManager.GetWindowColorIndex(xPos - windowX, windowLineCounter);
                 var color = BgpColorMap[colorIndex];
 
                 DrawPixel(pixel, line, color);
+                incrementLineCounter = true;
+            }
+
+            // If the window is active on this line, increment the counter
+            if (incrementLineCounter)
+            {
+                windowLineCounter++;
             }
         }
 

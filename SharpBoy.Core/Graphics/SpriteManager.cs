@@ -87,7 +87,7 @@ namespace SharpBoy.Core.Graphics
         public byte[] GetLineToRender(int y, int spriteHeight)
         {
             byte[] lineData = new byte[8];
-            var tile = tileData.GetTile(TileNumber);
+            var tile = tileData.GetTile(TileNumber, spriteHeight);
 
             if (YFlip)
             {

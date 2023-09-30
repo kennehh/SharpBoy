@@ -89,7 +89,7 @@ namespace SharpBoy.Core.Graphics
         private Tile GetTile(int x, int y)
         {
             int tileNumber = GetTileNumber(x >>> 3, y >>> 3);
-            return activeTileData.GetTile(tileNumber);
+            return activeTileData.GetTile(tileNumber, 8);
         }
 
         // Get the tile index number from the tile map based on coordinates.
@@ -127,10 +127,11 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        public Tile GetTile(int tileNumber)
+        public Tile GetTile(int tileNumber, int tileHeight)
         {
-            // Normalize the tile number to be within [0, 255]
-            int normalizedTileNumber = tileNumber & 0xFF;
+            // Normalize the tile number based on sprite height
+            // Ignore bit 0 if it's 8x16
+            int normalizedTileNumber = tileNumber & (tileHeight == 16 ? 0xFE : 0xFF);
             return tiles[normalizedTileNumber];
         }
     }
