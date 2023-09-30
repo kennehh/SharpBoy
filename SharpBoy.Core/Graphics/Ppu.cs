@@ -56,7 +56,12 @@ namespace SharpBoy.Core.Graphics
             {
                 for (int x = 0; x < LcdWidth; x++)
                 {
-                    DrawPixel(x, y, TransparentColor);
+                    int bufferPosition = ((y * LcdWidth) + x) * 4;
+
+                    blankFrameBuffer[bufferPosition] = TransparentColor.Red;
+                    blankFrameBuffer[bufferPosition + 1] = TransparentColor.Green;
+                    blankFrameBuffer[bufferPosition + 2] = TransparentColor.Blue;
+                    blankFrameBuffer[bufferPosition + 3] = 0xff;
                 }
             }
         }
@@ -64,20 +69,14 @@ namespace SharpBoy.Core.Graphics
         
 
         public void Tick()
-        {            
-            var currentLcdEnabledStatus = Registers.LCDC.HasFlag(LcdcFlags.LcdEnable);
-
-            if (!currentLcdEnabledStatus)
+        {
+            if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
             {
                 if (LastLcdEnabledStatus)
                 {
                     LastLcdEnabledStatus = false;
-                    Registers.LY = 0;
-                    cycles = 0;
-                    Registers.CurrentStatus = PpuStatus.HorizontalBlank;
-                    renderQueue.Enqueue(blankFrameBuffer);
+                    ResetLcdState();
                 }
-
                 return;
             }
 
@@ -155,6 +154,14 @@ namespace SharpBoy.Core.Graphics
         public void DoOamDmaTransfer(byte[] sourceData)
         {
             oam.Copy(sourceData);
+        }
+
+        private void ResetLcdState()
+        {
+            Registers.LY = 0;
+            cycles = 0;
+            Registers.CurrentStatus = PpuStatus.HorizontalBlank;
+            renderQueue.Enqueue(blankFrameBuffer);
         }
 
         private void UpdateLcdc(byte newValue)
