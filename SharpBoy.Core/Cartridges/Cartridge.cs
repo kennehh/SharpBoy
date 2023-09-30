@@ -6,22 +6,23 @@ namespace SharpBoy.Core.Cartridges
     {
         public CartridgeHeader Header { get; }
 
-        private readonly IReadableMemory rom = null;
-        private readonly IReadWriteMemory eram = null;
+        protected IReadableMemory Rom { get; private set; }
+        protected IReadWriteMemory ERam { get; private set; }
 
         public Cartridge(CartridgeHeader header, IReadableMemory rom)
         {
             Header = header;
-            this.rom = rom;
+            Rom = rom;
 
             if (header.RamSize > 0)
             {
-                eram = new Ram(header.RamSize);
+                ERam = new Ram(header.RamSize);
             }
         }
 
-        public virtual byte ReadRom(ushort address) => rom.Read(address);
-        public virtual byte ReadERam(ushort address) => eram?.Read(address) ?? 0xff;
-        public virtual void WriteERam(ushort address, byte value) => eram?.Write(address, value);
+        public virtual byte ReadRom(ushort address) => Rom.Read(address);
+        public virtual byte ReadERam(ushort address) => ERam?.Read(address) ?? 0xff;
+        public virtual void WriteRom(ushort address, byte value) { }
+        public virtual void WriteERam(ushort address, byte value) => ERam?.Write(address, value);
     }
 }

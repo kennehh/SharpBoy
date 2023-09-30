@@ -26,8 +26,8 @@ namespace SharpBoy.App
 
             var gameboy = serviceCollection.GetRequiredService<GameBoy>();
 
-            //const string romPath = "Z:\\Games\\Roms\\gb\\NFL Football (USA).zip";
-            const string romPath = "C:\\Projects\\Dr. Mario (World) (Rev A).gb";
+            const string romPath = "Z:\\Games\\Roms\\gb\\Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev B).zip";
+            //const string romPath = "C:\\Projects\\Dr. Mario (World) (Rev A).gb";
             //const string romPath = "D:\\Emulators\\bgb\\bgbtest.gb";
             //const string bootPath = "Z:\\games\\bios\\gb\\gb_bios.bin";
             //gameboy.LoadBootRom(bootPath);

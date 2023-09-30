@@ -17,5 +17,6 @@ namespace SharpBoy.Core.Cartridges
         public byte ReadERam(ushort address) => 0xff;
         public byte ReadRom(ushort address) => 0xff;
         public void WriteERam(ushort address, byte value) { }
+        public void WriteRom(ushort address, byte value) { }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpBoy.Core.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,27 +43,27 @@ namespace SharpBoy.Core.Cartridges
 
         public static readonly IReadOnlyDictionary<byte, (int, int)> RomSizes = new Dictionary<byte, (int, int)>
         {
-            {0x00, (32 * 1024,                  2)},
-            {0x01, (64 * 1024,                  4)},
-            {0x02, (128 * 1024,                 8)},
-            {0x03, (256 * 1024,                 16)},
-            {0x04, (512 * 1024,                 32)},
-            {0x05, (1024 * 1024,                64)},
-            {0x06, (2 * 1024 * 1024,            128)},
-            {0x07, (4 * 1024 * 1024,            256)},
-            {0x08, (8 * 1024 * 1024,            512)},
-            {0x52, ((int)(1.1 * 1024 * 1024),   72)},
-            {0x53, ((int)(1.2 * 1024 * 1024),   80)},
-            {0x54, ((int)(1.5 * 1024 * 1024),   96)}
+            {0x00, (MemorySizes.Bytes32KB,    2)},
+            {0x01, (MemorySizes.Bytes64KB,    4)},
+            {0x02, (MemorySizes.Bytes128KB,   8)},
+            {0x03, (MemorySizes.Bytes256KB,   16)},
+            {0x04, (MemorySizes.Bytes512KB,   32)},
+            {0x05, (MemorySizes.Bytes1MB,     64)},
+            {0x06, (MemorySizes.Bytes2MB,     128)},
+            {0x07, (MemorySizes.Bytes4MB,     256)},
+            {0x08, (MemorySizes.Bytes8MB,     512)},
+            {0x52, ((int)(1.1 * 1024 * 1024), 72)},
+            {0x53, ((int)(1.2 * 1024 * 1024), 80)},
+            {0x54, ((int)(1.5 * 1024 * 1024), 96)}
         };
 
         public static readonly IReadOnlyDictionary<byte, (int, int)> RamSizes = new Dictionary<byte, (int, int)>
         {
-            {0x00, (0,                          0)},
-            {0x02, (8 * 1024,                   1)},
-            {0x03, (32 * 1024,                  4)},
-            {0x04, (128 * 1024,                 16)},
-            {0x05, (64 * 1024,                  8)}
+            {0x00, (0,                        0)},
+            {0x02, (MemorySizes.Bytes8KB,     1)},
+            {0x03, (MemorySizes.Bytes32KB,    4)},
+            {0x04, (MemorySizes.Bytes128KB,   16)},
+            {0x05, (MemorySizes.Bytes64KB,    8)}
         };
 
         public static readonly IReadOnlyDictionary<string, string> NewLicenseeCodes = new Dictionary<string, string>

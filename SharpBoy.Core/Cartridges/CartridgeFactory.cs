@@ -19,6 +19,10 @@ namespace SharpBoy.Core.Cartridges
             {
                 case CartridgeType.NoMbc:
                     return new NoMbcCartridge(header, rom);
+                case CartridgeType.Mbc1:
+                    return new Mbc1Cartridge(header, rom);
+                case CartridgeType.Mbc3:
+                    return new Mbc1Cartridge(header, rom);
                 default:
                     throw new NotImplementedException();
             }

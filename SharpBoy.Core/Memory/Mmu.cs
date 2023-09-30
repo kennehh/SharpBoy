@@ -79,6 +79,7 @@ namespace SharpBoy.Core.Memory
             switch (address)
             {
                 case <= 0x7fff:
+                    cartridge.WriteRom(address, value);
                     break;
                 case <= 0x9fff:
                     // In CGB mode, switchable bank 0/1

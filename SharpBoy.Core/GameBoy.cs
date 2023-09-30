@@ -57,7 +57,8 @@ namespace SharpBoy.Core
                 rom = File.ReadAllBytes(path);
             }
 
-            Mmu.LoadCartridge(cartridgeFactory.CreateCartridge(rom));
+            var cart = cartridgeFactory.CreateCartridge(rom);
+            Mmu.LoadCartridge(cart);
         }
 
         public void Run()
