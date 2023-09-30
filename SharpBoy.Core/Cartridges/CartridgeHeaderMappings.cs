@@ -4,20 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.CartridgeHandling
+namespace SharpBoy.Core.Cartridges
 {
     internal static class CartridgeHeaderMappings
     {
         public static readonly IReadOnlyDictionary<byte, (CartridgeType, CartridgeHardware)> CartridgeTypes = new Dictionary<byte, (CartridgeType, CartridgeHardware)>
         {
-            {0x00, (CartridgeType.Rom,          CartridgeHardware.None)},
+            {0x00, (CartridgeType.NoMbc,          CartridgeHardware.None)},
             {0x01, (CartridgeType.Mbc1,         CartridgeHardware.None)},
             {0x02, (CartridgeType.Mbc1,         CartridgeHardware.Ram)},
             {0x03, (CartridgeType.Mbc1,         CartridgeHardware.Ram | CartridgeHardware.Battery)},
             {0x05, (CartridgeType.Mbc2,         CartridgeHardware.None)},
             {0x06, (CartridgeType.Mbc2,         CartridgeHardware.Battery)},
-            {0x08, (CartridgeType.Rom,          CartridgeHardware.Ram)},
-            {0x09, (CartridgeType.Rom,          CartridgeHardware.Ram | CartridgeHardware.Battery)},
+            {0x08, (CartridgeType.NoMbc,          CartridgeHardware.Ram)},
+            {0x09, (CartridgeType.NoMbc,          CartridgeHardware.Ram | CartridgeHardware.Battery)},
             {0x0B, (CartridgeType.Mmm01,        CartridgeHardware.None)},
             {0x0C, (CartridgeType.Mmm01,        CartridgeHardware.Ram)},
             {0x0D, (CartridgeType.Mmm01,        CartridgeHardware.Ram | CartridgeHardware.Battery)},

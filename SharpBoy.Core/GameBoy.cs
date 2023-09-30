@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using SharpBoy.Core.Graphics;
-using SharpBoy.Core.CartridgeHandling;
+using SharpBoy.Core.Cartridges;
 using System.IO.Compression;
 using System.Runtime.Intrinsics.Arm;
 
@@ -25,16 +25,16 @@ namespace SharpBoy.Core
         private const double CpuCyclesPerMillisecond = CpuSpeedHz / 1000;
         private const double ExpectedMillisecondsPerUpdate = 1000 / RefreshRateHz;
         private const int ExpectedCpuCyclesPerUpdate = (int)(ExpectedMillisecondsPerUpdate * CpuCyclesPerMillisecond);
-        private readonly ICartridge cartridgeReader;
+        private readonly ICartridgeFactory cartridgeFactory;
         private readonly GameBoyState state;
         private bool stopped = false;
 
-        public GameBoy(ICpu cpu, IMmu mmu, IPpu ppu, ICartridge cartridgeReader, GameBoyState state)
+        public GameBoy(ICpu cpu, IMmu mmu, IPpu ppu, ICartridgeFactory cartridgeFactory, GameBoyState state)
         {
             Cpu = cpu;
             Mmu = mmu;
             Ppu = ppu;
-            this.cartridgeReader = cartridgeReader;
+            this.cartridgeFactory = cartridgeFactory;
             this.state = state;
         }
 
@@ -56,8 +56,8 @@ namespace SharpBoy.Core
             {
                 rom = File.ReadAllBytes(path);
             }
-            
-            cartridgeReader.LoadCartridge(rom);
+
+            Mmu.LoadCartridge(cartridgeFactory.CreateCartridge(rom));
         }
 
         public void Run()

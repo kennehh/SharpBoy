@@ -1,0 +1,27 @@
+﻿using SharpBoy.Core.Memory;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.PortableExecutable;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SharpBoy.Core.Cartridges
+{
+    public class CartridgeFactory : ICartridgeFactory
+    {
+        public ICartridge CreateCartridge(byte[] data)
+        {
+            var rom = new Rom(data);
+            var header = new CartridgeHeader(rom);
+
+            switch (header.Type)
+            {
+                case CartridgeType.NoMbc:
+                    return new NoMbcCartridge(header, rom);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.CartridgeHandling;
+﻿using SharpBoy.Core.Cartridges;
 using SharpBoy.Core.Graphics;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
@@ -17,21 +17,20 @@ namespace SharpBoy.Core.Memory
 
         private readonly IPpu ppu;
         private readonly ITimer timer;
-        private readonly ICartridge cartridgeReader;
         private readonly IInterruptManager interruptManager;
         private readonly IInputController inputController;
         private IReadableMemory bootRom = null;
+        private ICartridge cartridge = NoCartridge.Instance;
         private IReadWriteMemory wram = new Ram(0x2000);
         private IReadWriteMemory hram = new Ram(0x80);
         
         // TODO: Implement I/O, this array is just temporary
         private byte[] ioRegisters = new byte[0x10000];
 
-        public Mmu(IPpu ppu, ITimer timer, ICartridge cartridgeReader, IInterruptManager interruptManager, IInputController inputController)
+        public Mmu(IPpu ppu, ITimer timer, IInterruptManager interruptManager, IInputController inputController)
         {
             this.ppu = ppu;
             this.timer = timer;
-            this.cartridgeReader = cartridgeReader;
             this.interruptManager = interruptManager;
             this.inputController = inputController;
             Array.Fill<byte>(ioRegisters, 0xff);
@@ -43,6 +42,11 @@ namespace SharpBoy.Core.Memory
             BootRomLoaded = true;
         }
 
+        public void LoadCartridge(ICartridge cartridge)
+        {
+            this.cartridge = cartridge;
+        }
+
         public byte Read(int addr)
         {
             var address = (ushort)addr;
@@ -50,7 +54,7 @@ namespace SharpBoy.Core.Memory
             {
                 <= 0x7fff => ReadRom(address),
                 <= 0x9fff => ppu.ReadVram(address),
-                <= 0xbfff => cartridgeReader.ReadERam(address),
+                <= 0xbfff => cartridge.ReadERam(address),
                 <= 0xcfff => wram.Read(address),
                 <= 0xdfff => wram.Read(address), // In CGB mode, switchable bank 1~7 ;
                 <= 0xfdff => wram.Read(address), // copy of wram (echo ram) - use of this area should be prohibited
@@ -81,7 +85,7 @@ namespace SharpBoy.Core.Memory
                     ppu.WriteVram(address, value);
                     break;
                 case <= 0xbfff:
-                    cartridgeReader.WriteERam(address, value);
+                    cartridge.WriteERam(address, value);
                     break;
                 case <= 0xcfff:
                     wram.Write(address, value);
@@ -149,7 +153,7 @@ namespace SharpBoy.Core.Memory
             {
                 return bootRom.Read(address);
             }
-            return cartridgeReader.ReadRom(address);
+            return cartridge.ReadRom(address);
         }
 
         private void DoOamDmaTransfer(byte value)

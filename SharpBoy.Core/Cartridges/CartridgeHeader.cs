@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpBoy.Core.CartridgeHandling
+namespace SharpBoy.Core.Cartridges
 {
     public class CartridgeHeader
     {
@@ -22,7 +22,16 @@ namespace SharpBoy.Core.CartridgeHandling
         public int RamBanks { get; private set; }
         public DestinationCode Destination { get; private set; }
 
-        public void ReadRom(IReadableMemory rom)
+        public CartridgeHeader()
+        {
+        }
+
+        public CartridgeHeader(IReadableMemory rom)
+        {
+            ReadRom(rom);
+        }
+
+        private void ReadRom(IReadableMemory rom)
         {
             ReadCartridgeType(rom);
             ReadRomSize(rom);
@@ -146,7 +155,7 @@ namespace SharpBoy.Core.CartridgeHandling
 
     public enum CartridgeType
     {
-        Rom,
+        NoMbc,
         Mbc1,
         Mbc2,
         Mmm01,
