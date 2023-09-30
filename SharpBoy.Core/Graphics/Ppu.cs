@@ -36,12 +36,14 @@ namespace SharpBoy.Core.Graphics
         private IReadWriteMemory vram = new Ram(0x2000);
         private IReadWriteMemory oam = new Ram(0xa0);
         private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 4];
+        private byte[] blankFrameBuffer = new byte[LcdWidth * LcdHeight * 4];
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
         private readonly IRenderQueue renderQueue;
         private readonly TileMapManager tileMapManager;
         private readonly SpriteManager spriteManager;
+        private bool LastLcdEnabledStatus = false;
 
         public Ppu(IInterruptManager interruptManager, IRenderQueue renderQueue)
         {
@@ -49,10 +51,37 @@ namespace SharpBoy.Core.Graphics
             this.renderQueue = renderQueue;
             tileMapManager = new TileMapManager(vram);
             spriteManager = new SpriteManager(oam, vram);
+
+            for (int y = 0; y < LcdHeight; y ++)
+            {
+                for (int x = 0; x < LcdWidth; x++)
+                {
+                    DrawPixel(x, y, TransparentColor);
+                }
+            }
         }
 
+        
+
         public void Tick()
-        {
+        {            
+            var currentLcdEnabledStatus = Registers.LCDC.HasFlag(LcdcFlags.LcdEnable);
+
+            if (!currentLcdEnabledStatus)
+            {
+                if (LastLcdEnabledStatus)
+                {
+                    LastLcdEnabledStatus = false;
+                    Registers.LY = 0;
+                    cycles = 0;
+                    Registers.CurrentStatus = PpuStatus.HorizontalBlank;
+                    renderQueue.Enqueue(blankFrameBuffer);
+                }
+
+                return;
+            }
+
+            LastLcdEnabledStatus = true;
             var previousStatus = Registers.CurrentStatus;
             cycles += 4;
 
@@ -211,16 +240,6 @@ namespace SharpBoy.Core.Graphics
 
         private void RenderScanline()
         {
-            // If the LCD is disabled, fill the framebuffer with the transparent color for this scanline
-            if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
-            {
-                for (int x = 0; x < LcdWidth; x++)
-                {
-                    DrawPixel(x, Registers.LY, TransparentColor);
-                }
-                return; // Exit early since LCD is disabled
-            }
-
             RenderBgScanline();
             RenderWindowScanline();
             RenderSpritesScanline();
