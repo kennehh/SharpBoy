@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharpBoy.Core.Cartridges;
 using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Tests.Mocks
@@ -19,6 +20,8 @@ namespace SharpBoy.Core.Tests.Mocks
         public bool BootRomLoaded => false;
 
         public void LoadBootRom(byte[] rom) { }
+
+        public void LoadCartridge(ICartridge cartridge) { }
 
         public byte Read(int address) => memory[address];
 

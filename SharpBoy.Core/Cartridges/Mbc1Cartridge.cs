@@ -23,13 +23,11 @@ namespace SharpBoy.Core.Cartridges
 
         private int currentLowerRomBank = 1;
         private int currentUpperRomBank = 0;
-        private int romBankMask = 0;
 
         private int currentRamBank = 0;
 
         public Mbc1Cartridge(CartridgeHeader header, IReadableMemory rom) : base(header, rom)
         {
-            romBankMask = GetRomBankMask(header.RomBanks);
             this.header = header;
         }
 
@@ -39,7 +37,7 @@ namespace SharpBoy.Core.Cartridges
             {
                 if (bankingMode && header.RomSize >= MemorySizes.Bytes1MB)
                 {
-                    var bank = currentUpperRomBank << 5;
+                    var bank = (currentUpperRomBank << 5) % header.RomBanks;
                     var bankOffset = bank * RomBankSize;
                     return Rom.Read(address + bankOffset);
                 }
@@ -47,10 +45,10 @@ namespace SharpBoy.Core.Cartridges
             }
             else
             {
-                var bankAddress = address - RomBankSize;
-                var bank = Math.Max((currentUpperRomBank << 5) + currentLowerRomBank, 1);
+                var relativeAddress = address - RomBankSize;
+                var bank = Math.Max((currentUpperRomBank << 5) + currentLowerRomBank, 1) % header.RomBanks;
                 var bankOffset = bank * RomBankSize;
-                return Rom.Read(bankAddress + bankOffset);
+                return Rom.Read(relativeAddress + bankOffset);
             }
         }
 
@@ -62,7 +60,7 @@ namespace SharpBoy.Core.Cartridges
                     ramEnabled = (value & 0x0f) == 0x0a;
                     break;
                 case <= 0x3fff:
-                    currentLowerRomBank = Math.Max(value & 0x1f & romBankMask, 1);
+                    currentLowerRomBank = Math.Max(value & 0x1f, 1);
                     break;
                 case <= 0x5fff:
                     if (header.RomSize >= MemorySizes.Bytes1MB)
@@ -106,12 +104,6 @@ namespace SharpBoy.Core.Cartridges
         {
             var bankOffset = currentRamBank * RamBankSize;
             return address + bankOffset;
-        }
-
-        private static int GetRomBankMask(int numberOfRomBanks)
-        {
-            int requiredBits = (int)Math.Ceiling(Math.Log(numberOfRomBanks, 2));
-            return (1 << requiredBits) - 1;
         }
     }
 }
