@@ -85,7 +85,7 @@ namespace SharpBoy.Core.Cartridges
             }
             else
             {
-                throw new Exception($"Unknown cartridge type value: 0x{cartridgeTypeByte:X}");
+                Console.WriteLine($"Unknown cartridge type value: 0x{cartridgeTypeByte:X}");
             }
         }
 
@@ -99,7 +99,7 @@ namespace SharpBoy.Core.Cartridges
             }
             else
             {
-                throw new Exception($"Unknown rom size value: 0x{romSizeByte:X}");
+                Console.WriteLine($"Unknown rom size value: 0x{romSizeByte:X}");
             }
         }
 
@@ -113,7 +113,7 @@ namespace SharpBoy.Core.Cartridges
             }
             else
             {
-                throw new Exception($"Unknown rom size value: 0x{ramSizeByte:X}");
+                Console.WriteLine($"Unknown rom size value: 0x{ramSizeByte:X}");
             }
         }
 
@@ -122,7 +122,7 @@ namespace SharpBoy.Core.Cartridges
             Destination = (DestinationCode)rom.Read(0x014A);
             if (!Enum.IsDefined(Destination))
             {
-                throw new Exception($"Unknown destination code value: 0x{(byte)Destination:X}");
+                Console.WriteLine($"Unknown destination code value: 0x{(byte)Destination:X}");
             }
         }
 
@@ -139,7 +139,7 @@ namespace SharpBoy.Core.Cartridges
                 }
                 else
                 {
-                    throw new Exception($"Unknown new licensee code value: {newLicenseeCode}");
+                    Console.WriteLine($"Unknown new licensee code value: {newLicenseeCode}");
                 }
             }
             else if (CartridgeHeaderMappings.OldLicenseeCodes.TryGetValue(oldLicenseeCodeByte, out var oldLicensee))
@@ -148,7 +148,7 @@ namespace SharpBoy.Core.Cartridges
             }
             else
             {
-                throw new Exception($"Unknown old licensee code value: 0x{oldLicenseeCodeByte:X}");
+                Console.WriteLine($"Unknown old licensee code value: 0x{oldLicenseeCodeByte:X}");
             }
         }
     }

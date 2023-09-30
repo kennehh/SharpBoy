@@ -60,8 +60,6 @@ namespace SharpBoy.Core.Tests
                     characters.Add(gb.Mmu.Read(0xff01));
                     gb.Mmu.Write(0xff02, 0x01);
                 }
-
-                //Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(30), "Test took too long");
             }
 
             stopwatch.Reset();
