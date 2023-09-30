@@ -29,7 +29,6 @@ namespace SharpBoy.Core.Graphics
         };
 
         private static readonly ColorRgb TransparentColor = Colors[0];
-        private const int SpriteTransparentColorIndex = 0;
         private static readonly ColorRgb[] BgpColorMap = (ColorRgb[])Colors.Clone();
         private static readonly ColorRgb[] Obp0ColorMap = (ColorRgb[])Colors.Clone();
         private static readonly ColorRgb[] Obp1ColorMap = (ColorRgb[])Colors.Clone();
@@ -265,26 +264,25 @@ namespace SharpBoy.Core.Graphics
 
             foreach (var sprite in visibleSprites)
             {
-                int line = currentScanline - (sprite.YPos - 16);
+                int lineToRender = currentScanline - (sprite.YPos - 16);
 
                 if (sprite.YFlip)
                 {
-                    line = spriteHeight - line - 1;
+                    lineToRender = spriteHeight - lineToRender - 1;
                 }
 
-                byte[] lineData = sprite.GetLineToRender(line);
+                byte[] lineData = sprite.GetLineToRender(lineToRender, spriteHeight);
 
                 for (int i = 0; i < lineData.Length; i++)
                 {
                     var index = lineData[i];
-                    if (index == SpriteTransparentColorIndex)
+                    if (index == 0)
                     {
                         continue;
                     }
 
-                    var color = GetSpriteColor(index, sprite.UseObp1Palette);
                     int screenX = sprite.XPos + i - 8;
-                    int screenY = sprite.YPos + line - 16;
+                    int screenY = sprite.YPos + lineToRender - 16;
 
                     if (screenX < 0 || screenY < 0 || screenX >= LcdWidth || screenY >= LcdHeight)
                     {
@@ -300,6 +298,7 @@ namespace SharpBoy.Core.Graphics
                         }
                     }
 
+                    var color = GetSpriteColor(index, sprite.UseObp1Palette);
                     DrawPixel(screenX, screenY, color);
                 }
             }

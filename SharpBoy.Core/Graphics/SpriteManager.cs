@@ -42,15 +42,9 @@ namespace SharpBoy.Core.Graphics
                 }
             }
 
-            // Sort sprites based on their X position and priority rules
-            // Sorting could be important for sprite overlap
-            visibleSprites.Sort((a, b) =>
-            {
-                int xPosComparison = a.XPos.CompareTo(b.XPos);
-                return xPosComparison != 0 ? xPosComparison : a.OamIndex.CompareTo(b.OamIndex);
-            });
-
-            return visibleSprites;
+            // Sprites with lower x position will get rendered if pixels overlap, then OAM index
+            // TODO: remove x position check, CGB uses OAM index only
+            return visibleSprites.OrderByDescending(x => x.XPos).ThenByDescending(x => x.OamIndex);
         }
 
         private bool IsSpriteVisibleOnScanline(Sprite sprite, int scanline, int spriteHeight)
@@ -90,19 +84,14 @@ namespace SharpBoy.Core.Graphics
         public byte CgbPalette => (byte)(Attributes & SpriteAttributeFlags.CgbPalette); // Mask to get bits 0-2
         public bool UseVramBank1 => Attributes.HasFlag(SpriteAttributeFlags.UseVramBank1);
 
-        public int GetColorIndex(int x, int y)
-        {
-            return tileData.GetTile(TileNumber).GetColorIndex(x, y);
-        }
-
-        public byte[] GetLineToRender(int y)
+        public byte[] GetLineToRender(int y, int tileHeight)
         {
             byte[] lineData = new byte[8];
             var tile = tileData.GetTile(TileNumber);
 
             for (int x = 0; x < 8; x++)
             {
-                lineData[XFlip ? 7 - x : x] = (byte)tile.GetColorIndex(x, y);
+                lineData[XFlip ? 7 - x : x] = (byte)tile.GetColorIndex(x, y, tileHeight);
             }
 
             return lineData;

@@ -83,7 +83,7 @@ namespace SharpBoy.Core.Graphics
 
         public int GetColorIndex(int x, int y)
         {
-            return GetTile(x, y).GetColorIndex(x, y);
+            return GetTile(x, y).GetColorIndex(x, y, 8);
         }
 
         private Tile GetTile(int x, int y)
@@ -150,10 +150,10 @@ namespace SharpBoy.Core.Graphics
         }
 
         // Fetch the color index for a specific pixel within the tile.
-        public int GetColorIndex(int x, int y)
+        public int GetColorIndex(int x, int y, int tileHeight)
         {
-            int xPixelInTile = x & 7;  // Extract the x position within the tile.
-            int yPixelInTile = y & 7;  // Extract the y position within the tile.
+            int xPixelInTile = x & (tileHeight - 1);  // Extract the x position within the tile.
+            int yPixelInTile = y & (tileHeight - 1);  // Extract the y position within the tile.
 
             int yOffset = yPixelInTile * 2; // 2 bytes per row
             byte data1 = vram.Read(baseAddress + yOffset);
