@@ -22,6 +22,8 @@ namespace SharpBoy.Core.Tests
         private static IEnumerable<string> MemTimingRoms => Directory.GetFiles("TestRoms/blargg/mem_timing/individual")
             .Concat(Directory.GetFiles("TestRoms/blargg/mem_timing-2/rom_singles"));
 
+        private static IEnumerable<string> OamBugRoms => Directory.GetFiles("TestRoms/blargg/oam_bug/rom_singles");
+
         [Test, TestCaseSource(nameof(CpuInstrRoms))]
         public void CpuInstrTest(string path) => TestBlarggRom(path);
 
@@ -31,6 +33,8 @@ namespace SharpBoy.Core.Tests
         [Test, TestCaseSource(nameof(MemTimingRoms))]
         public void MemTimingTest(string path) => TestBlarggRom(path);
 
+        [Test, TestCaseSource(nameof(OamBugRoms))]
+        public void OamBugTest(string path) => TestBlarggRom(path);
 
         [Test]
         public void HaltBugTest() => TestBlarggRom("TestRoms/blargg/halt_bug.gb");

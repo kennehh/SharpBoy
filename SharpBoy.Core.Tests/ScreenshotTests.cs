@@ -12,10 +12,15 @@ namespace SharpBoy.Core.Tests
     [Parallelizable(ParallelScope.All)]
     public class ScreenshotTests
     {
+        private static IEnumerable<(string, string)> MealybugTearoomPpuTestRoms => GetMealybugTearoomTests();
+
+        [Test, TestCaseSource(nameof(MealybugTearoomPpuTestRoms))]
+        public void MealybugTearoomPpuTest((string rom, string screenshot) test) => TestRom(test.rom, test.screenshot, 0x40);
+
         [Test]
         public void DmgAcid2Test() => TestRom("TestRoms/dmg-acid2/dmg-acid2.gb", "TestRoms/dmg-acid2/dmg-acid2-dmg.png", 0x40);
 
-        private void TestRom(string pathToRom, string pathToScreenshot, byte opcodeToStopAt)
+        private static void TestRom(string pathToRom, string pathToScreenshot, byte opcodeToStopAt)
         {
             var serviceProvider = GetServiceProvider();
             var gb = serviceProvider.GetService<GameBoy>();
@@ -34,7 +39,7 @@ namespace SharpBoy.Core.Tests
             CompareToScreenshot(fb.ToArray(), pathToScreenshot);
         }
 
-        private void CompareToScreenshot(byte[] framebuffer, string pathToScreenshot)
+        private static void CompareToScreenshot(byte[] framebuffer, string pathToScreenshot)
         {
             using (var expectedImage = Image.Load<Rgba32>(pathToScreenshot))
             {
@@ -58,6 +63,24 @@ namespace SharpBoy.Core.Tests
                 .AddSingleton<IInputHandler, InputHandlerMock>()
                 .AddSingleton<IRenderQueue, RenderQueueMock>()
                 .BuildServiceProvider();
+        }
+
+        private static IEnumerable<(string, string)> GetMealybugTearoomTests()
+        {
+            var files = Directory.GetFiles("TestRoms/mealybug-tearoom-tests/ppu");
+            var roms = files.Where(x => Path.GetExtension(x) == ".gb");
+
+            var tests = roms.Select(rom =>
+            {
+                var screenshot = files.FirstOrDefault(x =>
+                    x.Contains(Path.GetFileNameWithoutExtension(rom)) &&
+                    Path.GetExtension(x) == ".png" &&
+                    x.Contains("dmg_blob"));
+
+                return (rom, screenshot);
+            });
+
+            return tests.Where(x => !string.IsNullOrEmpty(x.rom) && !string.IsNullOrEmpty(x.screenshot));
         }
     }
 }
