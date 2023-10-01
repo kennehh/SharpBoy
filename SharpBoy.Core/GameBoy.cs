@@ -71,6 +71,8 @@ namespace SharpBoy.Core
         }
 
         private long cyclesEmulated = 0;
+        private long lastCyclesTime = 0;
+        private long cyclesCounter = 0;
         private Stopwatch stopwatch = new Stopwatch();
 
         public void Run()
@@ -79,8 +81,6 @@ namespace SharpBoy.Core
 
             stopwatch = Stopwatch.StartNew();
             var targetCyclesPerSecond = CpuSpeedHz;
-            var lastCyclesTime = 0L;
-            var cyclesCounter = 0L;
 
             while (!stopped)
             {
@@ -134,9 +134,14 @@ namespace SharpBoy.Core
 
         public void UncapSpeed(bool value)
         {
-            runUncapped = value;
-            cyclesEmulated = 0;
-            stopwatch.Restart();
+            if (runUncapped != value)
+            {
+                runUncapped = value;
+                cyclesEmulated = 0;
+                lastCyclesTime = 0;
+                cyclesCounter = 0;
+                stopwatch.Restart();
+            }
         }
 
         internal int Step()
