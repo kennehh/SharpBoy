@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpBoy.Core.Utilities;
+﻿using SharpBoy.Core.Utilities;
 
 namespace SharpBoy.Core.Graphics
 {

@@ -1,12 +1,4 @@
-﻿using ImGuiNET;
-using SDL2;
-using SharpBoy.App.SdlCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SharpBoy.App.SdlCore;
 
 namespace SharpBoy.App.ImGuiCore
 {

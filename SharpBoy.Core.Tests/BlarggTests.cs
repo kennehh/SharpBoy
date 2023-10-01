@@ -1,17 +1,10 @@
-﻿using SharpBoy.Core.Processor;
-using SharpBoy.Core.Memory;
-using SharpBoy.Core.Tests.Mocks;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
-using SharpBoy.Core.Utilities;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SharpBoy.Core.InputHandling;
+using SharpBoy.Core.Processor;
+using SharpBoy.Core.Tests.Mocks;
+using SharpBoy.Core.Utilities;
+using System.Diagnostics;
+using System.Text;
 
 namespace SharpBoy.Core.Tests
 {

@@ -3,11 +3,6 @@ using SharpBoy.Core.Graphics;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Timing;
-using System;
-using System.Collections.Generic;
-using System.Runtime.Intrinsics.Arm;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace SharpBoy.Core.Memory
 {
@@ -23,7 +18,7 @@ namespace SharpBoy.Core.Memory
         private ICartridge cartridge = NoCartridge.Instance;
         private IReadWriteMemory wram = new Ram(0x2000);
         private IReadWriteMemory hram = new Ram(0x80);
-        
+
         // TODO: Implement I/O, this array is just temporary
         private byte[] ioRegisters = new byte[0x10000];
 
@@ -167,7 +162,7 @@ namespace SharpBoy.Core.Memory
                 sourceData[i] = Read(sourceAddress + i);
             }
 
-            ppu.DoOamDmaTransfer(sourceData); 
+            ppu.DoOamDmaTransfer(sourceData);
         }
     }
 }

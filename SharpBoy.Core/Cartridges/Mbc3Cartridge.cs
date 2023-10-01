@@ -1,13 +1,4 @@
-﻿using Microsoft.Win32;
-using SharpBoy.Core.Memory;
-using SharpBoy.Core.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Cartridges
 {
@@ -27,7 +18,7 @@ namespace SharpBoy.Core.Cartridges
 
         private Dictionary<RtcRegister, byte> rtcRegisters = new();
 
-        public Mbc3Cartridge(CartridgeHeader header, IReadableMemory rom) : base(header, rom)
+        public Mbc3Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram) : base(header, rom, ram)
         {
             this.header = header;
         }

@@ -2,6 +2,6 @@
 {
     public interface ICartridgeFactory
     {
-        ICartridge CreateCartridge(byte[] data);
+        ICartridge CreateCartridge(byte[] romData, byte[] ramData = null);
     }
 }

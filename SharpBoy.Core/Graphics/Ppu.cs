@@ -1,21 +1,12 @@
 ﻿using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
-using SharpBoy.Core.Utilities;
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Numerics;
-using System.Reflection;
-using System.Text;
 
 namespace SharpBoy.Core.Graphics
 {
 
     public class Ppu : IPpu
     {
-        public PpuRegisters Registers { get; } = new PpuRegisters();
+        public PpuRegisters Registers { get; private set; } = new PpuRegisters();
 
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
@@ -35,40 +26,25 @@ namespace SharpBoy.Core.Graphics
         private IReadWriteMemory vram = new Ram(0x2000);
         private IReadWriteMemory oam = new Ram(0xa0);
         private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 4];
-        private byte[] blankFrameBuffer = new byte[LcdWidth * LcdHeight * 4];
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
-        private readonly IRenderQueue renderQueue;
+        private readonly IFrameBufferManager frameBufferManager;
         private readonly TileMapManager tileMapManager;
         private readonly SpriteManager spriteManager;
         private bool LastLcdEnabledStatus = false;
 
         private int windowLineCounter = 0;
 
-        public Ppu(IInterruptManager interruptManager, IRenderQueue renderQueue)
+        public Ppu(IInterruptManager interruptManager, IFrameBufferManager renderQueue)
         {
             this.interruptManager = interruptManager;
-            this.renderQueue = renderQueue;
+            this.frameBufferManager = renderQueue;
             tileMapManager = new TileMapManager(vram);
             spriteManager = new SpriteManager(oam, vram);
-
-            var blankColor = Colors[3];
-            for (int y = 0; y < LcdHeight; y ++)
-            {
-                for (int x = 0; x < LcdWidth; x++)
-                {
-                    int bufferPosition = ((y * LcdWidth) + x) * 4;
-
-                    blankFrameBuffer[bufferPosition] = blankColor.Red;
-                    blankFrameBuffer[bufferPosition + 1] = blankColor.Green;
-                    blankFrameBuffer[bufferPosition + 2] = blankColor.Blue;
-                    blankFrameBuffer[bufferPosition + 3] = 0xff;
-                }
-            }
         }
 
-        
+
 
         public void Tick()
         {
@@ -137,15 +113,15 @@ namespace SharpBoy.Core.Graphics
                 case 0xff46: Registers.DMA = value; break;
                 case 0xff47:
                     Registers.BGP = value;
-                    UpdateColorMap(BgpColorMap, value); 
+                    UpdateColorMap(BgpColorMap, value);
                     break;
                 case 0xff48:
                     Registers.OBP0 = value;
-                    UpdateColorMap(Obp0ColorMap, value); 
+                    UpdateColorMap(Obp0ColorMap, value);
                     break;
                 case 0xff49:
                     Registers.OBP1 = value;
-                    UpdateColorMap(Obp1ColorMap, value); 
+                    UpdateColorMap(Obp1ColorMap, value);
                     break;
                 case 0xff4a: Registers.WY = value; break;
                 case 0xff4b: Registers.WX = value; break;
@@ -158,12 +134,25 @@ namespace SharpBoy.Core.Graphics
             oam.Copy(sourceData);
         }
 
+        public void ResetState(bool bootRomLoaded)
+        {
+            Registers = new PpuRegisters();
+            frameBufferManager.ClearBuffers();
+
+            if (!bootRomLoaded)
+            {
+                Registers.LCDC = (LcdcFlags)0x91;
+                Registers.BGP = 0xfc;
+                Registers.OBP0 = 0xff;
+                Registers.OBP1 = 0xff;
+            }
+        }
+
         private void ResetLcdState()
         {
             Registers.LY = 0;
             cycles = 0;
             Registers.CurrentStatus = PpuStatus.HorizontalBlank;
-            renderQueue.Enqueue(blankFrameBuffer);
         }
 
         private void UpdateLcdc(byte newValue)
@@ -238,7 +227,7 @@ namespace SharpBoy.Core.Graphics
             if (Registers.CurrentStatus != previousStatus)
             {
                 interruptManager.RequestInterrupt(InterruptFlags.VBlank);
-                renderQueue.Enqueue(frameBuffer);
+                frameBufferManager.PushFrame(frameBuffer);
             }
 
             if (cycles >= 456)

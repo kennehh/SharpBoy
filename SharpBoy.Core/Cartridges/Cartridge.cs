@@ -9,14 +9,14 @@ namespace SharpBoy.Core.Cartridges
         protected IReadableMemory Rom { get; private set; }
         protected IReadWriteMemory ERam { get; private set; }
 
-        public Cartridge(CartridgeHeader header, IReadableMemory rom)
+        public Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram)
         {
             Header = header;
             Rom = rom;
 
             if (header.RamSize > 0)
             {
-                ERam = new Ram(header.RamSize);
+                ERam = ram ?? new Ram(header.RamSize);
             }
         }
 

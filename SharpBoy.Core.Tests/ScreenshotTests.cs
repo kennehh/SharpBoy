@@ -4,8 +4,6 @@ using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
 using SharpBoy.Core.Utilities;
-using System.Drawing;
-using System.Runtime.CompilerServices;
 
 namespace SharpBoy.Core.Tests
 {
@@ -34,8 +32,8 @@ namespace SharpBoy.Core.Tests
                 gb.Step();
             }
 
-            var renderQueue = serviceProvider.GetService<IRenderQueue>();
-            renderQueue.TryDequeue(out var fb);
+            var renderQueue = serviceProvider.GetService<IFrameBufferManager>();
+            renderQueue.TryGetNextFrame(out var fb);
             CompareToScreenshot(fb.ToArray(), pathToScreenshot);
         }
 
@@ -61,7 +59,7 @@ namespace SharpBoy.Core.Tests
             return new ServiceCollection()
                 .RegisterCoreServices()
                 .AddSingleton<IInputHandler, InputHandlerMock>()
-                .AddSingleton<IRenderQueue, RenderQueueMock>()
+                .AddSingleton<IFrameBufferManager, RenderQueueMock>()
                 .BuildServiceProvider();
         }
 

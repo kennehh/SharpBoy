@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using NUnit.Framework.Internal;
+using SharpBoy.Core.InputHandling;
+using SharpBoy.Core.Memory;
 using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
-using SharpBoy.Core.Graphics;
-using Microsoft.Extensions.DependencyInjection;
-using SharpBoy.Core.Memory;
 using SharpBoy.Core.Utilities;
-using SharpBoy.Core.InputHandling;
 
 namespace SharpBoy.Core.Tests
 {

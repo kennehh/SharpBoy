@@ -1,14 +1,4 @@
-﻿using SharpBoy.Core.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SharpBoy.Core.Interrupts
+﻿namespace SharpBoy.Core.Interrupts
 {
     public class InterruptManager : IInterruptManager
     {

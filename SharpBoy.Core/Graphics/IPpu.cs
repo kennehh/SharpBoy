@@ -1,11 +1,4 @@
-﻿using SharpBoy.Core.Processor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SharpBoy.Core.Graphics
+﻿namespace SharpBoy.Core.Graphics
 {
     public interface IPpu
     {
@@ -18,5 +11,6 @@ namespace SharpBoy.Core.Graphics
         void WriteRegister(ushort address, byte value);
         void DoOamDmaTransfer(byte[] sourceData);
         void Tick();
+        void ResetState(bool bootRomLoaded);
     }
 }

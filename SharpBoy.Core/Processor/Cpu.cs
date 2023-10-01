@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Reflection.Emit;
-using System.Reflection.Metadata;
-using System.Text;
-using SharpBoy.Core.Graphics;
+﻿using SharpBoy.Core.Graphics;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
@@ -20,7 +14,7 @@ namespace SharpBoy.Core.Processor
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
         internal byte Opcode { get; private set; }
-        public CpuRegisters Registers { get; }
+        public CpuRegisters Registers { get; private set; }
 
         private int cycles = 0;
         private bool haltBugTriggered = false;
@@ -56,6 +50,20 @@ namespace SharpBoy.Core.Processor
             inputController.CheckForInputs();
 
             return cycles;
+        }
+
+        public void ResetState(bool bootRomLoaded)
+        {
+            Registers = new CpuRegisters();
+            if (!bootRomLoaded)
+            {
+                Registers.AF = 0x01b0;
+                Registers.BC = 0x0013;
+                Registers.DE = 0x00d8;
+                Registers.HL = 0x014d;
+                Registers.PC = 0x0100;
+                Registers.SP = 0xfffe;
+            }
         }
 
         private void HandleInterrupts()

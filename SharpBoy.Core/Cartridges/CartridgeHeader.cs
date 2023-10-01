@@ -1,10 +1,5 @@
 ﻿using SharpBoy.Core.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Cartridges
 {
@@ -106,7 +101,7 @@ namespace SharpBoy.Core.Cartridges
         private void ReadRamSize(IReadableMemory rom)
         {
             var ramSizeByte = rom.Read(0x0149);
-            if (CartridgeHeaderMappings.RomSizes.TryGetValue(ramSizeByte, out var ramSize))
+            if (CartridgeHeaderMappings.RamSizes.TryGetValue(ramSizeByte, out var ramSize))
             {
                 RamSize = ramSize.Item1;
                 RamBanks = ramSize.Item2;
@@ -190,6 +185,6 @@ namespace SharpBoy.Core.Cartridges
     {
         NotCgb = 0,
         CgbBackwardsCompatible = 0x80,
-        CgbOnly =  0xC0
+        CgbOnly = 0xC0
     }
 }

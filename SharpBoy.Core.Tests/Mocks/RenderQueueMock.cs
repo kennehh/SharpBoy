@@ -1,29 +1,25 @@
 ﻿using SharpBoy.Core.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Tests.Mocks
 {
-    internal class RenderQueueMock : IRenderQueue
+    internal class RenderQueueMock : IFrameBufferManager
     {
         private ReadOnlyMemory<byte> frameBuffer;
 
-        public void Enqueue(ReadOnlyMemory<byte> frame)
+        public void ClearBuffers()
+        {
+            frameBuffer = null;
+        }
+
+        public void PushFrame(ReadOnlyMemory<byte> frame)
         {
             frameBuffer = frame;
         }
 
-        public bool TryDequeue(out ReadOnlySpan<byte> fb)
+        public bool TryGetNextFrame(out ReadOnlySpan<byte> nextFrame)
         {
-            fb = frameBuffer.Span;
+            nextFrame = frameBuffer.Span;
             return true;
-        }
-
-        public void WaitForNextFrame()
-        {
         }
     }
 }

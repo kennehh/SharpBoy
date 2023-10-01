@@ -1,7 +1,4 @@
 ﻿using SharpBoy.Core.Cartridges;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SharpBoy.Core.Memory
 {

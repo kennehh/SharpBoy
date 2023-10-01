@@ -1,13 +1,5 @@
-﻿using Microsoft.Win32;
-using SharpBoy.Core.Memory;
+﻿using SharpBoy.Core.Memory;
 using SharpBoy.Core.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Cartridges
 {
@@ -26,7 +18,7 @@ namespace SharpBoy.Core.Cartridges
 
         private int currentRamBank = 0;
 
-        public Mbc1Cartridge(CartridgeHeader header, IReadableMemory rom) : base(header, rom)
+        public Mbc1Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram) : base(header, rom, ram)
         {
             this.header = header;
         }
@@ -102,8 +94,9 @@ namespace SharpBoy.Core.Cartridges
 
         private int GetERamAddress(ushort address)
         {
-            var bankOffset = currentRamBank * RamBankSize;
-            return address + bankOffset;
+            var bankOffset = bankingMode ? currentRamBank * RamBankSize : 0;
+            var baseAddress = address - 0xa000;
+            return baseAddress + bankOffset;
         }
     }
 }

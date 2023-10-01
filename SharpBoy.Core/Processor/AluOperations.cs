@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SharpBoy.Core.Utilities;
+﻿using SharpBoy.Core.Utilities;
 
 namespace SharpBoy.Core.Processor
 {

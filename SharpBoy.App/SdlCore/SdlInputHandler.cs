@@ -1,10 +1,5 @@
 ﻿using SDL2;
 using SharpBoy.Core.InputHandling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpBoy.App.SdlCore
 {
@@ -16,7 +11,7 @@ namespace SharpBoy.App.SdlCore
             { GameBoyButton.A, SDL.SDL_Scancode.SDL_SCANCODE_X },
             { GameBoyButton.B, SDL.SDL_Scancode.SDL_SCANCODE_Z },
             { GameBoyButton.Start, SDL.SDL_Scancode.SDL_SCANCODE_RETURN },
-            { GameBoyButton.Select, SDL.SDL_Scancode.SDL_SCANCODE_BACKSPACE },
+            { GameBoyButton.Select, SDL.SDL_Scancode.SDL_SCANCODE_SPACE },
             { GameBoyButton.Up, SDL.SDL_Scancode.SDL_SCANCODE_UP },
             { GameBoyButton.Down, SDL.SDL_Scancode.SDL_SCANCODE_DOWN },
             { GameBoyButton.Left, SDL.SDL_Scancode.SDL_SCANCODE_LEFT },

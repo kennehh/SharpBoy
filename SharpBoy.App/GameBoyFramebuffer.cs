@@ -1,12 +1,6 @@
 ﻿using SDL2;
 using SharpBoy.App.SdlCore;
 using SharpBoy.Core.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpBoy.App
 {
@@ -15,7 +9,7 @@ namespace SharpBoy.App
         private const int TextureWidth = 160;
         private const int TextureHeight = 144;
 
-        private IRenderQueue renderQueue;
+        private IFrameBufferManager fbManager;
         private SdlRenderer renderer;
         private SdlTexture texture;
         private int width = TextureWidth;
@@ -23,9 +17,9 @@ namespace SharpBoy.App
         private int xPosition = 0;
         private int yPosition = 0;
 
-        public GameBoyFramebuffer(IRenderQueue renderQueue)
+        public GameBoyFramebuffer(IFrameBufferManager fbManager)
         {
-            this.renderQueue = renderQueue;
+            this.fbManager = fbManager;
         }
 
         public void Initialise(SdlRenderer renderer)
@@ -36,8 +30,7 @@ namespace SharpBoy.App
 
         public void Render()
         {
-            //_renderQueue.WaitForNextFrame();
-            if (renderQueue.TryDequeue(out ReadOnlySpan<byte> frameBuffer))
+            if (fbManager.TryGetNextFrame(out ReadOnlySpan<byte> frameBuffer))
             {
                 texture.Update(frameBuffer);
             }
