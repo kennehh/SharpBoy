@@ -1,104 +1,64 @@
-﻿using SharpBoy.Core.Processor;
-using SharpBoy.Core.Memory;
-using SharpBoy.Core.Tests.Mocks;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
-using SharpBoy.Core.Utilities;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SharpBoy.Core.Graphics;
 using SharpBoy.Core.InputHandling;
+using SharpBoy.Core.Processor;
+using SharpBoy.Core.Tests.Mocks;
+using SharpBoy.Core.Utilities;
+using System.Drawing;
 
 namespace SharpBoy.Core.Tests
 {
     [Parallelizable(ParallelScope.All)]
     public class IntegrationTests
     {
-        private static IEnumerable<string> CpuInstrRoms => Directory.GetFiles("TestRoms/blargg/cpu_instrs/individual");
-        private static IEnumerable<string> MemTimingRoms => Directory.GetFiles("TestRoms/blargg/mem_timing/individual")
-            .Concat(Directory.GetFiles("TestRoms/blargg/mem_timing-2/rom_singles"));
-
-        [Test, TestCaseSource(nameof(CpuInstrRoms))]
-        public void BlarggCpuInstrTest(string path) => TestBlarggRom(path);
-
         [Test]
-        public void BlarggInstrTimingTest() => TestBlarggRom("TestRoms/blargg/instr_timing/instr_timing.gb");
+        public void DmgAcid2Test() => TestRom("TestRoms/dmg-acid2/dmg-acid2.gb", "TestRoms/dmg-acid2/dmg-acid2-dmg.png", 0x40);
 
-        [Test, TestCaseSource(nameof(MemTimingRoms))]
-        public void BlarggMemTimingTest(string path) => TestBlarggRom(path);
-
-        [Test]
-        public void BlarggHaltBugTest() => TestBlarggRom("TestRoms/blargg/halt_bug.gb");
-
-        private void TestBlarggRom(string path)
+        private void TestRom(string pathToRom, string pathToScreenshot, byte opcodeToStopAt)
         {
-            var gb = CreateGameBoy();
-            gb.LoadCartridge(path);
+            var serviceProvider = GetServiceProvider();
+            var gb = serviceProvider.GetService<GameBoy>();
+
+            gb.LoadCartridge(pathToRom);
             var cpu = (Cpu)gb.Cpu;
 
-            var lastPC = -1;
-            gb.Cpu.Registers.PC = 0x101;
-            var characters = new List<byte>();
+            gb.Cpu.Registers.PC = 0x100;
+            gb.InitialiseGameBoyState();
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var isHalted = false;
-            while (!(lastPC == cpu.Registers.PC && !isHalted))
+            while (cpu.Opcode != opcodeToStopAt)
             {
-                isHalted = cpu.State == CpuState.Halted;
-                lastPC = cpu.Registers.PC;
-
                 gb.Step();
-
-                if (gb.Mmu.Read(0xff02) == 0x81)
-                {
-                    characters.Add(gb.Mmu.Read(0xff01));
-                    gb.Mmu.Write(0xff02, 0x01);
-                }
             }
 
-            stopwatch.Reset();
-
-            if (!characters.Any())
-            {
-                // test message should be stored at 0xa004
-                Assert.That(gb.Mmu.Read(0xa001), Is.EqualTo(0xde));
-                Assert.That(gb.Mmu.Read(0xa002), Is.EqualTo(0xb0));
-                Assert.That(gb.Mmu.Read(0xa003), Is.EqualTo(0x61));
-
-                ushort address = 0xa004;
-                while (true)
-                {
-                    var character = gb.Mmu.Read(address++);
-                    if (character != 0)
-                    {
-                        characters.Add(character);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-
-            var message = Encoding.Default.GetString(characters.ToArray());
-            var passed = message.Contains("Passed") && !message.Contains("Failed");
-            Assert.That(passed, "Message: " + message);
+            var renderQueue = serviceProvider.GetService<IRenderQueue>();
+            renderQueue.TryDequeue(out var fb);
+            CompareToScreenshot(fb.ToArray(), pathToScreenshot);
         }
 
-        private static GameBoy CreateGameBoy()
+        private void CompareToScreenshot(byte[] framebuffer, string pathToScreenshot)
         {
-            var serviceProvider = new ServiceCollection()
+            using (var expectedImage = Image.Load<Rgba32>(pathToScreenshot))
+            {
+                for (int y = 0; y < expectedImage.Height; y++)
+                {
+                    for (int x = 0; x < expectedImage.Width; x++)
+                    {
+                        var expectedPixel = expectedImage[x, y];
+                        var offset = (y * 160 + x) * 4;
+                        var framebufferPixel = new Rgba32(framebuffer[offset], framebuffer[offset + 1], framebuffer[offset + 2], framebuffer[offset + 3]);
+                        Assert.That(framebufferPixel, Is.EqualTo(expectedPixel), $"Incorrect at {x},{y}");
+                    }
+                }
+            }
+        }
+
+        private static ServiceProvider GetServiceProvider()
+        {
+            return new ServiceCollection()
                 .RegisterCoreServices()
                 .AddSingleton<IInputHandler, InputHandlerMock>()
+                .AddSingleton<IRenderQueue, RenderQueueMock>()
                 .BuildServiceProvider();
-
-            return serviceProvider.GetService<GameBoy>();
         }
     }
 }

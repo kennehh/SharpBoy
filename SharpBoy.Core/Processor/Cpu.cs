@@ -19,6 +19,7 @@ namespace SharpBoy.Core.Processor
 
         internal IMmu Mmu { get; }
         internal IInterruptManager InterruptManager { get; }
+        internal byte Opcode { get; private set; }
         public CpuRegisters Registers { get; }
 
         private int cycles = 0;
@@ -43,8 +44,8 @@ namespace SharpBoy.Core.Processor
 
             if (State == CpuState.Running)
             {
-                var opcode = ReadImmediate8Bit();
-                ExecuteInstruction(opcode);
+                Opcode = ReadImmediate8Bit();
+                ExecuteInstruction(Opcode);
             }
             else
             {

@@ -61,7 +61,7 @@ namespace SharpBoy.Core
             Mmu.LoadCartridge(cart);
         }
 
-        public void Run()
+        public void InitialiseGameBoyState()
         {
             if (!Mmu.BootRomLoaded)
             {
@@ -77,6 +77,11 @@ namespace SharpBoy.Core
                 Ppu.Registers.OBP0 = 0xff;
                 Ppu.Registers.OBP1 = 0xff;
             }
+        }
+
+        public void Run()
+        {
+            InitialiseGameBoyState();
 
             var stopwatch = Stopwatch.StartNew();
             var cyclesEmulated = 0L;

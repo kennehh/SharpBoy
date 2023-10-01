@@ -11,7 +11,7 @@ using SharpBoy.Core.InputHandling;
 namespace SharpBoy.Core.Tests
 {
     [Parallelizable(ParallelScope.All)]
-    public class InstructionTests
+    public class InstructionUnitTests
     {
         private const string DirectoryPath = "GeneratedTests/InstructionTests";
         private static IEnumerable<string> Tests => Directory.GetFiles(DirectoryPath).Select(Path.GetFileNameWithoutExtension);

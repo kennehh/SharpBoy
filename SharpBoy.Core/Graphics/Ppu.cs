@@ -22,10 +22,10 @@ namespace SharpBoy.Core.Graphics
 
         private static readonly ColorRgb[] Colors =
         {
-            new ColorRgb(154, 158, 63),
-            new ColorRgb(73, 107, 34),
-            new ColorRgb(14, 69, 11),
-            new ColorRgb(27, 42, 9)
+            new ColorRgb(0xff, 0xff, 0xff),
+            new ColorRgb(0xaa, 0xaa, 0xaa),
+            new ColorRgb(0x55, 0x55, 0x55),
+            new ColorRgb(0x00, 0x00, 0x00)
         };
 
         private static readonly ColorRgb TransparentColor = Colors[0];
