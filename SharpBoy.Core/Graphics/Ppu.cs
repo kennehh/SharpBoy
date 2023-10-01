@@ -28,7 +28,6 @@ namespace SharpBoy.Core.Graphics
             new ColorRgb(0x00, 0x00, 0x00)
         };
 
-        private static readonly ColorRgb TransparentColor = Colors[0];
         private static readonly ColorRgb[] BgpColorMap = (ColorRgb[])Colors.Clone();
         private static readonly ColorRgb[] Obp0ColorMap = (ColorRgb[])Colors.Clone();
         private static readonly ColorRgb[] Obp1ColorMap = (ColorRgb[])Colors.Clone();
@@ -54,15 +53,16 @@ namespace SharpBoy.Core.Graphics
             tileMapManager = new TileMapManager(vram);
             spriteManager = new SpriteManager(oam, vram);
 
+            var blankColor = Colors[3];
             for (int y = 0; y < LcdHeight; y ++)
             {
                 for (int x = 0; x < LcdWidth; x++)
                 {
                     int bufferPosition = ((y * LcdWidth) + x) * 4;
 
-                    blankFrameBuffer[bufferPosition] = TransparentColor.Red;
-                    blankFrameBuffer[bufferPosition + 1] = TransparentColor.Green;
-                    blankFrameBuffer[bufferPosition + 2] = TransparentColor.Blue;
+                    blankFrameBuffer[bufferPosition] = blankColor.Red;
+                    blankFrameBuffer[bufferPosition + 1] = blankColor.Green;
+                    blankFrameBuffer[bufferPosition + 2] = blankColor.Blue;
                     blankFrameBuffer[bufferPosition + 3] = 0xff;
                 }
             }
