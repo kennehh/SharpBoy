@@ -75,28 +75,27 @@ namespace SharpBoy.Core.Cartridges
             }
         }
 
-        public override byte ReadERam(ushort address)
+        public override byte ReadRam(ushort address)
         {
-            if (ramEnabled && ERam != null)
+            if (ramEnabled && Ram != null)
             {
-                return ERam.Read(GetERamAddress(address));
+                return Ram.Read(GetERamAddress(address));
             }
             return 0xff;
         }
 
-        public override void WriteERam(ushort address, byte value)
+        public override void WriteRam(ushort address, byte value)
         {
-            if (ramEnabled && ERam != null)
+            if (ramEnabled && Ram != null)
             {
-                ERam.Write(GetERamAddress(address), value);
+                Ram.Write(GetERamAddress(address), value);
             }
         }
 
         private int GetERamAddress(ushort address)
         {
             var bankOffset = bankingMode ? currentRamBank * RamBankSize : 0;
-            var baseAddress = address - 0xa000;
-            return baseAddress + bankOffset;
+            return address + bankOffset;
         }
     }
 }

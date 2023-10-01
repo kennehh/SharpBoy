@@ -2,7 +2,7 @@
 
 namespace SharpBoy.Core.Tests.Mocks
 {
-    internal class RenderQueueMock : IFrameBufferManager
+    internal class FrameBufferManagerMock : IFrameBufferManager
     {
         private ReadOnlyMemory<byte> frameBuffer;
 

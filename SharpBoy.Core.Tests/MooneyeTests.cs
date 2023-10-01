@@ -58,11 +58,15 @@ namespace SharpBoy.Core.Tests
             while (cpu.Opcode != 0x40)
             {
                 gb.Step();
-                //Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(10), "Test took too long");
+                if (!Debugger.IsAttached)
+                {
+                    Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(10), "Test took too long");
+                }
             }
 
             stopwatch.Reset();
 
+            // Test is successful when the registers are set to the fibonacci sequence
             Assert.That(cpu.Registers.B, Is.EqualTo(3));
             Assert.That(cpu.Registers.C, Is.EqualTo(5));
             Assert.That(cpu.Registers.D, Is.EqualTo(8));

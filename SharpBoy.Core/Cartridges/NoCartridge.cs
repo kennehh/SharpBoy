@@ -8,9 +8,9 @@
         private static readonly CartridgeHeader header = new CartridgeHeader();
         public CartridgeHeader Header => header;
 
-        public byte ReadERam(ushort address) => 0xff;
+        public byte ReadRam(ushort address) => 0xff;
         public byte ReadRom(ushort address) => 0xff;
-        public void WriteERam(ushort address, byte value) { }
+        public void WriteRam(ushort address, byte value) { }
         public void WriteRom(ushort address, byte value) { }
     }
 }

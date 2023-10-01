@@ -26,6 +26,8 @@ namespace SharpBoy.Core
         private bool stopped = false;
         private bool runUncapped = false;
 
+        private readonly object syncRoot = new object();
+
         public GameBoy(ICpu cpu, IMmu mmu, IPpu ppu, ICartridgeFactory cartridgeFactory, GameBoyState state)
         {
             Cpu = cpu;
@@ -134,13 +136,16 @@ namespace SharpBoy.Core
 
         public void UncapSpeed(bool value)
         {
-            if (runUncapped != value)
+            lock (syncRoot)
             {
-                runUncapped = value;
-                cyclesEmulated = 0;
-                lastCyclesTime = 0;
-                cyclesCounter = 0;
-                stopwatch.Restart();
+                if (runUncapped != value)
+                {
+                    runUncapped = value;
+                    cyclesEmulated = 0;
+                    lastCyclesTime = 0;
+                    cyclesCounter = 0;
+                    stopwatch.Restart();
+                }
             }
         }
 

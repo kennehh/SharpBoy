@@ -49,7 +49,7 @@ namespace SharpBoy.Core.Memory
             {
                 <= 0x7fff => ReadRom(address),
                 <= 0x9fff => ppu.ReadVram(address),
-                <= 0xbfff => cartridge.ReadERam(address),
+                <= 0xbfff => cartridge.ReadRam(address),
                 <= 0xcfff => wram.Read(address),
                 <= 0xdfff => wram.Read(address), // In CGB mode, switchable bank 1~7 ;
                 <= 0xfdff => wram.Read(address), // copy of wram (echo ram) - use of this area should be prohibited
@@ -81,7 +81,7 @@ namespace SharpBoy.Core.Memory
                     ppu.WriteVram(address, value);
                     break;
                 case <= 0xbfff:
-                    cartridge.WriteERam(address, value);
+                    cartridge.WriteRam(address, value);
                     break;
                 case <= 0xcfff:
                     wram.Write(address, value);

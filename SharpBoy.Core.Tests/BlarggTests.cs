@@ -59,7 +59,10 @@ namespace SharpBoy.Core.Tests
                     gb.Mmu.Write(0xff02, 0x01);
                 }
 
-                Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(10), "Test took too long");
+                if (!Debugger.IsAttached)
+                {
+                    Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(10), "Test took too long");
+                }
             }
 
             stopwatch.Reset();

@@ -89,7 +89,7 @@ namespace SharpBoy.Core.Cartridges
             }
         }
 
-        public override byte ReadERam(ushort address)
+        public override byte ReadRam(ushort address)
         {
             if (ramEnabled)
             {
@@ -97,15 +97,15 @@ namespace SharpBoy.Core.Cartridges
                 {
                     return rtcRegisters[currentRtcRegister];
                 }
-                else if (ERam != null)
+                else if (Ram != null)
                 {
-                    return ERam.Read(GetERamAddress(address));
+                    return Ram.Read(GetERamAddress(address));
                 }
             }
             return 0xff;
         }
 
-        public override void WriteERam(ushort address, byte value)
+        public override void WriteRam(ushort address, byte value)
         {
             if (ramEnabled)
             {
@@ -113,9 +113,9 @@ namespace SharpBoy.Core.Cartridges
                 {
                     rtcRegisters[currentRtcRegister] = value;
                 }
-                else if (ERam != null)
+                else if (Ram != null)
                 {
-                    ERam.Write(GetERamAddress(address), value);
+                    Ram.Write(GetERamAddress(address), value);
                 }
             }
         }

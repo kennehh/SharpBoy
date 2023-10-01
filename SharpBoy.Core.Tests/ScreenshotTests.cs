@@ -59,7 +59,7 @@ namespace SharpBoy.Core.Tests
             return new ServiceCollection()
                 .RegisterCoreServices()
                 .AddSingleton<IInputHandler, InputHandlerMock>()
-                .AddSingleton<IFrameBufferManager, RenderQueueMock>()
+                .AddSingleton<IFrameBufferManager, DoubleBufferManager>()
                 .BuildServiceProvider();
         }
 
