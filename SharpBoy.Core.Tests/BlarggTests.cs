@@ -23,16 +23,17 @@ namespace SharpBoy.Core.Tests
             .Concat(Directory.GetFiles("TestRoms/blargg/mem_timing-2/rom_singles"));
 
         [Test, TestCaseSource(nameof(CpuInstrRoms))]
-        public void BlarggCpuInstrTest(string path) => TestBlarggRom(path);
+        public void CpuInstrTest(string path) => TestBlarggRom(path);
 
         [Test]
-        public void BlarggInstrTimingTest() => TestBlarggRom("TestRoms/blargg/instr_timing/instr_timing.gb");
+        public void InstrTimingTest() => TestBlarggRom("TestRoms/blargg/instr_timing/instr_timing.gb");
 
         [Test, TestCaseSource(nameof(MemTimingRoms))]
-        public void BlarggMemTimingTest(string path) => TestBlarggRom(path);
+        public void MemTimingTest(string path) => TestBlarggRom(path);
+
 
         [Test]
-        public void BlarggHaltBugTest() => TestBlarggRom("TestRoms/blargg/halt_bug.gb");
+        public void HaltBugTest() => TestBlarggRom("TestRoms/blargg/halt_bug.gb");
 
         private void TestBlarggRom(string path)
         {
@@ -60,6 +61,8 @@ namespace SharpBoy.Core.Tests
                     characters.Add(gb.Mmu.Read(0xff01));
                     gb.Mmu.Write(0xff02, 0x01);
                 }
+
+                Assert.That(stopwatch.Elapsed.TotalSeconds, Is.LessThan(10), "Test took too long");
             }
 
             stopwatch.Reset();

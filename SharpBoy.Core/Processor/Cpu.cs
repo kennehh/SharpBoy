@@ -404,11 +404,15 @@ namespace SharpBoy.Core.Processor
             {
                 State = CpuState.Halted;
             }
+            CycleTick();
+            CycleTick();
         }
 
         private void stop()
         {
             State = CpuState.Stopped;
+            CycleTick();
+            CycleTick();
         }
 
         private void di() => InterruptManager.IME = false;
