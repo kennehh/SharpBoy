@@ -38,7 +38,7 @@ namespace SharpBoy.Core.Cartridges
             else
             {
                 var relativeAddress = address - RomBankSize;
-                var bank = Math.Max((currentUpperRomBank << 5) + currentLowerRomBank, 1) % header.RomBanks;
+                var bank = (currentUpperRomBank << 5) + currentLowerRomBank;
                 var bankOffset = bank * RomBankSize;
                 return Rom.Read(relativeAddress + bankOffset);
             }

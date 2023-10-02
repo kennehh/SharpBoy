@@ -161,7 +161,8 @@ namespace SharpBoy.Core
 
             using (var zip = ZipFile.OpenRead(path))
             {
-                var gbEntry = zip.Entries.FirstOrDefault(x => Path.GetExtension(x.Name) == ".gb");
+                var validExtensions = new[] { ".gb", ".gbc" };
+                var gbEntry = zip.Entries.FirstOrDefault(x => validExtensions.Contains(Path.GetExtension(x.Name)));
                 if (gbEntry == null)
                 {
                     return null;
