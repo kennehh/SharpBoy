@@ -4,12 +4,13 @@ using System.Diagnostics;
 
 namespace SharpBoy.Core.Cartridges
 {
-    public class Mbc3Cartridge : Cartridge
+    public class Mbc3Cartridge : MbcCartridge
     {
-        private const int RomBankSize = 0x4000;
-        private const int RamBankSize = 0x2000;
+        protected override int CurrentRomBank => currentRomBank;
+        protected override int CurrentRamBank => currentRamBank;
+        protected override bool RamEnabled => ramEnabled;
+
         private readonly Mbc3RtcController rtcController;
-        private readonly CartridgeHeader header;
 
         private bool ramEnabled = false;
         private bool rtcSelected = false;
@@ -21,22 +22,7 @@ namespace SharpBoy.Core.Cartridges
 
         public Mbc3Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram) : base(header, rom, ram)
         {
-            this.rtcController = new Mbc3RtcController();
-            this.header = header;
-        }
-
-        public override byte ReadRom(ushort address)
-        {
-            if (address <= 0x3fff)
-            {
-                return Rom.Read(address);
-            }
-            else
-            {
-                var relativeAddress = address - RomBankSize;
-                var bankOffset = currentRomBank * RomBankSize;
-                return Rom.Read(relativeAddress + bankOffset);
-            }
+            rtcController = new Mbc3RtcController();
         }
 
         public override void WriteRom(ushort address, byte value)
@@ -83,39 +69,26 @@ namespace SharpBoy.Core.Cartridges
 
         public override byte ReadRam(ushort address)
         {
-            if (ramEnabled)
+            if (ramEnabled && rtcSelected)
             {
-                if (rtcSelected)
-                {
-                    return rtcController.ReadFromRegister(currentRtcRegister);
-                }
-                else if (Ram != null)
-                {
-                    return Ram.Read(GetERamAddress(address));
-                }
+                return rtcController.ReadFromRegister(currentRtcRegister);
             }
-            return 0xff;
+            else
+            {
+                return base.ReadRam(address);
+            }
         }
 
         public override void WriteRam(ushort address, byte value)
         {
-            if (ramEnabled)
+            if (ramEnabled && rtcSelected)
             {
-                if (rtcSelected)
-                {
-                    rtcController.WriteToRegister(currentRtcRegister, value);
-                }
-                else if (Ram != null)
-                {
-                    Ram.Write(GetERamAddress(address), value);
-                }
+                rtcController.WriteToRegister(currentRtcRegister, value);
             }
-        }
-
-        private int GetERamAddress(ushort address)
-        {
-            var bankOffset = currentRamBank * RamBankSize;
-            return address + bankOffset;
+            else
+            {
+                base.WriteRam(address, value);
+            }
         }
     }
 }

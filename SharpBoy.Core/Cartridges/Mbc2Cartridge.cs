@@ -3,32 +3,17 @@ using SharpBoy.Core.Utilities;
 
 namespace SharpBoy.Core.Cartridges
 {
-    public class Mbc2Cartridge : Cartridge
+    public class Mbc2Cartridge : MbcCartridge
     {
-        private const int RomBankSize = 0x4000;
-
-        private readonly CartridgeHeader header;
+        protected override int CurrentRomBank => currentRomBank;
+        protected override int CurrentRamBank => 0;
+        protected override bool RamEnabled => ramEnabled;
 
         private bool ramEnabled = false;
         private int currentRomBank = 1;
 
         public Mbc2Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram) : base(header, rom, ram, 512)
         {
-            this.header = header;
-        }
-
-        public override byte ReadRom(ushort address)
-        {
-            if (address <= 0x3fff)
-            {
-                return Rom.Read(address);
-            }
-            else
-            {
-                var relativeAddress = address - RomBankSize;
-                var bankOffset = currentRomBank * RomBankSize;
-                return Rom.Read(relativeAddress + bankOffset);
-            }
         }
 
         public override void WriteRom(ushort address, byte value)
@@ -50,8 +35,7 @@ namespace SharpBoy.Core.Cartridges
         {
             if (ramEnabled && Ram != null)
             {
-                address -= 0xa000;
-                return (byte)(Ram.Read(address) & 0x0f);
+                return ConvertTo4BitValue(Ram.Read(address));
             }
             return 0xff;
         }
@@ -60,10 +44,14 @@ namespace SharpBoy.Core.Cartridges
         {
             if (ramEnabled && Ram != null)
             {
-                address -= 0xa000;
-                // Only the lower 4 bits are written
-                Ram.Write(address, (byte)(value & 0x0f));
+                Ram.Write(address, ConvertTo4BitValue(value));
             }
+        }
+
+        private static byte ConvertTo4BitValue(byte value)
+        {
+            var correctValue = 0xf0 + (value & 0x0f);
+            return (byte)correctValue;
         }
     }
 }

@@ -5,10 +5,12 @@ using System.Diagnostics;
 
 namespace SharpBoy.Core.Cartridges
 {
-    public class Mbc5Cartridge : Cartridge
+    public class Mbc5Cartridge : MbcCartridge
     {
-        private const int RomBankSize = 0x4000;
-        private const int RamBankSize = 0x2000;
+        protected override int CurrentRomBank => (currentUpperRomBank << 8) + currentLowerRomBank;
+        protected override int CurrentRamBank => currentRamBank;
+        protected override bool RamEnabled => ramEnabled;
+
         private readonly CartridgeHeader header;
 
         private bool ramEnabled = false;
@@ -22,21 +24,6 @@ namespace SharpBoy.Core.Cartridges
         public Mbc5Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram) : base(header, rom, ram)
         {
             this.header = header;
-        }
-
-        public override byte ReadRom(ushort address)
-        {
-            if (address <= 0x3fff)
-            {
-                return Rom.Read(address);
-            }
-            else
-            {
-                var relativeAddress = address - RomBankSize;
-                var bank = (currentUpperRomBank << 8) + currentLowerRomBank;
-                var bankOffset = bank * RomBankSize;
-                return Rom.Read(relativeAddress + bankOffset);
-            }
         }
 
         public override void WriteRom(ushort address, byte value)
@@ -64,29 +51,6 @@ namespace SharpBoy.Core.Cartridges
                     }
                     break;
             }
-        }
-
-        public override byte ReadRam(ushort address)
-        {
-            if (ramEnabled)
-            {
-                return Ram.Read(GetERamAddress(address));
-            }
-            return 0xff;
-        }
-
-        public override void WriteRam(ushort address, byte value)
-        {
-            if (ramEnabled)
-            {
-                Ram.Write(GetERamAddress(address), value);
-            }
-        }
-
-        private int GetERamAddress(ushort address)
-        {
-            var bankOffset = currentRamBank * RamBankSize;
-            return address + bankOffset;
         }
     }
 }

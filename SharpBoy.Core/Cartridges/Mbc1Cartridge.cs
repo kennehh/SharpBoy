@@ -3,10 +3,11 @@ using SharpBoy.Core.Utilities;
 
 namespace SharpBoy.Core.Cartridges
 {
-    public class Mbc1Cartridge : Cartridge
+    public class Mbc1Cartridge : MbcCartridge
     {
-        private const int RomBankSize = 0x4000;
-        private const int RamBankSize = 0x2000;
+        protected override int CurrentRomBank => (currentUpperRomBank << 5) + currentLowerRomBank;
+        protected override int CurrentRamBank => bankingMode ? currentRamBank : 0;
+        protected override bool RamEnabled => ramEnabled;
 
         private readonly CartridgeHeader header;
 
@@ -21,27 +22,6 @@ namespace SharpBoy.Core.Cartridges
         public Mbc1Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram) : base(header, rom, ram)
         {
             this.header = header;
-        }
-
-        public override byte ReadRom(ushort address)
-        {
-            if (address <= 0x3fff)
-            {
-                if (bankingMode && header.RomSize >= MemorySizes.Bytes1MB)
-                {
-                    var bank = (currentUpperRomBank << 5) % header.RomBanks;
-                    var bankOffset = bank * RomBankSize;
-                    return Rom.Read(address + bankOffset);
-                }
-                return Rom.Read(address);
-            }
-            else
-            {
-                var relativeAddress = address - RomBankSize;
-                var bank = (currentUpperRomBank << 5) + currentLowerRomBank;
-                var bankOffset = bank * RomBankSize;
-                return Rom.Read(relativeAddress + bankOffset);
-            }
         }
 
         public override void WriteRom(ushort address, byte value)
@@ -75,27 +55,15 @@ namespace SharpBoy.Core.Cartridges
             }
         }
 
-        public override byte ReadRam(ushort address)
+        protected override byte ReadFixedRom(ushort address)
         {
-            if (ramEnabled && Ram != null)
+            if (bankingMode && header.RomSize >= MemorySizes.Bytes1MB)
             {
-                return Ram.Read(GetERamAddress(address));
+                var bank = currentUpperRomBank << 5;
+                var bankOffset = bank * RomBankSize;
+                return Rom.Read(address + bankOffset);
             }
-            return 0xff;
-        }
-
-        public override void WriteRam(ushort address, byte value)
-        {
-            if (ramEnabled && Ram != null)
-            {
-                Ram.Write(GetERamAddress(address), value);
-            }
-        }
-
-        private int GetERamAddress(ushort address)
-        {
-            var bankOffset = bankingMode ? currentRamBank * RamBankSize : 0;
-            return address + bankOffset;
+            return Rom.Read(address);
         }
     }
 }
