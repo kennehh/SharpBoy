@@ -1,4 +1,5 @@
-﻿using SharpBoy.Core.Interrupts;
+﻿using SharpBoy.Core.Graphics.Interfaces;
+using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Graphics
@@ -12,12 +13,12 @@ namespace SharpBoy.Core.Graphics
         private int cycles;
         private readonly IInterruptManager interruptManager;
         private readonly IPpuMemory memory;
-        private readonly IRenderer renderer;
+        private readonly IPpuRenderer renderer;
         
         private bool LastLcdEnabledStatus = false;
 
 
-        public Ppu(IInterruptManager interruptManager, IPpuMemory memory, IRenderer renderer)
+        public Ppu(IInterruptManager interruptManager, IPpuMemory memory, IPpuRenderer renderer)
         {
             this.interruptManager = interruptManager;
             this.memory = memory;

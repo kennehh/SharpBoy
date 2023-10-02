@@ -1,4 +1,4 @@
-﻿namespace SharpBoy.Core.Cartridges
+﻿namespace SharpBoy.Core.Cartridges.Interfaces
 {
     public interface ICartridge
     {

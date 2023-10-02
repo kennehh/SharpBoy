@@ -1,4 +1,4 @@
-﻿namespace SharpBoy.Core.Graphics
+﻿namespace SharpBoy.Core.Graphics.Interfaces
 {
     public interface IPpu
     {

@@ -1,5 +1,6 @@
 ﻿using SharpBoy.Core.Cartridges;
-using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Cartridges.Interfaces;
+using SharpBoy.Core.Graphics.Interfaces;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Timing;

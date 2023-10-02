@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Cartridges;
+﻿using SharpBoy.Core.Cartridges.Interfaces;
 using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Tests.Mocks

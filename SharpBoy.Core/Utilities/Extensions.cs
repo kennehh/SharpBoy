@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SharpBoy.Core.Cartridges;
+using SharpBoy.Core.Cartridges.Interfaces;
 using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Graphics.Interfaces;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;
@@ -25,7 +27,7 @@ namespace SharpBoy.Core.Utilities
                 .AddSingleton<IInterruptManager, InterruptManager>()
                 .AddSingleton<IInputController, InputController>()
                 .AddSingleton<IPpuMemory, PpuMemory>()
-                .AddSingleton<IRenderer, Renderer>()
+                .AddSingleton<IPpuRenderer, PpuRenderer>()
                 .AddSingleton<ITimer, Timer>();
         }
     }

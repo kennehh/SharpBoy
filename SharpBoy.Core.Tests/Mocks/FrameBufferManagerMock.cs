@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Graphics;
+﻿using SharpBoy.Core.Graphics.Interfaces;
 
 namespace SharpBoy.Core.Tests.Mocks
 {

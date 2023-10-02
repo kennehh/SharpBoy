@@ -1,4 +1,6 @@
-﻿namespace SharpBoy.Core.Graphics
+﻿using SharpBoy.Core.Graphics.Interfaces;
+
+namespace SharpBoy.Core.Graphics
 {
     public class DoubleBufferManager : IFrameBufferManager
     {

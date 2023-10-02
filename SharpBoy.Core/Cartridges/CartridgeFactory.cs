@@ -1,4 +1,5 @@
-﻿using SharpBoy.Core.Memory;
+﻿using SharpBoy.Core.Cartridges.Interfaces;
+using SharpBoy.Core.Memory;
 
 namespace SharpBoy.Core.Cartridges
 {

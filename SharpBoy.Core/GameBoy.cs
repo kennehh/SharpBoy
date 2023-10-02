@@ -1,5 +1,5 @@
-﻿using SharpBoy.Core.Cartridges;
-using SharpBoy.Core.Graphics;
+﻿using SharpBoy.Core.Cartridges.Interfaces;
+using SharpBoy.Core.Graphics.Interfaces;
 using SharpBoy.Core.Memory;
 using SharpBoy.Core.Processor;
 using System.Diagnostics;

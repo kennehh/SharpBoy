@@ -1,6 +1,6 @@
 ﻿using SharpBoy.Core.Memory;
 
-namespace SharpBoy.Core.Graphics
+namespace SharpBoy.Core.Graphics.Interfaces
 {
     public interface IPpuMemory
     {

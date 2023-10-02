@@ -1,6 +1,6 @@
 ﻿using SDL2;
 using SharpBoy.App.SdlCore;
-using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Graphics.Interfaces;
 
 namespace SharpBoy.App
 {

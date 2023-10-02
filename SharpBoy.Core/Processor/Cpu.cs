@@ -1,4 +1,4 @@
-﻿using SharpBoy.Core.Graphics;
+﻿using SharpBoy.Core.Graphics.Interfaces;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Interrupts;
 using SharpBoy.Core.Memory;

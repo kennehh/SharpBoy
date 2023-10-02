@@ -1,6 +1,6 @@
-﻿namespace SharpBoy.Core.Graphics
+﻿namespace SharpBoy.Core.Graphics.Interfaces
 {
-    public interface IRenderer
+    public interface IPpuRenderer
     {
         void ClearBuffers();
         void PushFrame();

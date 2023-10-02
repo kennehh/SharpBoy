@@ -1,4 +1,6 @@
-﻿namespace SharpBoy.Core.Cartridges
+﻿using SharpBoy.Core.Cartridges.Interfaces;
+
+namespace SharpBoy.Core.Cartridges
 {
     public class NoCartridge : ICartridge
     {

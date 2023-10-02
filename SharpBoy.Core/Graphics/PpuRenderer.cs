@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using SharpBoy.Core.Graphics.Interfaces;
 using SharpBoy.Core.Memory;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SharpBoy.Core.Graphics
 {
-    public class Renderer : IRenderer
+    public class PpuRenderer : IPpuRenderer
     {
         private const int LcdWidth = 160;
         private const int LcdHeight = 144;
@@ -32,7 +33,7 @@ namespace SharpBoy.Core.Graphics
         private readonly SpriteManager spriteManager;
         private readonly IFrameBufferManager fbManager;
 
-        public Renderer(IFrameBufferManager fbManager, IPpuMemory memory)
+        public PpuRenderer(IFrameBufferManager fbManager, IPpuMemory memory)
         {
             tileMapManager = new TileMapManager(memory.Vram);
             spriteManager = new SpriteManager(memory.Oam, memory.Vram);

@@ -1,4 +1,5 @@
-﻿using SharpBoy.Core.Memory;
+﻿using SharpBoy.Core.Graphics.Interfaces;
+using SharpBoy.Core.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;

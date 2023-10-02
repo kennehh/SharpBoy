@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SharpBoy.Core.Graphics;
+using SharpBoy.Core.Graphics.Interfaces;
 using SharpBoy.Core.InputHandling;
 using SharpBoy.Core.Processor;
 using SharpBoy.Core.Tests.Mocks;
