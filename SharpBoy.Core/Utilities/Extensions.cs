@@ -24,6 +24,8 @@ namespace SharpBoy.Core.Utilities
                 .AddSingleton<IFrameBufferManager, DoubleBufferManager>()
                 .AddSingleton<IInterruptManager, InterruptManager>()
                 .AddSingleton<IInputController, InputController>()
+                .AddSingleton<IPpuMemory, PpuMemory>()
+                .AddSingleton<IRenderer, Renderer>()
                 .AddSingleton<ITimer, Timer>();
         }
     }

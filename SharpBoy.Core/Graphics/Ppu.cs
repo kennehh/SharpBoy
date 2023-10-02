@@ -6,63 +6,41 @@ namespace SharpBoy.Core.Graphics
 
     public class Ppu : IPpu
     {
-        public PpuRegisters Registers { get; private set; } = new PpuRegisters();
-
-        private const int LcdWidth = 160;
-        private const int LcdHeight = 144;
-
-        private static readonly ColorRgb[] Colors =
-        {
-            new ColorRgb(0xff, 0xff, 0xff),
-            new ColorRgb(0xaa, 0xaa, 0xaa),
-            new ColorRgb(0x55, 0x55, 0x55),
-            new ColorRgb(0x00, 0x00, 0x00)
-        };
-
-        private static readonly ColorRgb[] BgpColorMap = (ColorRgb[])Colors.Clone();
-        private static readonly ColorRgb[] Obp0ColorMap = (ColorRgb[])Colors.Clone();
-        private static readonly ColorRgb[] Obp1ColorMap = (ColorRgb[])Colors.Clone();
-
-        private IReadWriteMemory vram = new Ram(0x2000);
-        private IReadWriteMemory oam = new Ram(0xa0);
-        private byte[] frameBuffer = new byte[LcdWidth * LcdHeight * 4];
+        private PpuRegisters registers = new PpuRegisters();
+        
 
         private int cycles;
         private readonly IInterruptManager interruptManager;
-        private readonly IFrameBufferManager frameBufferManager;
-        private readonly TileMapManager tileMapManager;
-        private readonly SpriteManager spriteManager;
+        private readonly IPpuMemory memory;
+        private readonly IRenderer renderer;
+        
         private bool LastLcdEnabledStatus = false;
 
-        private int windowLineCounter = 0;
 
-        public Ppu(IInterruptManager interruptManager, IFrameBufferManager renderQueue)
+        public Ppu(IInterruptManager interruptManager, IPpuMemory memory, IRenderer renderer)
         {
             this.interruptManager = interruptManager;
-            this.frameBufferManager = renderQueue;
-            tileMapManager = new TileMapManager(vram);
-            spriteManager = new SpriteManager(oam, vram);
+            this.memory = memory;
+            this.renderer = renderer;
         }
-
-
 
         public void Tick()
         {
-            if (!Registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
+            if (!registers.LCDC.HasFlag(LcdcFlags.LcdEnable))
             {
                 if (LastLcdEnabledStatus)
                 {
                     LastLcdEnabledStatus = false;
-                    ResetLcdState();
+                    ResetLcd();
                 }
                 return;
             }
 
             LastLcdEnabledStatus = true;
-            var previousStatus = Registers.CurrentStatus;
+            var previousStatus = registers.CurrentStatus;
             cycles += 4;
 
-            if (Registers.LY <= 143)
+            if (registers.LY <= 143)
             {
                 HandleModeSwitching(previousStatus);
             }
@@ -72,30 +50,56 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        public byte ReadVram(ushort address) => vram.Read(address);
+        public byte ReadVram(ushort address)
+        {
+            if (registers.CurrentStatus != PpuStatus.Drawing)
+            {
+                return memory.Vram.Read(address);
+            }
+            return 0xff;
+        }
 
-        public byte ReadOam(ushort address) => oam.Read(address);
+        public byte ReadOam(ushort address)
+        {
+            if (registers.CurrentStatus != PpuStatus.Drawing && registers.CurrentStatus != PpuStatus.SearchingOam)
+            {
+                return memory.Oam.Read(address);
+            }
+            return 0xff;
+        }
 
-        public void WriteVram(ushort address, byte value) => vram.Write(address, value);
+        public void WriteVram(ushort address, byte value)
+        {
+            if (registers.CurrentStatus != PpuStatus.Drawing)
+            {
+                memory.Vram.Write(address, value);
+            }
+        }
 
-        public void WriteOam(ushort address, byte value) => oam.Write(address, value);
+        public void WriteOam(ushort address, byte value)
+        {
+            if (registers.CurrentStatus != PpuStatus.Drawing && registers.CurrentStatus != PpuStatus.SearchingOam)
+            {
+                memory.Oam.Write(address, value);
+            }
+        }
 
         public byte ReadRegister(ushort address)
         {
             return address switch
             {
-                0xff40 => (byte)Registers.LCDC,
-                0xff41 => Registers.STAT,
-                0xff42 => Registers.SCY,
-                0xff43 => Registers.SCX,
-                0xff44 => Registers.LY,
-                0xff45 => Registers.LYC,
-                0xff46 => Registers.DMA,
-                0xff47 => Registers.BGP,
-                0xff48 => Registers.OBP0,
-                0xff49 => Registers.OBP1,
-                0xff4a => Registers.WY,
-                0xff4b => Registers.WX,
+                0xff40 => (byte)registers.LCDC,
+                0xff41 => registers.STAT,
+                0xff42 => registers.SCY,
+                0xff43 => registers.SCX,
+                0xff44 => registers.LY,
+                0xff45 => registers.LYC,
+                0xff46 => registers.DMA,
+                0xff47 => registers.BGP,
+                0xff48 => registers.OBP0,
+                0xff49 => registers.OBP1,
+                0xff4a => registers.WY,
+                0xff4b => registers.WX,
                 _ => throw new NotImplementedException(),
             };
         }
@@ -105,87 +109,85 @@ namespace SharpBoy.Core.Graphics
             switch (address)
             {
                 case 0xff40: UpdateLcdc(value); break;
-                case 0xff41: Registers.STAT = value; break;
-                case 0xff42: Registers.SCY = value; break;
-                case 0xff43: Registers.SCX = value; break;
+                case 0xff41: registers.STAT = value; break;
+                case 0xff42: registers.SCY = value; break;
+                case 0xff43: registers.SCX = value; break;
                 case 0xff44: break;
                 case 0xff45: UpdateLyc(value); break;
-                case 0xff46: Registers.DMA = value; break;
+                case 0xff46: registers.DMA = value; break;
                 case 0xff47:
-                    Registers.BGP = value;
-                    UpdateColorMap(BgpColorMap, value);
+                    registers.BGP = value;
+                    renderer.UpdateBgColorMapping(value);
                     break;
                 case 0xff48:
-                    Registers.OBP0 = value;
-                    UpdateColorMap(Obp0ColorMap, value);
+                    registers.OBP0 = value;
+                    renderer.UpdateObp0ColorMapping(value);
                     break;
                 case 0xff49:
-                    Registers.OBP1 = value;
-                    UpdateColorMap(Obp1ColorMap, value);
+                    registers.OBP1 = value;
+                    renderer.UpdateObp1ColorMapping(value);
                     break;
-                case 0xff4a: Registers.WY = value; break;
-                case 0xff4b: Registers.WX = value; break;
+                case 0xff4a: registers.WY = value; break;
+                case 0xff4b: registers.WX = value; break;
                 default: throw new NotImplementedException();
             }
         }
 
         public void DoOamDmaTransfer(byte[] sourceData)
         {
-            oam.Copy(sourceData);
+            memory.Oam.Copy(sourceData);
         }
 
         public void ResetState(bool bootRomLoaded)
         {
-            Registers = new PpuRegisters();
-            frameBufferManager.ClearBuffers();
+            registers = new PpuRegisters();
+            renderer.ClearBuffers();
 
             if (!bootRomLoaded)
             {
-                Registers.LCDC = (LcdcFlags)0x91;
-                Registers.BGP = 0xfc;
-                Registers.OBP0 = 0xff;
-                Registers.OBP1 = 0xff;
+                registers.LCDC = (LcdcFlags)0x91;
+                registers.BGP = 0xfc;
+                registers.OBP0 = 0xff;
+                registers.OBP1 = 0xff;
             }
         }
 
-        private void ResetLcdState()
+        private void ResetLcd()
         {
-            Registers.LY = 0;
+            registers.LY = 0;
             cycles = 0;
-            Registers.CurrentStatus = PpuStatus.HorizontalBlank;
+            registers.CurrentStatus = PpuStatus.HorizontalBlank;
         }
 
         private void UpdateLcdc(byte newValue)
         {
-            Registers.LCDC = (LcdcFlags)newValue;
-            tileMapManager.SetActiveBgTileMap(Registers.LCDC.HasFlag(LcdcFlags.BgTileMapArea));
-            tileMapManager.SetActiveWindowTileMap(Registers.LCDC.HasFlag(LcdcFlags.WindowTileMapArea));
-            tileMapManager.SetActiveTileData(Registers.LCDC.HasFlag(LcdcFlags.TileDataArea));
+            registers.LCDC = (LcdcFlags)newValue;
+            renderer.SetActiveTileMapAndTileData(registers.LCDC);
         }
 
         private void UpdateLyc(byte newValue)
         {
-            Registers.LYC = newValue;
+            registers.LYC = newValue;
             CheckLyEqualsLycInterrupt();
         }
 
         private void IncrementLy()
         {
-            if (Registers.LY >= 153)
+            if (registers.LY >= 153)
             {
-                Registers.LY = 0;
-                windowLineCounter = 0;
+                registers.LY = 0;
+                renderer.ResetWindowLineCounter();
             }
             else
             {
-                Registers.LY++;
+                registers.LY++;
             }
             CheckLyEqualsLycInterrupt();
         }
 
         private void CheckLyEqualsLycInterrupt()
         {
-            if (Registers.LyCompareFlag)
+            if (registers.LyCompareFlag)
             {
                 HandleStatInterrupt(StatInterruptSourceFlags.LyEqualsLyc);
             }
@@ -196,20 +198,20 @@ namespace SharpBoy.Core.Graphics
             switch (cycles)
             {
                 case < 80:
-                    Registers.CurrentStatus = PpuStatus.SearchingOam;
+                    registers.CurrentStatus = PpuStatus.SearchingOam;
                     HandleStatInterrupt(StatInterruptSourceFlags.SearchingOam);
                     break;
                 case < 252:
                     // could take from 172 to 289 cycles, defaulting to 172 for now
-                    Registers.CurrentStatus = PpuStatus.Drawing;
-                    if (Registers.CurrentStatus != previousStatus)
+                    registers.CurrentStatus = PpuStatus.Drawing;
+                    if (registers.CurrentStatus != previousStatus)
                     {
-                        RenderScanline();
+                        renderer.RenderScanline(registers);
                     }
                     break;
                 case < 456:
                     // could take from 87 to 204 cycles, defaulting to 204 for now
-                    Registers.CurrentStatus = PpuStatus.HorizontalBlank;
+                    registers.CurrentStatus = PpuStatus.HorizontalBlank;
                     HandleStatInterrupt(StatInterruptSourceFlags.HorizontalBlank);
                     break;
                 default:
@@ -221,13 +223,13 @@ namespace SharpBoy.Core.Graphics
 
         private void HandleVBlank(PpuStatus previousStatus)
         {
-            Registers.CurrentStatus = PpuStatus.VerticalBlank;
+            registers.CurrentStatus = PpuStatus.VerticalBlank;
             HandleStatInterrupt(StatInterruptSourceFlags.VerticalBlank);
 
-            if (Registers.CurrentStatus != previousStatus)
+            if (registers.CurrentStatus != previousStatus)
             {
                 interruptManager.RequestInterrupt(InterruptFlags.VBlank);
-                frameBufferManager.PushFrame(frameBuffer);
+                renderer.PushFrame();
             }
 
             if (cycles >= 456)
@@ -237,209 +239,11 @@ namespace SharpBoy.Core.Graphics
             }
         }
 
-        private void RenderScanline()
-        {
-            if (Registers.LCDC.HasFlag(LcdcFlags.BgWindowPriority))
-            {
-                RenderBgScanline();
-                RenderWindowScanline();
-            }
-            RenderSpritesScanline();
-        }
-
-        private void RenderBgScanline()
-        {
-            var line = Registers.LY;
-
-            // Calculate the adjusted Y position accounting for vertical scroll
-            int yPos = (line + Registers.SCY) & 0xFF;
-
-            // Iterate through each pixel in the current scanline
-            for (int pixel = 0; pixel < LcdWidth; pixel++)
-            {
-                // Calculate the adjusted X position accounting for horizontal scroll
-                int xPos = (pixel + Registers.SCX) & 0xFF;
-
-                // Fetch the color index for the given pixel from the active tilemap
-                var colorIndex = tileMapManager.GetBgColorIndex(xPos, yPos);
-
-                // Get the actual RGB color using the fetched color index
-                var color = BgpColorMap[colorIndex];
-
-                // Fill the framebuffer with the RGB values
-                DrawPixel(pixel, line, color);
-            }
-        }
-
-        private void RenderSpritesScanline()
-        {
-            if (!Registers.LCDC.HasFlag(LcdcFlags.ObjEnable))
-            {
-                return;
-            }
-
-            var spriteHeight = Registers.LCDC.HasFlag(LcdcFlags.ObjSize) ? 16 : 8;
-            var currentScanline = Registers.LY;
-
-            var visibleSprites = spriteManager.GetVisibleSprites(Registers.LY, spriteHeight);
-
-            foreach (var sprite in visibleSprites)
-            {
-                int lineToRender = currentScanline - (sprite.YPos - 16);
-                var lineData = sprite.GetLineToRender(lineToRender, spriteHeight);
-
-                for (int i = 0; i < lineData.Length; i++)
-                {
-                    var index = lineData[i];
-                    if (index == 0)
-                    {
-                        continue;
-                    }
-
-                    int screenX = sprite.XPos + i - 8;
-                    int screenY = sprite.YPos + lineToRender - 16;
-
-                    if (screenX < 0 || screenY < 0 || screenX >= LcdWidth || screenY >= LcdHeight)
-                    {
-                        continue;
-                    }
-
-                    if (sprite.BgAndWindowHasPriority)
-                    {
-                        var bgIndex = GetBgPixelColorIndex(screenX, screenY);
-                        if (bgIndex != 0)
-                        {
-                            continue;
-                        }
-                    }
-
-                    var color = GetSpriteColor(index, sprite.UseObp1Palette);
-                    DrawPixel(screenX, screenY, color);
-                }
-            }
-        }
-
-        private void RenderWindowScanline()
-        {
-            if (!Registers.LCDC.HasFlag(LcdcFlags.WindowEnable))
-            {
-                return;
-            }
-
-            var line = Registers.LY;
-
-            int windowX = Registers.WX - 7;
-            int windowY = Registers.WY;
-
-            if (line < windowY)
-            {
-                return;
-            }
-
-            var incrementLineCounter = false;
-
-            for (int pixel = 0; pixel < LcdWidth; pixel++)
-            {
-                int xPos = pixel;
-
-                if (xPos < windowX)
-                {
-                    continue;
-                }
-
-                var colorIndex = tileMapManager.GetWindowColorIndex(xPos - windowX, windowLineCounter);
-                var color = BgpColorMap[colorIndex];
-
-                DrawPixel(pixel, line, color);
-                incrementLineCounter = true;
-            }
-
-            // If the window is active on this line, increment the counter
-            if (incrementLineCounter)
-            {
-                windowLineCounter++;
-            }
-        }
-
-        private void DrawPixel(int x, int y, ColorRgb color)
-        {
-            int bufferPosition = ((y * LcdWidth) + x) * 4;
-
-            frameBuffer[bufferPosition] = color.Red;
-            frameBuffer[bufferPosition + 1] = color.Green;
-            frameBuffer[bufferPosition + 2] = color.Blue;
-            frameBuffer[bufferPosition + 3] = 0xff;
-        }
-
-        private ColorRgb GetPixelColor(int x, int y)
-        {
-            int bufferPosition = ((y * LcdWidth) + x) * 4;
-
-            var red = frameBuffer[bufferPosition];
-            var green = frameBuffer[bufferPosition + 1];
-            var blue = frameBuffer[bufferPosition + 2];
-
-            return new ColorRgb(red, green, blue);
-        }
-
-        private int GetBgPixelColorIndex(int x, int y)
-        {
-            return Array.IndexOf(BgpColorMap, GetPixelColor(x, y));
-        }
-
-        private ColorRgb GetSpriteColor(int colorIndex, bool useObp1)
-        {
-            return useObp1 ? Obp1ColorMap[colorIndex] : Obp0ColorMap[colorIndex];
-        }
-
-        private void UpdateColorMap(ColorRgb[] colorMap, byte registerValue)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                var colorValue = registerValue >>> (i * 2) & 3;
-                colorMap[i] = Colors[colorValue];
-            }
-        }
-
         private void HandleStatInterrupt(StatInterruptSourceFlags flagToCheck)
         {
-            if (Registers.StatInterruptSource != StatInterruptSourceFlags.None && Registers.StatInterruptSource.HasFlag(flagToCheck))
+            if (registers.StatInterruptSource != StatInterruptSourceFlags.None && registers.StatInterruptSource.HasFlag(flagToCheck))
             {
                 interruptManager.RequestInterrupt(InterruptFlags.LcdStat);
-            }
-        }
-
-        private struct ColorRgb
-        {
-            public byte Red { get; }
-            public byte Green { get; }
-            public byte Blue { get; }
-
-            public ColorRgb(byte red, byte green, byte blue)
-            {
-                Red = red;
-                Green = green;
-                Blue = blue;
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is ColorRgb other && this == other;
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Red, Green, Blue);
-            }
-
-            public static bool operator ==(ColorRgb x, ColorRgb y)
-            {
-                return x.Red == y.Red && x.Blue == y.Blue && x.Green == y.Green;
-            }
-
-            public static bool operator !=(ColorRgb x, ColorRgb y)
-            {
-                return !(x == y);
             }
         }
     }

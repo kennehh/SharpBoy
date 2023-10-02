@@ -2,7 +2,6 @@
 {
     public interface IPpu
     {
-        PpuRegisters Registers { get; }
         byte ReadVram(ushort address);
         byte ReadOam(ushort address);
         byte ReadRegister(ushort address);
