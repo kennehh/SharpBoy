@@ -1,4 +1,6 @@
 ﻿using SharpBoy.Core.Memory;
+using SharpBoy.Core.Utilities;
+using System.Diagnostics;
 
 namespace SharpBoy.Core.Cartridges
 {
@@ -6,20 +8,20 @@ namespace SharpBoy.Core.Cartridges
     {
         private const int RomBankSize = 0x4000;
         private const int RamBankSize = 0x2000;
-
+        private readonly Mbc3RtcController rtcController;
         private readonly CartridgeHeader header;
 
         private bool ramEnabled = false;
         private bool rtcSelected = false;
+        private bool rtcLatchPrepared = false;
 
         private int currentRomBank = 1;
         private int currentRamBank = 0;
         private RtcRegister currentRtcRegister = 0;
 
-        private Dictionary<RtcRegister, byte> rtcRegisters = new();
-
         public Mbc3Cartridge(CartridgeHeader header, IReadableMemory rom, IReadWriteMemory ram) : base(header, rom, ram)
         {
+            this.rtcController = new Mbc3RtcController();
             this.header = header;
         }
 
@@ -63,27 +65,18 @@ namespace SharpBoy.Core.Cartridges
                     }
                     break;
                 case <= 0x7fff:
-                    var dateTimeNow = DateTime.Now;
-                    int totalDays = dateTimeNow.DayOfYear;
-
-                    rtcRegisters[RtcRegister.Seconds] = (byte)dateTimeNow.Second;
-                    rtcRegisters[RtcRegister.Minutes] = (byte)dateTimeNow.Minute;
-                    rtcRegisters[RtcRegister.Hours] = (byte)dateTimeNow.Hour;
-                    rtcRegisters[RtcRegister.Days] = (byte)(totalDays & 0xFF);
-
-                    // Reset the Control register (you might want to preserve other bits if they are set elsewhere)
-                    rtcRegisters[RtcRegister.Control] = 0;
-
-                    // Set the 9th bit (Bit 0 of Control register) if needed
-                    if ((totalDays & 0x100) != 0) // Checks the 9th bit
+                    if (value == 0x00)
                     {
-                        rtcRegisters[RtcRegister.Control] |= 0x01; // Sets Bit 0
+                        rtcLatchPrepared = true;
                     }
-
-                    // Optional: Set the overflow bit (Bit 7 of Control register) if days exceed 511
-                    if (totalDays > 511)
+                    else if (value == 0x01 && rtcLatchPrepared)
                     {
-                        rtcRegisters[RtcRegister.Control] |= 0x80; // Sets Bit 7
+                        rtcController.Latch();
+                        rtcLatchPrepared = false;
+                    }
+                    else
+                    {
+                        rtcLatchPrepared = false;
                     }
                     break;
             }
@@ -95,7 +88,7 @@ namespace SharpBoy.Core.Cartridges
             {
                 if (rtcSelected)
                 {
-                    return rtcRegisters[currentRtcRegister];
+                    return rtcController.ReadFromRegister(currentRtcRegister);
                 }
                 else if (Ram != null)
                 {
@@ -111,7 +104,7 @@ namespace SharpBoy.Core.Cartridges
             {
                 if (rtcSelected)
                 {
-                    rtcRegisters[currentRtcRegister] = value;
+                    rtcController.WriteToRegister(currentRtcRegister, value);
                 }
                 else if (Ram != null)
                 {
@@ -124,16 +117,6 @@ namespace SharpBoy.Core.Cartridges
         {
             var bankOffset = currentRamBank * RamBankSize;
             return address + bankOffset;
-        }
-
-        private enum RtcRegister
-        {
-            None = 0,
-            Seconds = 0x08,
-            Minutes = 0x09,
-            Hours = 0x0a,
-            Days = 0x0b,
-            Control = 0x0c
         }
     }
 }
